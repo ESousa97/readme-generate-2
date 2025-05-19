@@ -16,11 +16,11 @@ if project_root_dir not in sys.path:
     sys.path.insert(0, project_root_dir)
 
 from gerador_readme_ia_web.config import get_gemini_model, APP_NAME, APP_AUTHOR
-# PROMPT_README_GENERATION será substituído pela lógica de seleção de prompt
 from gerador_readme_ia_web.constants_web import (
     PROMPT_README_SIMPLE, 
     PROMPT_README_MODERATE, 
-    PROMPT_README_COMPLETE
+    PROMPT_README_COMPLETE,
+    USER_LINKS_INSTRUCTIONS_TEMPLATE
 )
 from gerador_readme_ia_web.gemini_client_web import GeminiClient
 from gerador_readme_ia_web.utils import extract_project_data_from_zip
@@ -32,7 +32,7 @@ logger.info(f"Sistema Operacional detectado (os.name): {os.name}")
 app = FastAPI(
     title="Gerador de README.md API",
     description="API para gerar README.md com níveis de detalhe e informações opcionais.",
-    version="1.2.0"
+    version="1.2.2" # Versão atualizada
 )
 
 app.add_middleware(
@@ -51,15 +51,14 @@ async def get_request_specific_gemini_client(x_api_key: Annotated[str | None, He
         client = GeminiClient(api_key=x_api_key, model_name=model_name)
         logger.info(f"Cliente Gemini inicializado para a requisição com modelo: {model_name}.")
         return client
-    except Exception as e: # Captura mais genérica para erros de inicialização do cliente
+    except Exception as e:
         logger.critical(f"Erro ao criar cliente Gemini: {e}", exc_info=True)
         raise HTTPException(status_code=503, detail=f"Erro ao configurar cliente da IA: {str(e)}")
-
 
 @app.post("/api/generate-readme")
 async def generate_readme_endpoint(
     project_zip: UploadFile = File(...),
-    readme_level: str = Form("moderate"), # Valor padrão 'moderate'
+    readme_level: str = Form("moderate"),
     repo_link: Optional[str] = Form(None),
     linkedin_link: Optional[str] = Form(None),
     gemini_client: GeminiClient = Depends(get_request_specific_gemini_client)
@@ -81,31 +80,31 @@ async def generate_readme_endpoint(
         if not project_data_str:
             raise HTTPException(status_code=500, detail="Não foi possível processar o arquivo .zip.")
         
-        # Selecionar o prompt com base no nível
         if readme_level == "simple":
             selected_prompt_template = PROMPT_README_SIMPLE
         elif readme_level == "complete":
             selected_prompt_template = PROMPT_README_COMPLETE
-        else: # Padrão para moderado
+        else: 
             selected_prompt_template = PROMPT_README_MODERATE
         
-        # Montar o prompt final, incorporando links se fornecidos
-        # Adicionaremos uma seção ao início do project_data para os links
-        additional_context = ""
-        if repo_link:
-            additional_context += f"\n\nInformações Adicionais Fornecidas pelo Usuário:\n- Link do Repositório do Projeto: {repo_link}\n"
-        if linkedin_link:
-            if not additional_context: # Se repo_link não foi fornecido
-                 additional_context += f"\n\nInformações Adicionais Fornecidas pelo Usuário:\n"
-            additional_context += f"- Link do Perfil LinkedIn do Autor/Contato Principal: {linkedin_link}\n"
+        # Preparar as instruções dos links do usuário
+        user_links_instructions_str = ""
+        # Só formata USER_LINKS_INSTRUCTIONS_TEMPLATE se houver links para preencher seus placeholders.
+        # Se não houver links, user_links_instructions_str permanecerá vazio,
+        # e o placeholder {user_provided_links_instructions} no PROMPT_README_BASE_HEADER será substituído por uma string vazia.
+        if repo_link or linkedin_link: 
+            user_links_instructions_str = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
+                repo_link=repo_link if repo_link else "Não fornecido",
+                linkedin_link=linkedin_link if linkedin_link else "Não fornecido"
+            )
         
-        # Instrução para a IA usar esses links
-        if additional_context:
-            additional_context += "\nInstrução: Utilize as 'Informações Adicionais Fornecidas pelo Usuário' acima para enriquecer as seções apropriadas do README, como 'Badges' (usando o link do repositório), 'Autores/Contato', ou para inferir o nome do autor/projeto. NÃO liste esta seção 'Informações Adicionais Fornecidas pelo Usuário' diretamente no README final.\n"
-
-        final_project_data = additional_context + project_data_str
+        # Formatar o prompt principal com as duas chaves separadamente
+        # selected_prompt_template já inclui PROMPT_README_BASE_HEADER
+        prompt = selected_prompt_template.format(
+            project_data=project_data_str,  # Dados extraídos do ZIP
+            user_provided_links_instructions=user_links_instructions_str # String formatada com os links (ou vazia)
+        )
         
-        prompt = selected_prompt_template.format(project_data=final_project_data)
         logger.debug(f"Prompt selecionado (nível: {readme_level}). Enviando para Gemini...")
         
         readme_content = gemini_client.send_conversational_prompt(prompt)
@@ -119,6 +118,9 @@ async def generate_readme_endpoint(
     except HTTPException as http_exc:
         logger.error(f"HTTPException: {http_exc.detail}")
         raise http_exc
+    except KeyError as ke:
+        logger.critical(f"KeyError ao formatar o prompt: {ke}. Verifique se todos os placeholders em PROMPT_README_BASE_HEADER (project_data, user_provided_links_instructions) estão sendo fornecidos. E se USER_LINKS_INSTRUCTIONS_TEMPLATE tem os placeholders corretos (repo_link, linkedin_link) se estiver sendo formatado.", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro de formatação interna do prompt: {str(ke)}")
     except Exception as e:
         logger.critical(f"Erro inesperado: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")

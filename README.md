@@ -16,6 +16,7 @@
 
 Este projeto fornece uma API e uma interface web simples para gerar arquivos `README.md` para projetos de software utilizando a IA Gemini.  Basta fornecer um arquivo `.zip` contendo o código-fonte do seu projeto, e a API retornará um `README.md` bem formatado e informativo, contendo informações como a estrutura do projeto, tecnologias utilizadas, instruções de instalação e muito mais.  Isso facilita a documentação de seus projetos e a colaboração com outros desenvolvedores. O público-alvo são desenvolvedores que buscam automatizar a criação de documentação e facilitar a publicação de seus projetos open source ou internos.
 
+
 ## 🚧 Status do Projeto
 
 Em Desenvolvimento Ativo
@@ -34,6 +35,8 @@ A aplicação web possui uma interface intuitiva e amigável.  Para uma demonstr
 - 📄 Retorna um `README.md` formatado em Markdown.
 - 🌐 Interface web amigável e intuitiva.
 - 🔑 Autenticação segura via API Key.
+- Permite selecionar o nível de detalhe do README gerado (simples, moderado ou completo).
+- Permite fornecer links para o repositório e perfil do LinkedIn do autor para inclusão no README.
 
 
 ## 🛠️ Tecnologias Utilizadas
@@ -146,3 +149,4 @@ Distribuído sob a Licença MIT. Veja `LICENSE.md` para mais informações.
 ## 📞 Contato e Suporte
 
 Abra uma [Issue no GitHub](URL_DO_REPOSITORIO/issues/new/choose) para reportar bugs ou solicitar suporte.
+

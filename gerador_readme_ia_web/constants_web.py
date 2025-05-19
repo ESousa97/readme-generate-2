@@ -1,10 +1,24 @@
 # gerador_readme_ia_web/constants_web.py
 
+# ATENÇÃO: Este é o template para as instruções sobre os links do usuário.
+# Ele usa {repo_link} e {linkedin_link} como placeholders.
+USER_LINKS_INSTRUCTIONS_TEMPLATE = """
+
+Informações Adicionais Fornecidas pelo Usuário (para seu contexto, não para listar diretamente no README):
+- Link do Repositório do Projeto: {repo_link}
+- Link do Perfil LinkedIn do Autor/Contato Principal: {linkedin_link}
+
+Instrução Específica: Se os links acima foram fornecidos, utilize-os para enriquecer as seções apropriadas do README (ex: Badges, Autores, Contato, inferir nome do autor/projeto). Se um link não foi fornecido como "Não fornecido", adapte o README para não mencioná-lo ou use placeholders genéricos. NÃO liste esta seção "Informações Adicionais Fornecidas pelo Usuário" diretamente no README final.
+"""
+
+# ATENÇÃO: Este é o cabeçalho base para todos os prompts.
+# Ele usa {project_data} e {user_provided_links_instructions} como placeholders.
+# NÃO deve conter {repo_link} ou {linkedin_link} diretamente.
 PROMPT_README_BASE_HEADER = """
 Analise os dados do projeto fornecidos (estrutura de diretórios e conteúdo de arquivos selecionados de um arquivo .zip) e, a partir deles, gere um README.md em Português do Brasil.
 
 **Dados do Projeto (extraídos do arquivo .zip e informações do usuário):**
-{project_data} 
+{project_data}
 {user_provided_links_instructions}
 
 **Formato Final do Output:**
@@ -12,14 +26,6 @@ Analise os dados do projeto fornecidos (estrutura de diretórios e conteúdo de 
 * Formate todo o conteúdo utilizando Markdown padrão do GitHub (GFM).
 * Não inclua nenhuma introdução, conclusão, comentários ou metadados seus antes ou depois do conteúdo do README.
 ---
-"""
-
-USER_LINKS_INSTRUCTIONS_TEMPLATE = """
-Informações Adicionais Fornecidas pelo Usuário (para seu contexto, não para listar diretamente no README):
-- Link do Repositório do Projeto: {repo_link}
-- Link do Perfil LinkedIn do Autor/Contato Principal: {linkedin_link}
-
-Instrução Específica: Se os links acima foram fornecidos, utilize-os para enriquecer as seções apropriadas do README (ex: Badges, Autores, Contato, inferir nome do autor/projeto). Se um link não foi fornecido, ignore a instrução referente a ele.
 """
 
 # NÍVEL 1: SIMPLES (Dev 5+ anos)
@@ -34,13 +40,16 @@ PROMPT_README_SIMPLE = PROMPT_README_BASE_HEADER + """
 3.  **Tecnologias Utilizadas:** Lista simples das principais tecnologias (ex: Python, React, Docker).
 4.  **Pré-requisitos:** Apenas os absolutamente necessários.
 5.  **Como Instalar e Configurar:** Passos mínimos para a instalação de dependências e configuração básica. Use blocos de código para comandos.
-    ```bash
-    # Exemplo de comandos
-    git clone URL_DO_PROJETO_AQUI  # Se o link do repositório foi fornecido, use-o aqui, senão, use um placeholder.
-    cd NOME_DO_PROJETO
-    pip install -r requirements.txt # ou equivalente
-    # cp .env.example .env (se aplicável)
-    ```
+    * Exemplo de comandos:
+        ```bash
+        # Se o link do repositório foi fornecido nas "Informações Adicionais", mencione-o aqui.
+        # Ex: git clone [LINK_DO_REPOSITORIO_FORNECIDO]
+        # Senão, use um placeholder genérico:
+        # git clone URL_DO_PROJETO_AQUI
+        cd NOME_DO_PROJETO
+        pip install -r requirements.txt # ou equivalente
+        # cp .env.example .env (se aplicável, explique brevemente)
+        ```
 6.  **Como Executar:** Comando principal para iniciar a aplicação.
     ```bash
     python main.py # ou equivalente
@@ -50,10 +59,10 @@ PROMPT_README_SIMPLE = PROMPT_README_BASE_HEADER + """
 **Estilo:**
 * Direto e objetivo.
 * Use cabeçalhos Markdown (`##`, `###`) para cada seção.
-* Mínimo de badges (talvez apenas licença, se disponível).
+* Mínimo de badges (talvez apenas licença, se disponível, e use o link do repositório se fornecido).
 """
 
-# NÍVEL 2: MODERADO (Dev 10+ anos) - Este é o prompt que já refinamos anteriormente
+# NÍVEL 2: MODERADO (Dev 10+ anos)
 PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
 **Persona da IA:** Você é um Principal Technical Writer e Engenheiro de Software Sênior, com uma década de experiência na criação de documentação de excelência para projetos de código aberto e empresariais. Sua especialidade é transformar informações de projeto em READMEs que são não apenas informativos, mas também convidativos, visualmente organizados e fáceis de navegar.
 
@@ -71,7 +80,7 @@ PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
     * **Slogan/Tagline:** Conciso (1-2 linhas).
 
 2.  **Badges (Shields.io):**
-    * Agrupados logicamente. Forneça placeholders completos (ex: `USUARIO/REPO` a ser substituído. Se o link do repositório foi fornecido pelo usuário, use-o para construir os URLs dos badges).
+    * Agrupados logicamente. Forneça placeholders completos (ex: `USUARIO/REPO` a ser substituído). Se o link do repositório foi fornecido pelo usuário nas "Informações Adicionais", use-o para construir os URLs dos badges, substituindo `USUARIO/REPO`.
     * Considere: Build, Versão, Licença, Downloads, Tamanho, Issues, PRs, Linguagem, Contribuições, Status. Use `style=for-the-badge`.
 
 3.  **Descrição Detalhada:** (1-3 parágrafos) Problema, solução, diferenciais, público-alvo.
@@ -89,7 +98,7 @@ PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
 9.  **📋 Pré-requisitos:** Dependências de software, ferramentas, versões.
 
 10. **🚀 Guia de Início Rápido (Getting Started):** Passos exatos para clonar, configurar ambiente, instalar dependências e executar.
-    * Inclua `git clone {repo_link_placeholder_ou_fornecido}`.
+    * No comando `git clone`, se o link do repositório foi fornecido nas "Informações Adicionais", use-o. Senão, use `URL_DO_REPOSITORIO_AQUI`.
 
 11. **⚙️ Uso e Comandos Detalhados:** Outros comandos importantes (produção, build, lint, format).
 
@@ -103,16 +112,15 @@ PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
 
 16. **📜 Licença:** Indique claramente. Se `LICENSE` encontrado, mencione. Senão, sugira adicionar uma.
 
-17. **👥 Autores e Agradecimentos:** (Opcional) Reconheça autores/mantenedores. Se o link do LinkedIn foi fornecido, sugira usá-lo aqui.
+17. **👥 Autores e Agradecimentos:** (Opcional) Reconheça autores/mantenedores. Se o link do LinkedIn foi fornecido nas "Informações Adicionais", sugira usá-lo aqui.
 
 18. **🗺️ Roadmap (Roteiro):** (Opcional) Funcionalidades futuras.
 
-19. **📞 Contato e Suporte:** Melhor forma de obter ajuda. Se o link do LinkedIn ou repositório foi fornecido, use-os.
+19. **📞 Contato e Suporte:** Melhor forma de obter ajuda. Se o link do LinkedIn ou repositório foi fornecido, use-os para sugerir formas de contato.
 
 **Estilo:**
 * Use emojis de forma sutil e apropriada para melhorar a legibilidade.
 """
-
 
 # NÍVEL 3: COMPLETO (Equipe PhD 11+ anos)
 PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
@@ -132,68 +140,42 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
 
 2.  **Abstract (Resumo Técnico):** (1-2 parágrafos) Como um resumo de artigo científico, apresentando o contexto, o problema, a metodologia/solução proposta, os resultados esperados/alcançados e a contribuição principal do projeto.
 
-3.  **Badges Abrangentes:** Inclua badges de qualidade de código (SonarQube, CodeClimate), segurança (Snyk, Dependabot), atividade do projeto, e métricas de comunidade. Use o `{repo_link}` fornecido extensivamente.
+3.  **Badges Abrangentes:** Inclua badges de qualidade de código (SonarQube, CodeClimate), segurança (Snyk, Dependabot), atividade do projeto, e métricas de comunidade. Use o link do repositório (se fornecido nas "Informações Adicionais") extensivamente para construir os URLs dos badges.
 
-4.  **Introdução e Motivação:**
-    * Contextualização detalhada do problema.
-    * Limitações de soluções existentes (estado da arte).
-    * A proposta de valor única e a inovação do projeto.
+4.  **Introdução e Motivação:** Contextualização detalhada do problema, limitações de soluções existentes, proposta de valor única.
 
-5.  **Arquitetura do Sistema:**
-    * Descrição dos principais componentes, módulos e suas interações.
-    * **Sugestão explícita para diagrama de arquitetura:** ``
-    * Discussão sobre decisões arquiteturais chave (ex: microserviços vs. monolito, escolha de padrões de design).
+5.  **Arquitetura do Sistema:** Descrição dos componentes, módulos, interações. **Sugestão explícita para diagrama de arquitetura.** Discussão sobre decisões arquiteturais.
 
-6.  **Decisões de Design Chave:** Justificativas técnicas para as escolhas mais importantes de tecnologias, algoritmos, ou estruturas de dados.
+6.  **Decisões de Design Chave:** Justificativas técnicas para escolhas de tecnologias, algoritmos, estruturas de dados.
 
-7.  **✨ Funcionalidades (com Casos de Uso):** Detalhe as funcionalidades com exemplos de casos de uso ou cenários.
+7.  **✨ Funcionalidades (com Casos de Uso):** Detalhe com exemplos de casos de uso.
 
-8.  **🛠️ Tech Stack Detalhado:**
-    * Tabela detalhada com versões, propósito de cada tecnologia e justificativa da escolha.
-    * Ex:
-        | Componente | Tecnologia      | Versão | Propósito Principal                     | Justificativa da Escolha                     |
-        |------------|-----------------|--------|-----------------------------------------|----------------------------------------------|
-        | API        | FastAPI (Python)| 0.100+ | Framework web assíncrono de alta perf. | Desempenho, tipagem, docs automáticas (Swagger) |
-        | Cache      | Redis           | 7.x    | Cache de sessão e dados frequentes      | Velocidade, baixa latência                   |
+8.  **🛠️ Tech Stack Detalhado:** Tabela com versões, propósito e justificativa da escolha.
 
-9.  **📂 Estrutura Detalhada do Código-Fonte:** Explique a filosofia por trás da organização do código, os principais namespaces/módulos e suas responsabilidades.
+9.  **📂 Estrutura Detalhada do Código-Fonte:** Filosofia da organização, namespaces/módulos e responsabilidades.
 
-10. **🚀 Guia de Instalação e Configuração Avançada:**
-    * Múltiplos ambientes (desenvolvimento, staging, produção).
-    * Configuração com Docker, Docker Compose.
-    * Detalhes sobre todas as variáveis de ambiente e seus efeitos.
+10. **🚀 Guia de Instalação e Configuração Avançada:** Múltiplos ambientes, Docker, Docker Compose, detalhes de todas as variáveis de ambiente. (Se o link do repositório foi fornecido, use-o no comando `git clone`).
 
-11. **⚙️ API Reference (se aplicável):**
-    * Se for uma API, sugira linkar para a documentação Swagger/OpenAPI gerada ou uma seção resumindo os principais endpoints, métodos HTTP, parâmetros e respostas esperadas.
-    * ``
+11. **⚙️ API Reference (se aplicável):** Sugira link para documentação Swagger/OpenAPI ou resumo dos endpoints.
 
-12. **🧪 Estratégia de Testes e Qualidade:**
-    * Tipos de testes implementados (unitários, integração, E2E, performance, segurança).
-    * Ferramentas de teste e como são usadas.
-    * Políticas de CI/CD para testes e qualidade de código.
-    * Como contribuir com novos testes.
+12. **🧪 Estratégia de Testes e Qualidade:** Tipos de testes, ferramentas, políticas de CI/CD, como contribuir com testes.
 
-13. **🚢 Deployment Detalhado e Escalabilidade:**
-    * Opções de deployment (Kubernetes, Serverless, VMs).
-    * Considerações sobre escalabilidade, monitoramento, logging em produção.
+13. **🚢 Deployment Detalhado e Escalabilidade:** Opções (Kubernetes, Serverless), considerações sobre escalabilidade, monitoramento, logging.
 
-14. **🤝 Contribuição (Nível Avançado):**
-    * Processo detalhado: Fork, Branching Model (ex: Gitflow), Padrões de Commit (Conventional Commits), Code Style, Processo de Code Review.
-    * Como configurar o ambiente de desenvolvimento para depuração e desenvolvimento de features complexas.
-    * Link para Issues com labels `good first issue` ou `help wanted`.
+14. **🤝 Contribuição (Nível Avançado):** Processo detalhado (Fork, Branching Model, Conventional Commits, Code Style, Code Review). Como configurar ambiente para depuração avançada. Link para Issues (use o link do repositório se fornecido).
 
-15. **📜 Licença e Aspectos Legais:** Análise da licença e suas implicações.
+15. **📜 Licença e Aspectos Legais:** Análise da licença e implicações.
 
-16. **📚 Publicações e Citações (se aplicável):** Se o projeto resultou em publicações acadêmicas ou é baseado em pesquisa, liste-as ou sugira onde adicionar.
+16. **📚 Publicações e Citações (se aplicável):** Liste ou sugira onde adicionar.
 
-17. **👥 Equipe Principal e Colaboradores Chave:** Reconhecimento formal. Use o `{linkedin_link}` se fornecido.
+17. **👥 Equipe Principal e Colaboradores Chave:** Reconhecimento. Use o link do LinkedIn (se fornecido nas "Informações Adicionais").
 
-18. **🗺️ Roadmap Detalhado e Visão de Longo Prazo:** Metas de curto, médio e longo prazo. Desafios futuros.
+18. **🗺️ Roadmap Detalhado e Visão de Longo Prazo:** Metas, desafios futuros.
 
-19. **❓ FAQ (Perguntas Frequentes):** Antecipe dúvidas comuns.
+19. **❓ FAQ (Perguntas Frequentes):** Antecipe dúvidas.
 
 **Estilo:**
 * Formal, preciso e acadêmico, mas acessível.
 * Uso extensivo de listas, tabelas e blocos de código bem formatados.
-* Sugestões claras para adição de diagramas ou elementos visuais.
+* Sugestões claras para adição de diagramas.
 """
