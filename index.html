@@ -3,65 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Readme.md generation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --bg-primary-light: #ffffff; --bg-secondary-light: #f2f3f5; --bg-tertiary-light: #e3e5e8; --bg-accent-light: #5865f2;
-            --text-primary-light: #060607; --text-secondary-light: #4f5660; --text-muted-light: #747f8d; --text-link-light: #0068e0;
-            --border-light: #c9ced1; --output-bg-light: #f9f9f9; --output-text-light: #2e3338; --output-border-light: #e3e5e8;
-            --success-light: #2d7d46; --error-light: #d83c3e; --warning-light: #e39112;
-        }
-        .dark:root {
-            --bg-primary-dark: #36393f; --bg-secondary-dark: #2f3136; --bg-tertiary-dark: #202225; --bg-accent-dark: #5865f2;
-            --text-primary-dark: #ffffff; --text-secondary-dark: #b9bbbe; --text-muted-dark: #72767d; --text-link-dark: #0096fa;
-            --border-dark: #202225; --output-bg-dark: #2b2d31; --output-text-dark: #dcddde; --output-border-dark: #232428;
-            --success-dark: #43b581; --error-dark: #f04747; --warning-dark: #faa61a;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary-light); color: var(--text-primary-light); transition: background-color 0.3s ease, color 0.3s ease; }
-        .dark body { background-color: var(--bg-primary-dark); color: var(--text-primary-dark); }
-        .section-card { background-color: var(--bg-secondary-light); border: 1px solid var(--border-light); }
-        .dark .section-card { background-color: var(--bg-secondary-dark); border-color: var(--border-dark); }
-        .input-field { background-color: var(--bg-primary-light); border-color: var(--border-light); color: var(--text-primary-light); }
-        .dark .input-field { background-color: var(--bg-tertiary-dark); border-color: var(--border-dark); color: var(--text-primary-dark); }
-        .input-field::placeholder { color: var(--text-muted-light); }
-        .dark .input-field::placeholder { color: var(--text-muted-dark); }
-        .text-header { color: var(--text-muted-light); } .dark .text-header { color: var(--text-muted-dark); }
-        .text-description { color: var(--text-secondary-light); } .dark .text-description { color: var(--text-secondary-dark); }
-        .brand-text { color: var(--bg-accent-light); } .dark .brand-text { color: var(--bg-accent-dark); }
-        .brand-bg { background-color: var(--bg-accent-light); } .dark .brand-bg { background-color: var(--bg-accent-dark); }
-        #readmeOutput pre { background-color: var(--output-bg-light); border: 1px solid var(--output-border-light); color: var(--output-text-light); white-space: pre-wrap; word-wrap: break-word; padding: 1rem; border-radius: 0.375rem; overflow-x: auto; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        .dark #readmeOutput pre { background-color: var(--output-bg-dark); border-color: var(--output-border-dark); color: var(--output-text-dark); }
-        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--bg-accent-light); animation: spin 1s ease infinite; }
-        .dark .spinner { border-left-color: var(--bg-accent-dark); }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status-success { background-color: #d1fae5; color: var(--success-light); border-left-color: var(--success-light); } 
-        .dark .status-success { background-color: #1a3c2a; color: var(--success-dark); border-left-color: var(--success-dark); }
-        .status-error { background-color: #fee2e2; color: var(--error-light); border-left-color: var(--error-light); }
-        .dark .status-error { background-color: #4a2123; color: var(--error-dark); border-left-color: var(--error-dark); }
-        .status-warning { background-color: #ffedd5; color: var(--warning-light); border-left-color: var(--warning-light); }
-        .dark .status-warning { background-color: #4d3313; color: var(--warning-dark); border-left-color: var(--warning-dark); }
-        .status-info { background-color: #dbeafe; color: #1d4ed8; border-left-color: #1d4ed8; }
-        .dark .status-info { background-color: #1e293b; color: #93c5fd; border-left-color: #93c5fd; }
-        #themeToggle { color: var(--text-secondary-light); } .dark #themeToggle { color: var(--text-secondary-dark); }
-        #themeToggle:hover { color: var(--text-primary-light); } .dark #themeToggle:hover { color: var(--text-primary-dark); }
-        /* Estilo para radio buttons customizados */
-        .radio-label { transition: all 0.2s ease-in-out; }
-        .radio-label:hover { background-color: var(--bg-tertiary-light); }
-        .dark .radio-label:hover { background-color: var(--bg-tertiary-dark); }
-        input[type="radio"]:checked + .radio-label {
-            background-color: var(--bg-accent-light);
-            color: white; /* Cor do texto no modo claro quando selecionado */
-            border-color: var(--bg-accent-light);
-        }
-        .dark input[type="radio"]:checked + .radio-label {
-            background-color: var(--bg-accent-dark);
-            color: var(--text-primary-dark); /* Cor do texto no modo escuro quando selecionado */
-            border-color: var(--bg-accent-dark);
-        }
-    </style>
+    <title>Readme Generation</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.tailwindcss.com"></script> 
     <script>
-        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'discord-blurple': '#5865F2', 'discord-dark-bg-primary': '#36393f', 'discord-dark-bg-secondary': '#2f3136', 'discord-dark-bg-tertiary': '#202225', 'discord-dark-text-primary': '#ffffff', 'discord-dark-text-secondary': '#b9bbbe', 'discord-dark-text-muted': '#72767d', 'discord-light-bg-primary': '#ffffff', 'discord-light-bg-secondary': '#f2f3f5', 'discord-light-bg-tertiary': '#e3e5e8', 'discord-light-text-primary': '#060607', 'discord-light-text-secondary': '#4f5660', 'discord-light-text-muted': '#747f8d', } } } }
+        // Configuração do Tailwind (pode ser removida se não usar classes utilitárias do Tailwind diretamente)
+        tailwind.config = { 
+            darkMode: 'class',
+            theme: { extend: {} } // Pode deixar vazio se as cores vierem todas do style.css
+        }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,141 +19,266 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
-<body class="transition-colors duration-300">
-    <div class="container mx-auto p-4 md:p-8 max-w-3xl min-h-screen flex flex-col">
-        <header class="mb-6">
-            <div class="flex justify-between items-center mb-2">
-                <h1 class="text-3xl md:text-4xl font-bold brand-text">Gerador de README.md</h1>
-                <button id="themeToggle" title="Alternar tema" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-discord-blurple dark:focus:ring-offset-discord-dark-bg-primary">
-                    <svg id="themeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg>
+<body class="bg-bg-primary-light dark:bg-bg-primary-dark text-text-primary-light dark:text-text-primary-dark">
+    <div class="container mx-auto">
+        
+        <header class="mb-10 text-center pt-8 sm:pt-12">
+            <div class="flex justify-center sm:justify-end items-center mb-4 relative">
+                <button id="themeToggle" title="Alternar tema" class="button-icon absolute top-0 right-0 sm:relative">
+                    <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg>
                 </button>
             </div>
-            <p class="text-description mt-1 text-center md:text-left">Personalize seu README com informações adicionais e escolha o nível de detalhe!</p>
+            <h1 class="text-3xl sm:text-4xl font-bold" style="color: var(--bg-accent-light);">Readme Generation</h1>
+            <p class="text-base sm:text-lg mt-2">
+                Crie READMEs incríveis para seus projetos de forma rápida e fácil!
+            </p>
         </header>
 
-        <main class="flex-grow">
-            <section id="initialConfigSection" class="section-card p-6 rounded-lg shadow-md mb-8 space-y-6">
-                <div>
-                    <h2 class="text-xl font-semibold mb-1 text-header">1. API Key & Informações Opcionais</h2>
-                    <p class="text-xs text-description mb-4">Sua API Key é usada para a IA. Links são opcionais e podem ser usados para enriquecer seu README. <strong class="text-red-500 dark:text-red-400">Nunca compartilhe sua API Key.</strong></p>
+        <main class="main-content-wrapper">
+            <section id="initialConfigSection" class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">1. Configurações Essenciais</h2>
+                </div>
+                <div class="section-content space-y-6">
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label for="geminiApiKey" class="block text-sm font-medium text-description">Sua API Key do Gemini:</label>
-                            <input type="password" name="geminiApiKey" id="geminiApiKey"
-                                   class="input-field mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-discord-blurple focus:border-discord-blurple sm:text-sm"
-                                   placeholder="Cole sua API Key aqui">
-                            <div class="mt-2 flex items-center">
-                                <input id="saveApiKey" name="saveApiKey" type="checkbox" class="h-4 w-4 text-discord-blurple border-gray-300 dark:border-gray-600 rounded focus:ring-discord-blurple">
-                                <label for="saveApiKey" class="ml-2 block text-sm">Salvar API Key neste navegador?</label>
-                            </div>
-                            <p id="apiKeyStatus" class="text-xs mt-1"></p>
-                        </div>
-
-                        <div>
-                            <label for="repoUrl" class="block text-sm font-medium text-description">Link do Repositório (opcional):</label>
-                            <input type="url" name="repoUrl" id="repoUrl"
-                                   class="input-field mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-discord-blurple focus:border-discord-blurple sm:text-sm"
-                                   placeholder="https://github.com/seu-usuario/seu-projeto">
-                            <div class="mt-2 flex items-center">
-                                <input id="saveRepoUrl" name="saveRepoUrl" type="checkbox" class="h-4 w-4 text-discord-blurple border-gray-300 dark:border-gray-600 rounded focus:ring-discord-blurple">
-                                <label for="saveRepoUrl" class="ml-2 block text-sm">Salvar Link do Repositório?</label>
+                    <div class="form-group">
+                        <div class="label-with-help">
+                            <label for="geminiApiKey" class="label-form">Sua API Key do Gemini</label>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-api-key" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-gemini-api-key" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-api-key">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>API Key do Gemini</h4>
+                                    <p>Sua chave secreta para acessar a inteligência artificial do Google. É como uma senha para usar os recursos do Gemini. Mantenha-a segura!</p>
+                                </div>
                             </div>
                         </div>
+                        <input type="password" name="geminiApiKey" id="geminiApiKey" class="input-field" placeholder="AIzaSy...">
+                        <p id="apiKeyError" class="error-message hidden"></p>
+                        <div class="checkbox-container">
+                            <input id="saveApiKey" name="saveApiKey" type="checkbox" class="checkbox-custom">
+                            <label for="saveApiKey" class="checkbox-label">Salvar API Key (localmente)</label>
+                        </div>
+                        <p id="apiKeyStatus" class="status-text-xs"></p>
+                    </div>
 
-                        <div>
-                            <label for="linkedinUrl" class="block text-sm font-medium text-description">Link do seu LinkedIn (opcional):</label>
-                            <input type="url" name="linkedinUrl" id="linkedinUrl"
-                                   class="input-field mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-discord-blurple focus:border-discord-blurple sm:text-sm"
-                                   placeholder="https://linkedin.com/in/seu-perfil">
-                            <div class="mt-2 flex items-center">
-                                <input id="saveLinkedinUrl" name="saveLinkedinUrl" type="checkbox" class="h-4 w-4 text-discord-blurple border-gray-300 dark:border-gray-600 rounded focus:ring-discord-blurple">
-                                <label for="saveLinkedinUrl" class="ml-2 block text-sm">Salvar Link do LinkedIn?</label>
+                    <div class="form-group">
+                        <div class="label-with-help">
+                            <label for="geminiModelSelect" class="label-form">Modelo Gemini</label>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-model" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-gemini-model" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-model">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Modelo Gemini</h4>
+                                    <p>Define qual 'cérebro' do Gemini será usado. O <strong>Flash</strong> é mais rápido e econômico para a maioria dos READMEs. Outros modelos podem ser mais poderosos, mas podem ter custos diferentes.</p>
+                                </div>
                             </div>
+                        </div>
+                        <select name="geminiModelSelect" id="geminiModelSelect" class="input-field">
+                            <option value="DEFAULT_OPTION">Insira a API Key para carregar</option> 
+                        </select>
+                        <p id="geminiModelError" class="error-message hidden"></p>
+                         <div class="checkbox-container">
+                            <input id="saveGeminiModel" name="saveGeminiModel" type="checkbox" class="checkbox-custom">
+                            <label for="saveGeminiModel" class="checkbox-label">Salvar seleção de modelo</label>
                         </div>
                     </div>
-                </div>
-                
-                <div class="pt-4">
-                    <h3 class="text-lg font-medium text-header mb-2">Nível de Detalhe do README:</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <input type="radio" name="readmeLevel" id="levelSimple" value="simple" class="sr-only" checked>
-                            <label for="levelSimple" class="radio-label flex flex-col items-center justify-center text-center p-3 border-2 rounded-md cursor-pointer">
-                                <ion-icon name="document-text-outline" class="text-2xl mb-1"></ion-icon>
-                                <span class="text-sm font-medium">Simples</span>
-                                <span class="text-xs text-description">(Dev 5+ anos)</span>
-                            </label>
+
+                    <div class="form-group">
+                        <div class="label-with-help">
+                            <label for="repoUrl" class="label-form">Link do Repositório <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-repo-url" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-repo-url" class="help-tooltip hidden" data-tooltip-id="tooltip-repo-url">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Link do Repositório</h4>
+                                    <p>O link do seu projeto no GitHub, GitLab ou similar. Ajuda o Gemini a entender o código e a estrutura do projeto para gerar um README mais preciso e relevante.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <input type="radio" name="readmeLevel" id="levelModerate" value="moderate" class="sr-only">
-                            <label for="levelModerate" class="radio-label flex flex-col items-center justify-center text-center p-3 border-2 rounded-md cursor-pointer">
-                                <ion-icon name="newspaper-outline" class="text-2xl mb-1"></ion-icon>
-                                <span class="text-sm font-medium">Moderado</span>
-                                <span class="text-xs text-description">(Dev 10+ anos)</span>
-                            </label>
+                        <input type="url" name="repoUrl" id="repoUrl" class="input-field" placeholder="https://github.com/seu-usuario/seu-projeto">
+                        <p id="repoUrlError" class="error-message hidden"></p>
+                        <div class="checkbox-container">
+                            <input id="saveRepoUrl" name="saveRepoUrl" type="checkbox" class="checkbox-custom">
+                            <label for="saveRepoUrl" class="checkbox-label">Salvar Link do Repositório</label>
                         </div>
-                        <div>
-                            <input type="radio" name="readmeLevel" id="levelComplete" value="complete" class="sr-only">
-                            <label for="levelComplete" class="radio-label flex flex-col items-center justify-center text-center p-3 border-2 rounded-md cursor-pointer">
-                                <ion-icon name="library-outline" class="text-2xl mb-1"></ion-icon>
-                                <span class="text-sm font-medium">Completo</span>
-                                <span class="text-xs text-description">(Equipe PhD 11+ anos)</span>
-                            </label>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-with-help">
+                            <label for="linkedinUrl" class="label-form">Link do LinkedIn <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-linkedin-url" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-linkedin-url" class="help-tooltip hidden" data-tooltip-id="tooltip-linkedin-url">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Link do LinkedIn</h4>
+                                    <p>O link para o seu perfil no LinkedIn. Ele será incluído na seção de contato do README, permitindo que as pessoas te encontrem e se conectem profissionalmente.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="url" name="linkedinUrl" id="linkedinUrl" class="input-field" placeholder="https://linkedin.com/in/seu-perfil">
+                        <p id="linkedinUrlError" class="error-message hidden"></p>
+                        <div class="checkbox-container">
+                            <input id="saveLinkedinUrl" name="saveLinkedinUrl" type="checkbox" class="checkbox-custom">
+                            <label for="saveLinkedinUrl" class="checkbox-label">Salvar Link do LinkedIn</label>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="uploadSection" class="section-card p-6 rounded-lg shadow-md mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-header">2. Upload do Projeto (.zip)</h2>
-                <form id="uploadForm" class="space-y-4">
+            <section class="section-card">
+                 <div class="section-header">
+                    <h2 class="section-title">2. Detalhes do README</h2>
+                </div>
+                <div class="section-content space-y-6">
                     <div>
-                        <label for="projectZip" class="block text-sm font-medium text-description mb-1">Selecione o arquivo .zip:</label>
-                        <input type="file" name="projectZip" id="projectZip" accept=".zip" required
-                               class="input-field block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:brand-bg file:text-white dark:file:bg-discord-blurple dark:file:text-white hover:file:opacity-90 cursor-pointer border rounded-md focus:ring-discord-blurple focus:border-discord-blurple">
-                        <p id="fileName" class="text-xs text-description mt-1"></p>
+                        <div class="label-with-help">
+                            <h3 class="label-form mb-3">Nível de Detalhe</h3>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-readme-level" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-readme-level" class="help-tooltip hidden" data-tooltip-id="tooltip-readme-level">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Nível de Detalhe do README</h4>
+                                    <p>Escolha o quão completo você quer que seu README seja:</p>
+                                    <ul>
+                                        <li><strong>Simples:</strong> Um README mais curto, com o essencial.</li>
+                                        <li><strong>Moderado:</strong> Um bom equilíbrio, com as seções mais comuns.</li>
+                                        <li><strong>Completo:</strong> Um README detalhado, com várias seções e informações aprofundadas.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="radio-group">
+                            <div>
+                                <input type="radio" name="readmeLevel" id="levelSimple" value="simple" class="sr-only">
+                                <label for="levelSimple" class="radio-label">
+                                    <span class="icon-wrapper"><ion-icon name="document-text-outline"></ion-icon></span>
+                                    <span class="radio-text-main">Simples</span>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" name="readmeLevel" id="levelModerate" value="moderate" class="sr-only" checked>
+                                <label for="levelModerate" class="radio-label">
+                                    <span class="icon-wrapper"><ion-icon name="newspaper-outline"></ion-icon></span>
+                                    <span class="radio-text-main">Moderado</span>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" name="readmeLevel" id="levelComplete" value="complete" class="sr-only">
+                                <label for="levelComplete" class="radio-label">
+                                    <span class="icon-wrapper"><ion-icon name="library-outline"></ion-icon></span>
+                                    <span class="radio-text-main">Completo</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" id="generateButton"
-                            class="w-full brand-bg hover:opacity-90 text-white font-semibold py-2.5 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-discord-blurple dark:focus:ring-offset-discord-dark-bg-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                        <svg id="buttonIcon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div id="badgeSelectionSection">
+                        <div class="label-with-help">
+                            <h3 class="label-form mb-3">Badges Opcionais</h3>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-badges" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-badges" class="help-tooltip hidden" data-tooltip-id="tooltip-badges">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Badges Opcionais</h4>
+                                    <p>São pequenos ícones que você pode adicionar ao seu README para mostrar informações rápidas sobre o projeto, como a licença, o status do build, a versão da linguagem, etc.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="badgeSelectionContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <details class="info-details">
+                <summary class="info-summary">
+                    <ion-icon name="information-circle-outline"></ion-icon> 
+                    Informações sobre Modelos Gemini, Limites e API Key
+                </summary>
+                <div class="info-content">
+                    <h4 class="font-semibold">✅ O que é o Gemini Flash?</h4>
+                    <p>O Gemini Flash é uma versão mais rápida e mais barata da inteligência artificial do Google. Ela é boa para tarefas simples e rápidas, como responder perguntas, gerar textos curtos e organizar dados.</p>
+                    <h4 class="font-semibold">🆓 Uso grátis (camada gratuita)</h4>
+                    <p>Você pode usar o Gemini sem pagar nada, com algumas limitações por dia (RPM - Requisições Por Minuto, RPD - Requisições Por Dia, TPM - Tokens Por Minuto):</p>
+                    <ul><li><strong>Gemini 1.5 Flash:</strong><ul><li>RPM: 15</li><li>RPD: 1500</li><li>TPM: 1.000.000 (para o modelo <code>gemini-1.5-flash-latest</code>)</li></ul></li><li>⚠️ Esses limites são por projeto do Google Cloud / conta do AI Studio. Se você usar a mesma chave em vários lugares, os limites são compartilhados.</li></ul>
+                    <h4 class="font-semibold">💳 Se você quiser usar mais que isso:</h4>
+                    <p>Você pode ativar o plano pago no Google Cloud, que aumenta esses limites. Mas aí precisa criar um projeto no Google Cloud, ativar a cobrança (com cartão de crédito) e usar a API por lá.</p>
+                    <h4 class="font-semibold">🧠 Qual modelo usar?</h4>
+                    <p>Para esta ferramenta, recomendamos o <strong>Gemini 1.5 Flash (geralmente <code>gemini-1.5-flash-latest</code>)</strong> para a maioria das tarefas, pois oferece um bom equilíbrio entre velocidade, custo (gratuito dentro dos limites) e capacidade. Outros modelos "Pro" podem ser mais poderosos para tarefas muito complexas, mas podem ter diferentes implicações de custo ou limites.</p>
+                    <h4 class="font-semibold">👨‍💻 Exemplo prático dos limites</h4>
+                    <p>Se você fizer um programa que envia comandos para o Gemini todo dia com o <code>gemini-1.5-flash-latest</code>:</p>
+                    <ul><li>Pode mandar até 1.500 comandos por dia de graça.</li><li>Não mais que 15 comandos em um minuto.</li><li>Se mandar mais, vai dar erro (geralmente 429 - limite atingido).</li><li>Para projetos pessoais e testes, isso costuma ser mais do que suficiente.</li></ul>
+                    <h4 class="font-semibold">🧩 Tutorial: Como pegar a chave de API do Gemini (Google AI Studio)</h4>
+                    <ol><li><strong>Pré-requisitos:</strong> Uma conta Google (Gmail normal já serve) e um navegador.</li><li><strong>Acesse o Google AI Studio:</strong> Vá para <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/app/apikey</a>.</li><li><strong>Faça login</strong> com sua conta Google e aceite os termos, se for seu primeiro acesso.</li><li>Clique em <strong>"Create API key"</strong> (Criar chave de API).</li><li>Pode ser solicitado que você crie um novo projeto no Google Cloud ou selecione um existente. Siga as instruções.</li><li><strong>Copie sua chave:</strong> Uma chave será gerada (algo como <code>AIzaSyA...</code>). Essa é sua chave secreta.</li><li><strong>Guarde com segurança:</strong> ⚠️ Não compartilhe essa chave publicamente!</li></ol>
+                </div>
+            </details>
+
+            <section id="uploadSection" class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">3. Upload do Projeto</h2>
+                </div>
+                <form id="uploadForm" class="section-content space-y-5">
+                    <div class="form-group">
+                        <label for="projectZip" class="label-form">Selecione o arquivo .zip do seu projeto</label>
+                        <input type="file" name="projectZip" id="projectZip" accept=".zip" class="input-field file-input">
+                        <p id="fileName" class="status-text-xs"></p>
+                        <p id="projectZipError" class="error-message hidden"></p>
+                    </div>
+                    <button type="submit" id="generateButton" class="button-primary w-full">
+                        <span class="icon-wrapper" id="buttonIconWrapper">
+                           <svg id="buttonIcon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
                         <span id="buttonText">Gerar README.md</span>
                         <div id="loadingSpinner" class="spinner hidden ml-2"></div>
                     </button>
                 </form>
             </section>
 
-            <section id="statusSection" class="mb-8 hidden">
-                 <div id="statusMessage" class="p-4 rounded-md text-sm border-l-4"></div>
+            <section id="statusSection" class="mb-6 hidden">
+                 <div id="statusMessage" class="status-message-base"></div>
             </section>
             
-            <section id="outputSection" class="section-card p-6 rounded-lg shadow-md hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-header">3. README.md Gerado</h2>
-                    <button id="copyButton" title="Copiar para área de transferência"
-                            class="bg-green-500 hover:bg-green-600 dark:bg-discord-dark-bg-tertiary dark:hover:bg-opacity-75 dark:text-green-400 dark:border dark:border-green-500 text-white font-medium py-2 px-3 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 flex items-center transition-colors">
-                        <ion-icon name="copy-outline" class="mr-1"></ion-icon>
-                        Copiar
-                    </button>
+            <section id="outputSection" class="section-card hidden">
+                <div class="section-header flex justify-between items-center">
+                    <h2 class="section-title">4. README.md Gerado</h2>
+                    <div class="flex space-x-3">
+                        <button id="copyButton" title="Copiar" class="button-secondary button-small">
+                            <ion-icon name="copy-outline"></ion-icon> Copiar
+                        </button>
+                        <button id="downloadButton" title="Baixar" class="button-secondary button-small">
+                            <ion-icon name="download-outline"></ion-icon> Baixar
+                        </button>
+                    </div>
                 </div>
-                <div id="readmeOutput">
+                <div id="readmeOutput" class="section-content mt-4">
                     <pre><code id="readmeContent" class="language-markdown"></code></pre>
                 </div>
-                 <button id="downloadButton" title="Baixar README.md"
-                            class="mt-4 bg-purple-500 hover:bg-purple-600 dark:bg-discord-dark-bg-tertiary dark:hover:bg-opacity-75 dark:text-purple-400 dark:border dark:border-purple-500 text-white font-medium py-2 px-4 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 flex items-center transition-colors">
-                    <ion-icon name="download-outline" class="mr-2"></ion-icon>
-                    Baixar README.md
-                </button>
             </section>
         </main>
 
-        <footer class="text-center mt-12 py-6 border-t dark:border-discord-dark-bg-tertiary">
-            <p class="text-sm text-description">&copy; <span id="currentYear"></span> Enoque Sousa. Todos os direitos reservados.</p>
-            <p class="text-xs text-muted-light dark:text-muted-dark mt-1">Powered by Gemini & FastAPI.</p>
+        <footer class="text-center"> 
+            <p>&copy; <span id="currentYear"></span> Readme Generation. Todos os direitos reservados.</p>
+            <p class="text-xs mt-1">Powered by Gemini & FastAPI.</p>
+            <div class="developer-info mt-4">
+                <p class="text-sm">Desenvolvido por Enoque Sousa</p>
+                <div class="flex justify-center space-x-4 mt-2">
+                    <a href="https://github.com/ESousa97" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <ion-icon name="logo-github"></ion-icon>
+                    </a>
+                    <a href="https://www.linkedin.com/in/enoque-sousa-bb89aa168/" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <ion-icon name="logo-linkedin"></ion-icon>
+                    </a>
+                </div>
+            </div>
         </footer>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script type="module" src="/static/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>

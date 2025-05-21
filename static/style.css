@@ -1,0 +1,682 @@
+/* static/style.css */
+:root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    
+    /* Discord Light Theme Palette (Ajustado para um visual mais suave) */
+    --bg-primary-light: #F8F8F8;      /* Fundo principal: off-white suave */
+    --bg-secondary-light: #FFFFFF;     /* Fundo de cards/seções: branco puro para contraste */
+    --bg-tertiary-light: #F0F0F0;      /* Fundo de hover, bordas sutis: cinza muito claro */
+    --bg-accent-light: #5865F2;         /* Blurple (mantido) */
+    --bg-accent-hover-light: #4e5adf;   /* Blurple mais escuro (mantido) */
+    --bg-interactive-light: #E0E0E0;  /* Campos de input, botões: cinza claro mais distinto */
+    --bg-interactive-hover-light: #D0D0D0; /* Hover de elementos interativos: cinza médio claro */
+    --bg-info-light: #d1e7fd;           /* Fundo de informação (mantido) */
+    --bg-success-light: #d1e7dd;        /* Fundo de sucesso (mantido) */
+    --bg-warning-light: #fff3cd;        /* Fundo de aviso (mantido) */
+    --bg-error-light: #f8d7da;          /* Fundo de erro (mantido) */
+
+    --text-header-light: #060607;       /* Títulos fortes (mantido) */
+    --text-primary-light: #2e3338;      /* Texto principal (mantido) */
+    --text-secondary-light: #4f5660;    /* Rótulos, descrições (mantido) */
+    --text-muted-light: #747f8d;        /* Placeholders, texto de ajuda (mantido) */
+    --text-link-light: #0068e0;         /* Links (mantido) */
+    --text-on-accent-light: #ffffff;    /* Texto sobre cor de destaque (mantido) */
+    --text-info-light: #0c5460;         /* Texto de informação (mantido) */
+    --text-success-light: #14532d;      /* Texto de sucesso (mantido) */
+    --text-warning-light: #664d03;      /* Texto de aviso (mantido) */
+    --text-error-light: #b02a37;        /* Texto de erro (mantido) */
+
+    --border-light: #D0D0D0;            /* Bordas: cinza mais suave */
+    --border-focus-light: var(--bg-accent-light); /* Foco da borda (mantido) */
+    --shadow-light: rgba(0, 0, 0, 0.07); /* Sombra (mantido) */
+
+    --output-bg-light: #EEEEEE;         /* Fundo de blocos de código: cinza bem claro */
+    --output-text-light: #212529;       /* Texto de código (mantido) */
+    --output-border-light: #CCCCCC;     /* Borda de blocos de código: cinza médio claro */
+}
+
+.dark:root {
+    /* Discord Dark Theme Palette (mantido o original) */
+    --bg-primary-dark: #2f3136;         /* Main background (channels, user area) */
+    --bg-secondary-dark: #202225;       /* Server list, user popout, modals (darker) */
+    --bg-tertiary-dark: #18191c;         /* Hover, active channel, some borders (even darker) */
+    --bg-accent-dark: #5865F2;          /* Blurple */
+    --bg-accent-hover-dark: #6d7bff;    /* Lighter Blurple for hover */
+    --bg-interactive-dark: #2b2d31;    /* Input fields, buttons */
+    --bg-interactive-hover-dark: #3c3f44;
+    --bg-info-dark: #03284a;
+    --bg-success-dark: #0f3120;
+    --bg-warning-dark: #332405;
+    --bg-error-dark: #4d171a;
+
+    --text-header-dark: #ffffff;        /* Strong titles */
+    --text-primary-dark: #dcddde;        /* Main body text */
+    --text-secondary-dark: #b9bbbe;      /* Labels, descriptions (Discord's "Channels default") */
+    --text-muted-dark: #72767d;         /* Placeholders, help text (Discord's "Interactive muted") */
+    --text-link-dark: #00aff4;          /* Links (Discord's "Link") */
+    --text-on-accent-dark: #ffffff;
+    --text-info-dark: #5893df;
+    --text-success-dark: #61c07d;
+    --text-warning-dark: #f0b232;
+    --text-error-dark: #f04747;         /* Discord's red */
+
+    --border-dark: #1e1f22;            /* Darker borders */
+    --border-focus-dark: var(--bg-accent-dark);
+    --shadow-dark: rgba(0, 0, 0, 0.3);
+
+    --output-bg-dark: #1e1f22;         /* Very dark for code blocks */
+    --output-text-dark: #c9c9c9;       /* Lighter text for code */
+    --output-border-dark: #121315;
+}
+
+/* Reset e Base */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-primary-light);
+    color: var(--text-primary-light);
+    transition: background-color 0.2s ease-out, color 0.2s ease-out;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.65; /* Aumenta um pouco para melhor legibilidade */
+    font-size: 15px; /* Base um pouco menor, para UI moderna */
+}
+.dark body {
+    background-color: var(--bg-primary-dark);
+    color: var(--text-primary-dark);
+}
+
+/* Tipografia */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-header-light);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+}
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 { color: var(--text-header-dark); }
+
+h1 { font-size: 2rem; /* ~32px */ margin-top: 0; }
+h2 { font-size: 1.375rem; /* ~22px */ }
+h3 { font-size: 1.125rem; /* ~18px */ }
+h4 { font-size: 1rem; /* ~16px */ font-weight: 500; color: var(--text-secondary-light); }
+.dark h4 { color: var(--text-secondary-dark); }
+
+
+p { margin-bottom: 1em; color: var(--text-secondary-light); }
+.dark p { color: var(--text-secondary-dark); }
+
+a { color: var(--text-link-light); text-decoration: none; transition: color 0.2s ease-out;}
+.dark a { color: var(--text-link-dark); }
+a:hover { text-decoration: underline; color: var(--bg-accent-light); }
+.dark a:hover { color: var(--bg-accent-hover-dark); }
+
+code, pre {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.9em;
+}
+pre {
+    background-color: var(--output-bg-light);
+    border: 1px solid var(--output-border-light);
+    color: var(--output-text-light);
+    border-radius: 6px; padding: 1em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.dark pre {
+    background-color: var(--output-bg-dark);
+    border-color: var(--output-border-dark);
+    color: var(--output-text-dark);
+}
+/* Para <code> inline */
+:not(pre) > code {
+    background-color: var(--bg-tertiary-light);
+    color: var(--text-primary-light);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+}
+.dark :not(pre) > code {
+    background-color: var(--bg-tertiary-dark);
+    color: var(--text-primary-dark);
+}
+
+
+/* Layout e Cards */
+.container { max-width: 720px; padding: 1.5rem; } /* Um pouco mais estreito, mais padding */
+.main-content-wrapper { display: flex; flex-direction: column; gap: 2rem; /* Espaço entre seções principais */ }
+
+.section-card {
+    background-color: var(--bg-secondary-light);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 1.75rem; /* Mais padding interno */
+    box-shadow: 0 4px 12px var(--shadow-light); /* Sombra mais suave e definida */
+}
+.dark .section-card {
+    background-color: var(--bg-secondary-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 12px var(--shadow-dark);
+}
+.section-header {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+.dark .section-header { border-bottom-color: var(--border-dark); }
+.section-title { font-size: 1.25rem; font-weight: 600; } /* Já definido em h2/h3 */
+
+/* Formulários */
+.form-group { margin-bottom: 1.25rem; }
+
+/* Wrapper do label e botão de ajuda */
+.label-with-help {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem; /* Espaço abaixo do label */
+}
+
+.label-form {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary-light);
+    margin-bottom: 0; /* Removido para que o flexbox gerencie */
+    margin-right: 0.5rem; /* Espaço entre o label e o botão de ajuda */
+}
+.dark .label-form { color: var(--text-secondary-dark); }
+
+.input-field, select.input-field { /* Aplicar a selects também */
+    width: 100%;
+    background-color: var(--bg-interactive-light);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary-light);
+    border-radius: 5px; /* Bordas levemente arredondadas */
+    padding: 0.75rem 1rem; /* Mais padding vertical e horizontal */
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+    appearance: none; /* Remove estilos padrão do select */
+}
+.dark .input-field, .dark select.input-field {
+    background-color: var(--bg-interactive-dark);
+    border-color: var(--border-dark); /* Borda um pouco mais escura que o fundo */
+    color: var(--text-primary-dark);
+}
+select.input-field {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.5rem; /* Espaço para a seta */
+}
+.dark select.input-field {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+
+.input-field::placeholder { color: var(--text-muted-light); }
+.dark .input-field::placeholder { color: var(--text-muted-dark); }
+
+.input-field:focus, select.input-field:focus {
+    outline: none;
+    border-color: var(--border-focus-light);
+    box-shadow: 0 0 0 3px rgba(var(--bg-accent-light-rgb, 88, 101, 242), 0.25); /* Adapte a cor do shadow se --bg-accent-light-rgb não estiver definido */
+}
+.dark .input-field:focus, .dark select.input-field:focus {
+    border-color: var(--border-focus-dark);
+    box-shadow: 0 0 0 3px rgba(var(--bg-accent-dark-rgb, 88, 101, 242), 0.35);
+}
+/* Definindo as versões RGB para o box-shadow do focus */
+:root { --bg-accent-light-rgb: 88, 101, 242; --bg-accent-dark-rgb: 88, 101, 242; }
+
+
+.checkbox-container { margin-top: 0.75rem; display: flex; align-items: center; }
+.checkbox-custom {
+    height: 1.125rem; width: 1.125rem; /* Um pouco maior */
+    border-radius: 4px;
+    border: 2px solid var(--bg-interactive-hover-light); /* Borda mais visível */
+    color: var(--bg-accent-light);
+    margin-right: 0.625rem;
+    flex-shrink: 0;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+}
+.dark .checkbox-custom { border-color: var(--bg-interactive-hover-dark); color: var(--bg-accent-dark); }
+.checkbox-custom:checked {
+    background-color: var(--bg-accent-light);
+    border-color: var(--bg-accent-light);
+}
+.dark .checkbox-custom:checked { background-color: var(--bg-accent-dark); border-color: var(--bg-accent-dark); }
+.checkbox-custom:checked::before {
+    content: '✔';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8em;
+    color: var(--text-on-accent-light);
+}
+.dark .checkbox-custom:checked::before { color: var(--text-on-accent-dark); }
+.checkbox-label { font-size: 0.875rem; color: var(--text-secondary-light); cursor: pointer; }
+.dark .checkbox-label { color: var(--text-secondary-dark); }
+
+.error-message { font-size: 0.8rem; color: var(--text-error-light); margin-top: 0.375rem; }
+.dark .error-message { color: var(--text-error-dark); }
+.error-message.hidden { display: none; }
+
+.status-text-xs { font-size: 0.8rem; margin-top: 0.375rem; color: var(--text-muted-light); }
+.dark .status-text-xs { color: var(--text-muted-dark); }
+
+/* Radio Buttons */
+.radio-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+.radio-label {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 1rem 0.75rem; /* Mais padding vertical */
+    border: 2px solid var(--bg-interactive-light);
+    background-color: var(--bg-primary-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    color: var(--text-secondary-light);
+}
+.dark .radio-label { border-color: var(--bg-interactive-dark); background-color: var(--bg-secondary-dark); color: var(--text-secondary-dark); }
+.radio-label:hover { border-color: var(--bg-accent-light); background-color: var(--bg-tertiary-light); transform: translateY(-2px); }
+.dark .radio-label:hover { border-color: var(--bg-accent-dark); background-color: var(--bg-tertiary-dark); }
+.radio-label .icon-wrapper { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--text-muted-light); transition: color 0.2s ease-out; }
+.dark .radio-label .icon-wrapper { color: var(--text-muted-dark); }
+.radio-label .radio-text-main { font-size: 0.9rem; font-weight: 500; }
+.radio-label .radio-text-sub { font-size: 0.75rem; color: var(--text-muted-light); margin-top: 0.125rem; }
+.dark .radio-label .radio-text-sub { color: var(--text-muted-dark); }
+
+input[type="radio"].sr-only:checked + .radio-label {
+    background-color: var(--bg-accent-light);
+    color: var(--text-on-accent-light);
+    border-color: var(--bg-accent-light);
+    /* box-shadow: 0 0 0 3px rgba(var(--bg-accent-light-rgb), 0.3); */
+}
+.dark input[type="radio"].sr-only:checked + .radio-label {
+    background-color: var(--bg-accent-dark);
+    color: var(--text-on-accent-dark);
+    border-color: var(--bg-accent-dark);
+    /* box-shadow: 0 0 0 3px rgba(var(--bg-accent-dark-rgb), 0.4); */
+}
+input[type="radio"].sr-only:checked + .radio-label .icon-wrapper,
+input[type="radio"].sr-only:checked + .radio-label .radio-text-main,
+input[type="radio"].sr-only:checked + .radio-label .radio-text-sub {
+    color: var(--text-on-accent-light) !important;
+}
+.dark input[type="radio"].sr-only:checked + .radio-label .icon-wrapper,
+.dark input[type="radio"].sr-only:checked + .radio-label .radio-text-main,
+.dark input[type="radio"].sr-only:checked + .radio-label .radio-text-sub {
+    color: var(--text-on-accent-dark) !important;
+}
+
+
+/* Badges Opcionais Checkboxes */
+#badgeSelectionContainer .badge-checkbox-label {
+    padding: 0.75rem 1rem; font-size: 0.875rem;
+    flex-direction: row; justify-content: flex-start;
+    border: 1px solid var(--bg-interactive-light);
+    background-color: var(--bg-primary-light); border-radius: 6px;
+}
+.dark #badgeSelectionContainer .badge-checkbox-label { border-color: var(--bg-interactive-dark); background-color: var(--bg-secondary-dark); }
+#badgeSelectionContainer .badge-checkbox-label:hover { background-color: var(--bg-tertiary-light); border-color: var(--bg-accent-light); }
+.dark #badgeSelectionContainer .badge-checkbox-label:hover { background-color: var(--bg-tertiary-dark); border-color: var(--bg-accent-dark); }
+#badgeSelectionContainer .badge-checkbox-label input[type="checkbox"].checkbox-custom { margin-right: 0.75rem; }
+
+/* Simplificando: vamos estilizar o wrapper se o input dentro dele estiver checked */
+#badgeSelectionContainer label:has(input[type="checkbox"]:checked) {
+    background-color: var(--bg-accent-light);
+    color: var(--text-on-accent-light);
+    border-color: var(--bg-accent-light);
+}
+.dark #badgeSelectionContainer label:has(input[type="checkbox"]:checked) {
+    background-color: var(--bg-accent-dark);
+    color: var(--text-on-accent-dark);
+    border-color: var(--bg-accent-dark);
+}
+
+/* Botões */
+.button-primary, .button-secondary {
+    padding: 0.75rem 1.5rem; /* Mais padding */
+    border-radius: 6px;
+    font-size: 0.9rem; /* Um pouco maior */
+    font-weight: 500;
+    transition: background-color 0.15s ease-out, border-color 0.15s ease-out, transform 0.1s ease-out, box-shadow 0.15s ease-out;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+.button-primary {
+    background-color: var(--bg-accent-light); color: var(--text-on-accent-light); border: 1px solid var(--bg-accent-light);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(var(--bg-accent-light-rgb), 0.2);
+}
+.dark .button-primary { background-color: var(--bg-accent-dark); color: var(--text-on-accent-dark); border-color: var(--bg-accent-dark); box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 2px 4px rgba(var(--bg-accent-dark-rgb), 0.3); }
+.button-primary:hover { background-color: var(--bg-accent-hover-light); border-color: var(--bg-accent-hover-light); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.07), 0 4px 8px rgba(var(--bg-accent-light-rgb), 0.25); }
+.dark .button-primary:hover { background-color: var(--bg-accent-hover-dark); border-color: var(--bg-accent-hover-dark); box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 4px 8px rgba(var(--bg-accent-dark-rgb), 0.35); }
+.button-primary:disabled {
+    background-color: var(--bg-interactive-hover-light) !important;
+    color: var(--text-muted-light) !important;
+    border-color: var(--bg-interactive-hover-light) !important;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    opacity: 0.8;
+}
+.dark .button-primary:disabled { background-color: var(--bg-interactive-hover-dark) !important; color: var(--text-muted-dark) !important; border-color: var(--bg-interactive-hover-dark) !important; }
+
+.button-secondary {
+    background-color: var(--bg-interactive-light); color: var(--text-primary-light); border: 1px solid var(--border-light);
+}
+.dark .button-secondary { background-color: var(--bg-interactive-dark); color: var(--text-primary-dark); border-color: var(--border-dark); }
+.button-secondary:hover { background-color: var(--bg-interactive-hover-light); border-color: var(--text-muted-light); transform: translateY(-1px); }
+.dark .button-secondary:hover { background-color: var(--bg-interactive-hover-dark); border-color: var(--text-muted-dark); }
+.button-secondary .heroicon { width: 1.1em; height: 1.1em; margin-right: 0.5em; } /* Para Heroicons */
+.button-secondary ion-icon { font-size: 1.2em; margin-right: 0.4em; } /* Para IonIcons */
+
+
+.button-icon { /* Para o botão de tema */
+    padding: 0.6rem;
+    border-radius: 50%; /* Mantém a forma redonda */
+    color: var(--text-secondary-light);
+    background-color: var(--bg-tertiary-light); /* Fundo sutil */
+    border: 1px solid var(--border-light); /* Borda sutil */
+    transition: background-color 0.2s ease-out, color 0.2s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    display: flex; /* Garante que o ícone esteja centralizado */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Sombra suave */
+}
+.dark .button-icon {
+    color: var(--text-secondary-dark);
+    background-color: var(--bg-tertiary-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.button-icon:hover {
+    background-color: var(--bg-interactive-hover-light); /* Fundo mais escuro no hover */
+    color: var(--text-primary-light); /* Ícone mais visível no hover */
+    transform: translateY(-1px); /* Leve movimento para cima */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Sombra mais pronunciada no hover */
+}
+.dark .button-icon:hover {
+    background-color: var(--bg-interactive-hover-dark);
+    color: var(--text-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.button-icon svg, .button-icon .heroicon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* File Input */
+.file-input {
+    padding:0;
+    border-color: var(--border-light);
+}
+.dark .file-input { border-color: var(--border-dark); }
+.file-input::file-selector-button {
+    background-color: var(--bg-interactive-light);
+    color: var(--text-primary-light);
+    padding: 0.75rem 1rem;
+    margin-right: 1rem;
+    border: none;
+    border-right: 1px solid var(--border-light);
+    border-top-left-radius: 4px; 
+    border-bottom-left-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease-out;
+}
+.dark .file-input::file-selector-button { background-color: var(--bg-interactive-dark); color: var(--text-primary-dark); border-right-color: var(--border-dark); }
+.file-input::file-selector-button:hover { background-color: var(--bg-interactive-hover-light); }
+.dark .file-input::file-selector-button:hover { background-color: var(--bg-interactive-hover-dark); }
+
+
+/* Output e Status */
+.status-message-base { 
+    padding: 0.875rem 1.25rem; border-radius: 6px; font-size: 0.9rem; border-left-width: 4px;
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+.dark .status-message-base { box-shadow: 0 2px 6px var(--shadow-dark); }
+/* ... classes status-success, etc. como antes ... */
+.status-success { background-color: var(--success-bg-light); color: var(--text-success-light); border-left-color: var(--success-light); } 
+.dark .status-success { background-color: var(--success-bg-dark); color: var(--text-success-dark); border-left-color: var(--success-dark); }
+.status-error { background-color: var(--error-bg-light); color: var(--text-error-light); border-left-color: var(--error-light); }
+.dark .status-error { background-color: var(--error-bg-dark); color: var(--text-error-dark); border-left-color: var(--error-dark); }
+.status-warning { background-color: var(--warning-bg-light); color: var(--text-warning-light); border-left-color: var(--warning-light); }
+.dark .status-warning { background-color: var(--warning-bg-dark); color: var(--text-warning-dark); border-left-color: var(--warning-dark); }
+.status-info { background-color: var(--info-bg-light); color: var(--text-info-light); border-left-color: var(--info-light); }
+.dark .status-info { background-color: var(--info-bg-dark); color: var(--text-info-dark); border-left-color: var(--info-dark); }
+
+
+.spinner { 
+    border: 3px solid var(--bg-interactive-hover-light); 
+    width: 1.125rem; height: 1.125rem; 
+    border-radius: 50%; 
+    border-left-color: var(--text-on-accent-light);
+    animation: spin 0.7s linear infinite; 
+}
+.dark .spinner { border-color: var(--bg-interactive-hover-dark); border-left-color: var(--text-on-accent-dark); }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+
+/* Detalhes Informativos */
+.info-details {
+    background-color: var(--bg-primary-light); 
+    border: 1px solid var(--bg-tertiary-light);
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+.dark .info-details {
+    background-color: var(--bg-tertiary-dark); 
+    border-color: var(--border-dark);
+}
+.info-summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-link-light);
+    display: flex;
+    align-items: center;
+    outline: none;
+    font-size: 0.9rem;
+}
+.dark .info-summary { color: var(--text-link-dark); }
+.info-summary:hover { color: var(--bg-accent-light); }
+.dark .info-summary:hover { color: var(--bg-accent-dark); }
+.info-summary .heroicon { width: 1.25em; height: 1.25em; margin-right: 0.5em; } /* Para Heroicons */
+.info-summary ion-icon { font-size: 1.3em; margin-right: 0.4em; } /* Para IonIcons */
+
+.info-content {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+    font-size: 0.85rem; 
+    color: var(--text-secondary-light);
+    line-height: 1.6;
+}
+.dark .info-content { border-top-color: var(--border-dark); color: var(--text-secondary-dark); }
+.info-content h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.375rem; margin-top:1rem; color:var(--text-header-light); }
+.dark .info-content h4 { color:var(--text-header-dark); }
+.info-content ul, .info-content ol { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+.info-content li { margin-bottom: 0.375rem; }
+.info-content strong { font-weight: 600; color: var(--text-primary-light); }
+.dark .info-content strong { color: var(--text-primary-dark); }
+
+
+/* Ajustes Finais e Heroicons */
+.heroicon { /* Classe genérica para Heroicons se você os adicionar */
+    width: 1.25em; /* Ajuste conforme necessário */
+    height: 1.25em;
+    display: inline-block;
+    vertical-align: middle;
+    /* stroke-width: 1.5; (Pode ser definido no SVG ou aqui) */
+}
+
+/* Header */
+header h1.brand-text { color: var(--bg-accent-light); } /* Usa o Blurple para o título principal */
+.dark header h1.brand-text { color: var(--bg-accent-dark); }
+header p.text-description { font-size: 0.95rem; }
+
+/* Footer */
+footer {
+    border-top-color: var(--border-light);
+    padding-top: 1.5rem; padding-bottom: 1.5rem;
+    color: var(--text-muted-light);
+}
+.dark footer { border-top-color: var(--border-dark); color: var(--text-muted-dark); }
+footer p { margin-bottom: 0.25rem; }
+
+/* Novo estilo para a seção de desenvolvedor no rodapé */
+.developer-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary-light);
+}
+.dark .developer-info {
+    color: var(--text-secondary-dark);
+}
+
+.developer-info .social-link {
+    color: var(--text-muted-light); /* Cor padrão para os ícones sociais */
+    font-size: 1.5rem; /* Tamanho maior para os ícones */
+    transition: color 0.2s ease-out;
+}
+.dark .developer-info .social-link {
+    color: var(--text-muted-dark);
+}
+
+.developer-info .social-link:hover {
+    color: var(--bg-accent-light); /* Cor de destaque no hover */
+    text-decoration: none; /* Remover sublinhado no hover */
+}
+.dark .developer-info .social-link:hover {
+    color: var(--bg-accent-dark);
+}
+
+/* Estilos para o wrapper do botão de ajuda e tooltip */
+.help-tooltip-wrapper {
+    position: relative; /* Container para o tooltip que será posicionado absolutamente */
+    display: inline-flex; /* Para que o wrapper não ocupe a largura toda e envolva o botão */
+    align-items: center;
+    margin-left: 0.25rem; /* Pequeno espaço entre o label e o wrapper */
+}
+
+/* Estilos para o botão de ajuda */
+.help-button {
+    background: none;
+    border: none;
+    color: var(--text-muted-light);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease-out;
+    font-size: 1.1rem; /* Tamanho do ícone */
+    line-height: 1; /* Garante que o ícone fique centralizado verticalmente */
+}
+
+.dark .help-button {
+    color: var(--text-muted-dark);
+}
+
+.help-button:hover {
+    color: var(--bg-accent-light);
+    background-color: var(--bg-tertiary-light);
+}
+.dark .help-button:hover {
+    color: var(--bg-accent-dark);
+    background-color: var(--bg-tertiary-dark);
+}
+
+/* Estilos para o mini-card de ajuda (tooltip) */
+.help-tooltip {
+    position: absolute; /* Posiciona o tooltip de forma absoluta */
+    top: 50%; /* Alinha o centro verticalmente com o botão */
+    left: calc(100% + 10px); /* Posiciona à direita do botão + um pequeno espaçamento */
+    transform: translateY(-50%) scale(0.9); /* Centraliza verticalmente e escala um pouco para transição */
+    width: 250px; /* Largura fixa para o tooltip */
+    background-color: var(--bg-secondary-light);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px var(--shadow-light);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-primary-light);
+    z-index: 10; /* Para garantir que fique acima de outros elementos */
+    display: none; /* Inicia oculto */
+    opacity: 0;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out, visibility 0.3s ease-out; /* Adicionado visibility para transição */
+}
+
+.dark .help-tooltip {
+    background-color: var(--bg-tertiary-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 12px var(--shadow-dark);
+    color: var(--text-primary-dark);
+}
+
+.help-tooltip.active {
+    display: block; /* Torna visível */
+    opacity: 1;
+    transform: translateY(-50%) scale(1); /* Volta à escala normal */
+    visibility: visible;
+}
+
+.help-tooltip h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-header-light);
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+.dark .help-tooltip h4 {
+    color: var(--text-header-dark);
+}
+
+.help-tooltip p, .help-tooltip ul {
+    color: var(--text-secondary-light);
+    margin-bottom: 0.5rem;
+}
+.dark .help-tooltip p, .dark .help-tooltip ul {
+    color: var(--text-secondary-dark);
+}
+
+.help-tooltip ul {
+    padding-left: 1.25rem;
+    list-style: disc; /* Adiciona marcadores de lista */
+}
+
+.help-tooltip-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-muted-light); /* Cor padrão do 'X' */
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.2rem;
+    border-radius: 50%;
+    transition: all 0.2s ease-out;
+}
+.dark .help-tooltip-close {
+    color: var(--text-muted-dark); /* Cor padrão do 'X' no tema escuro */
+}
+
+.help-tooltip-close:hover {
+    color: var(--text-error-light); /* Agora o 'X' fica vermelho claro no hover */
+    /* background-color: transparent; <-- Opcional, mas já é 'none' no base. */
+    /* Removido: background-color: var(--bg-interactive-hover-light); */
+}
+.dark .help-tooltip-close:hover {
+    color: var(--text-error-dark); /* Agora o 'X' fica vermelho escuro no hover */
+    /* background-color: transparent; <-- Opcional, mas já é 'none' no base. */
+    /* Removido: background-color: var(--bg-interactive-hover-dark); */
+}

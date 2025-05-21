@@ -1,13 +1,15 @@
 # api/index.py
 import os
 import logging
-from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends, Form, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from typing import Annotated, Optional
 import tempfile
+import time # Importar para controle de tempo
+from collections import defaultdict # Para o dicionário de rate limit
 
 import sys
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,10 +17,12 @@ project_root_dir = os.path.dirname(current_file_dir)
 if project_root_dir not in sys.path:
     sys.path.insert(0, project_root_dir)
 
+import google.generativeai as genai_core
+
 from gerador_readme_ia_web.config import get_gemini_model, APP_NAME, APP_AUTHOR
 from gerador_readme_ia_web.constants_web import (
-    PROMPT_README_SIMPLE, 
-    PROMPT_README_MODERATE, 
+    PROMPT_README_SIMPLE,
+    PROMPT_README_MODERATE,
     PROMPT_README_COMPLETE,
     USER_LINKS_INSTRUCTIONS_TEMPLATE
 )
@@ -31,8 +35,8 @@ logger.info(f"Sistema Operacional detectado (os.name): {os.name}")
 
 app = FastAPI(
     title="Gerador de README.md API",
-    description="API para gerar README.md com níveis de detalhe e informações opcionais.",
-    version="1.2.2" # Versão atualizada
+    description="API para gerar README.md com níveis de detalhe, informações opcionais, seleção de badges e modelos Gemini.",
+    version="1.4.1"
 )
 
 app.add_middleware(
@@ -40,20 +44,158 @@ app.add_middleware(
     allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory=os.path.join(project_root_dir, "static")), name="static")
+static_dir = os.path.join(project_root_dir, "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir, exist_ok=True)
+    logger.info(f"Diretório estático '{static_dir}' criado.")
 
-async def get_request_specific_gemini_client(x_api_key: Annotated[str | None, Header()] = None) -> GeminiClient:
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# --- Configurações de Rate Limiting ---
+# Dicionário em memória para armazenar o estado do rate limit por IP
+# Formato: { "ip_address": { "requests": int, "first_request_time": float, "block_until": float, "offenses": int } }
+RATE_LIMIT_STORE = defaultdict(lambda: {"requests": 0, "first_request_time": 0.0, "block_until": 0.0, "offenses": 0})
+
+# Limites configuráveis
+RATE_LIMIT_REQUESTS = 5      # Número máximo de requisições
+RATE_LIMIT_PERIOD_SECONDS = 60 # Em segundos (1 minuto)
+BLOCK_TIME_INITIAL_SECONDS = 300 # Tempo de bloqueio inicial (5 minutos)
+BLOCK_TIME_MULTIPLIER = 2    # Multiplicador para bloqueios subsequentes
+MAX_BLOCK_TIME_SECONDS = 14400 # Bloqueio máximo de 4 horas
+
+# Limpeza de entradas antigas (para evitar que o dicionário cresça indefinidamente)
+CLEANUP_INTERVAL_SECONDS = 3600 # Limpar a cada hora
+
+last_cleanup_time = time.time()
+
+async def rate_limit_checker(request: Request):
+    global last_cleanup_time
+
+    client_ip = request.client.host
+    current_time = time.time()
+
+    # Limpeza periódica de entradas antigas
+    if current_time - last_cleanup_time > CLEANUP_INTERVAL_SECONDS:
+        logger.info("Executando limpeza de entradas antigas do rate limit.")
+        ips_to_remove = [ip for ip, data in RATE_LIMIT_STORE.items() if data["block_until"] < current_time - MAX_BLOCK_TIME_SECONDS * 2] # Remove IPs muito antigos
+        for ip in ips_to_remove:
+            del RATE_LIMIT_STORE[ip]
+        last_cleanup_time = current_time
+        logger.info(f"Limpeza concluída. {len(ips_to_remove)} IPs removidos.")
+
+    ip_data = RATE_LIMIT_STORE[client_ip]
+
+    # 1. Verificar se o IP está atualmente bloqueado
+    if ip_data["block_until"] > current_time:
+        block_remaining = int(ip_data["block_until"] - current_time)
+        logger.warning(f"IP {client_ip} bloqueado. Tempo restante: {block_remaining}s. Ofensas: {ip_data['offenses']}")
+        raise HTTPException(
+            status_code=429, # Too Many Requests
+            detail=f"Você fez muitas requisições. Tente novamente em {block_remaining} segundos. Bloqueio progressivo ativo."
+        )
+
+    # 2. Resetar contagem se o período de tempo expirou
+    if current_time - ip_data["first_request_time"] > RATE_LIMIT_PERIOD_SECONDS:
+        ip_data["requests"] = 0
+        ip_data["first_request_time"] = current_time
+
+    # 3. Incrementar contagem de requisições
+    ip_data["requests"] += 1
+
+    # 4. Verificar se o limite foi excedido
+    if ip_data["requests"] > RATE_LIMIT_REQUESTS:
+        ip_data["offenses"] += 1
+        
+        # Calcular o tempo de bloqueio baseado nas ofensas
+        block_duration = BLOCK_TIME_INITIAL_SECONDS * (BLOCK_TIME_MULTIPLIER ** (ip_data["offenses"] - 1))
+        block_duration = min(block_duration, MAX_BLOCK_TIME_SECONDS) # Limitar o tempo máximo de bloqueio
+
+        ip_data["block_until"] = current_time + block_duration
+        ip_data["requests"] = 0 # Resetar contagem após o bloqueio
+        ip_data["first_request_time"] = current_time # Resetar o início do período
+
+        logger.warning(f"IP {client_ip} excedeu o limite de requisições ({RATE_LIMIT_REQUESTS}/{RATE_LIMIT_PERIOD_SECONDS}s). Bloqueando por {block_duration}s. Total de ofensas: {ip_data['offenses']}")
+        raise HTTPException(
+            status_code=429,
+            detail=f"Você excedeu o limite de requisições. Bloqueado por {int(block_duration)} segundos. O tempo de bloqueio aumenta a cada infração."
+        )
+
+    logger.debug(f"IP {client_ip} - Requisições no período: {ip_data['requests']}")
+
+
+@app.get("/api/list-models")
+async def list_models_endpoint(
+    user_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None
+):
+    """
+    Lista os modelos Gemini disponíveis que suportam 'generateContent'.
+    Usa a X-API-Key fornecida pelo usuário no cabeçalho.
+    """
+    if not user_api_key:
+        logger.warning("X-API-Key não fornecida para /api/list-models.")
+        raise HTTPException(status_code=401, detail="API Key não fornecida no cabeçalho X-API-Key para listar modelos.")
+    try:
+        genai_core.configure(api_key=user_api_key)
+
+        models_data = []
+        for model in genai_core.list_models():
+            if 'generateContent' in model.supported_generation_methods:
+                model_name_simple = model.name.replace("models/", "")
+                models_data.append({
+                    "id": model_name_simple,
+                    "name": model.display_name,
+                    "full_name": model.name
+                })
+        
+        relevant_models_output = []
+        default_model_from_env = get_gemini_model().replace("models/", "")
+
+        default_model_info = next((m for m in models_data if m["id"] == default_model_from_env), None)
+        if default_model_info:
+            relevant_models_output.append(default_model_info)
+
+        for model_info in models_data:
+            if "gemini" in model_info["id"].lower() and model_info["id"] != default_model_from_env:
+                relevant_models_output.append(model_info)
+        
+        if not default_model_info and default_model_from_env:
+             relevant_models_output.insert(0, {"id": default_model_from_env, "name": f"{default_model_from_env} (Padrão do Sistema)", "full_name": f"models/{default_model_from_env}"})
+
+
+        logger.info(f"Modelos Gemini listados para seleção (usando chave do usuário): {[m['id'] for m in relevant_models_output]}")
+        return JSONResponse(content={"models": relevant_models_output})
+    except Exception as e:
+        logger.error(f"Erro ao listar modelos Gemini com chave do usuário: {e}", exc_info=True)
+        detail_msg = f"Erro ao listar modelos: {str(e)}. Verifique se a API Key fornecida tem permissão para listar modelos."
+        if "API key not valid" in str(e).lower() or "permission denied" in str(e).lower():
+            raise HTTPException(status_code=401, detail="API Key inválida ou sem permissão para listar modelos.")
+        raise HTTPException(status_code=500, detail=detail_msg)
+
+
+async def get_request_specific_gemini_client(
+    x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
+    requested_model_name: Optional[str] = None
+) -> GeminiClient:
     if not x_api_key:
-        logger.warning("Cabeçalho X-API-Key não fornecido.")
+        logger.warning("Cabeçalho X-API-Key não fornecido para get_request_specific_gemini_client.")
         raise HTTPException(status_code=401, detail="API Key não fornecida no cabeçalho X-API-Key.")
     try:
-        model_name = get_gemini_model()
-        client = GeminiClient(api_key=x_api_key, model_name=model_name)
-        logger.info(f"Cliente Gemini inicializado para a requisição com modelo: {model_name}.")
+        model_to_use = requested_model_name if requested_model_name and requested_model_name.strip() else get_gemini_model()
+        if model_to_use.startswith("models/"):
+             model_to_use = model_to_use.replace("models/","")
+
+        client = GeminiClient(api_key=x_api_key, model_name=model_to_use)
+        logger.info(f"Cliente Gemini inicializado para a requisição com modelo: {client.model_name}.")
         return client
+    except ValueError as ve:
+        logger.error(f"Erro de valor ao criar cliente Gemini: {ve}", exc_info=True)
+        raise HTTPException(status_code=400, detail=str(ve))
+    except ConnectionError as ce:
+        logger.critical(f"Erro de conexão ao criar cliente Gemini: {ce}", exc_info=True)
+        raise HTTPException(status_code=503, detail=f"Erro ao configurar cliente da IA: {str(ce)}")
     except Exception as e:
-        logger.critical(f"Erro ao criar cliente Gemini: {e}", exc_info=True)
-        raise HTTPException(status_code=503, detail=f"Erro ao configurar cliente da IA: {str(e)}")
+        logger.critical(f"Erro inesperado ao criar cliente Gemini: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro interno ao inicializar cliente da IA: {str(e)}")
 
 @app.post("/api/generate-readme")
 async def generate_readme_endpoint(
@@ -61,86 +203,115 @@ async def generate_readme_endpoint(
     readme_level: str = Form("moderate"),
     repo_link: Optional[str] = Form(None),
     linkedin_link: Optional[str] = Form(None),
-    gemini_client: GeminiClient = Depends(get_request_specific_gemini_client)
+    requested_badges: Optional[str] = Form(None),
+    gemini_model_select: Optional[str] = Form(None),
+    x_api_key_header: Annotated[str | None, Header(alias="X-API-Key")] = None,
+    # Adicionar a dependência do rate limit aqui
+    rate_limit_status: None = Depends(rate_limit_checker) 
 ):
-    logger.info(f"Solicitação para /api/generate-readme: arquivo={project_zip.filename}, nivel={readme_level}, repo={repo_link}, linkedin={linkedin_link}")
+    logger.info(f"Solicitação para /api/generate-readme: arquivo={project_zip.filename}, nivel={readme_level}, repo={repo_link}, linkedin={linkedin_link}, badges={requested_badges}, modelo_selecionado='{gemini_model_select}'")
+
+    try:
+        gemini_client = await get_request_specific_gemini_client(x_api_key_header, gemini_model_select)
+    except HTTPException as http_exc_client_init:
+        raise http_exc_client_init
 
     if not project_zip.filename or not project_zip.filename.endswith(".zip"):
+        logger.error(f"Upload inválido: {project_zip.filename}. Não é .zip ou sem nome.")
         raise HTTPException(status_code=400, detail="Arquivo .zip inválido ou ausente.")
 
-    temp_zip_path = None
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip", prefix="upload_") as tmp_file:
-            content = await project_zip.read()
-            tmp_file.write(content)
-            temp_zip_path = tmp_file.name
-        logger.info(f"Arquivo .zip salvo temporariamente em: {temp_zip_path}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_zip_path = os.path.join(temp_dir, project_zip.filename if project_zip.filename else "upload.zip")
+            with open(temp_zip_path, "wb") as tmp_file:
+                content = await project_zip.read()
+                tmp_file.write(content)
+            logger.info(f"Arquivo .zip salvo temporariamente em: {temp_zip_path}")
 
-        project_data_str = extract_project_data_from_zip(temp_zip_path, logger)
-        if not project_data_str:
-            raise HTTPException(status_code=500, detail="Não foi possível processar o arquivo .zip.")
-        
-        if readme_level == "simple":
-            selected_prompt_template = PROMPT_README_SIMPLE
-        elif readme_level == "complete":
-            selected_prompt_template = PROMPT_README_COMPLETE
-        else: 
-            selected_prompt_template = PROMPT_README_MODERATE
-        
-        # Preparar as instruções dos links do usuário
-        user_links_instructions_str = ""
-        # Só formata USER_LINKS_INSTRUCTIONS_TEMPLATE se houver links para preencher seus placeholders.
-        # Se não houver links, user_links_instructions_str permanecerá vazio,
-        # e o placeholder {user_provided_links_instructions} no PROMPT_README_BASE_HEADER será substituído por uma string vazia.
-        if repo_link or linkedin_link: 
-            user_links_instructions_str = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
+            project_data_str = extract_project_data_from_zip(temp_zip_path, logger)
+            if not project_data_str:
+                logger.error("Falha ao extrair dados do ZIP.")
+                raise HTTPException(status_code=500, detail="Não foi possível processar o arquivo .zip.")
+
+            prompt_map = {
+                "simple": PROMPT_README_SIMPLE,
+                "complete": PROMPT_README_COMPLETE,
+                "moderate": PROMPT_README_MODERATE
+            }
+            selected_prompt_template = prompt_map.get(readme_level, PROMPT_README_MODERATE)
+
+            badges_instructions_for_ia = ""
+            if requested_badges:
+                badges_list = [b.strip() for b in requested_badges.split(',') if b.strip()]
+                if badges_list:
+                    badges_instructions_for_ia = f"""
+
+**Instruções Adicionais para Badges Solicitados:**
+O usuário solicitou que a seção de badges (se aplicável ao nível de README) considere os seguintes tipos: {', '.join(badges_list)}.
+* Ao gerar a seção de badges, use o `{{{{repo_link}}}}` (que você deve inferir das instruções gerais do usuário, se fornecido) para obter `{{{{usuario_inferido}}}}` e `{{{{projeto_inferido}}}}` e assim construir os URLs dos badges.
+* Todos os badges devem usar `style=for-the-badge` (Ex: `![Nome Badge](https://img.shields.io/badge/exemplo-teste-blue?style=for-the-badge)`).
+* Se o `{{{{repo_link}}}}` não estiver disponível, ou se um tipo de badge solicitado não for aplicável/inferível, omita-o discretamente.
+* Se nenhum badge puder ser gerado com base nas informações e tipos solicitados, omita completamente a seção de badges do README.
+* Exemplos de construção (adapte para os tipos solicitados e use `{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`):
+    - Para 'License': `https://img.shields.io/github/license/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Issues': `https://img.shields.io/github/issues/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Top Language': `https://img.shields.io/github/languages/top/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Last Commit': `https://img.shields.io/github/last-commit/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Contributors': `https://img.shields.io/github/contributors/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+"""
+
+            base_user_instructions = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
                 repo_link=repo_link if repo_link else "Não fornecido",
                 linkedin_link=linkedin_link if linkedin_link else "Não fornecido"
             )
-        
-        # Formatar o prompt principal com as duas chaves separadamente
-        # selected_prompt_template já inclui PROMPT_README_BASE_HEADER
-        prompt = selected_prompt_template.format(
-            project_data=project_data_str,  # Dados extraídos do ZIP
-            user_provided_links_instructions=user_links_instructions_str # String formatada com os links (ou vazia)
-        )
-        
-        logger.debug(f"Prompt selecionado (nível: {readme_level}). Enviando para Gemini...")
-        
-        readme_content = gemini_client.send_conversational_prompt(prompt)
+            user_links_instructions_str = f"{base_user_instructions}{badges_instructions_for_ia}"
 
-        if readme_content:
-            logger.info("README.md gerado com sucesso pela IA.")
-            return JSONResponse(content={"filename": project_zip.filename, "readme_content": readme_content})
-        else:
-            raise HTTPException(status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo ou prompt foi bloqueado.")
+            prompt = selected_prompt_template.format(
+                project_data=project_data_str,
+                user_provided_links_instructions=user_links_instructions_str
+            )
+
+            logger.debug(f"Prompt selecionado (nível: {readme_level}, modelo: {gemini_client.model_name}). Tamanho aprox: {len(prompt):,} chars. Enviando para Gemini...")
+
+            readme_content = gemini_client.send_conversational_prompt(prompt)
+
+            if readme_content:
+                logger.info("README.md gerado com sucesso pela IA.")
+                return JSONResponse(content={"filename": project_zip.filename, "readme_content": readme_content})
+            else:
+                logger.error("Falha ao gerar README: IA não retornou conteúdo ou prompt foi bloqueado (ver logs anteriores).")
+                raise HTTPException(status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo ou o prompt pode ter sido bloqueado. Verifique os logs do servidor para mais detalhes.")
 
     except HTTPException as http_exc:
-        logger.error(f"HTTPException: {http_exc.detail}")
-        raise http_exc
+        logger.error(f"HTTPException no endpoint: {http_exc.status_code} - {http_exc.detail}", exc_info=True if http_exc.status_code >= 500 else False)
+        raise
     except KeyError as ke:
-        logger.critical(f"KeyError ao formatar o prompt: {ke}. Verifique se todos os placeholders em PROMPT_README_BASE_HEADER (project_data, user_provided_links_instructions) estão sendo fornecidos. E se USER_LINKS_INSTRUCTIONS_TEMPLATE tem os placeholders corretos (repo_link, linkedin_link) se estiver sendo formatado.", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Erro de formatação interna do prompt: {str(ke)}")
+        logger.critical(f"KeyError ao formatar o prompt: '{ke}'. Placeholders no template: project_data, user_provided_links_instructions.", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro de formatação interna do prompt: Chave '{str(ke)}' ausente.")
+    except ValueError as ve:
+        logger.error(f"ValueError no endpoint: {ve}", exc_info=True)
+        if "PROMPT BLOQUEADO PELA IA" in str(ve):
+            raise HTTPException(status_code=400, detail=f"Solicitação rejeitada pela IA: {str(ve)}")
+        raise HTTPException(status_code=500, detail=f"Erro de valor durante o processamento: {str(ve)}")
     except Exception as e:
-        logger.critical(f"Erro inesperado: {e}", exc_info=True)
+        logger.critical(f"Erro inesperado no endpoint /api/generate-readme: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
-    finally:
-        if temp_zip_path and os.path.exists(temp_zip_path):
-            try:
-                os.remove(temp_zip_path)
-                logger.info(f"Arquivo temporário {temp_zip_path} removido.")
-            except Exception as e_rm:
-                logger.error(f"Erro ao remover {temp_zip_path}: {e_rm}", exc_info=True)
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def get_root():
     html_file_path = os.path.join(project_root_dir, "index.html")
     if not os.path.exists(html_file_path):
+        logger.error(f"Arquivo index.html não encontrado em {html_file_path}")
         return HTMLResponse(content="<h1>Erro: Frontend não encontrado.</h1>", status_code=404)
-    with open(html_file_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
-    return HTMLResponse(content=html_content)
+    try:
+        with open(html_file_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except Exception as e:
+        logger.error(f"Erro ao ler index.html: {e}", exc_info=True)
+        return HTMLResponse(content="<h1>Erro ao carregar a página.</h1>", status_code=500)
 
 if __name__ == "__main__":
     logger.info("Iniciando Uvicorn localmente: http://127.0.0.1:8000")
-    uvicorn.run("api.index:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+    
