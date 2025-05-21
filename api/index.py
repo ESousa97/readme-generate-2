@@ -3,13 +3,14 @@ import os
 import logging
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends, Form, Request
 from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles # Importação correta
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from typing import Annotated, Optional
 import tempfile
-import time # Importar para controle de tempo
-from collections import defaultdict # Para o dicionário de rate limit
+import time
+from collections import defaultdict
+import re # Importar regex para parsing de mensagens de erro
 
 import sys
 current_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,8 @@ if project_root_dir not in sys.path:
     sys.path.insert(0, project_root_dir)
 
 import google.generativeai as genai_core
+# Importar exceções específicas da google-api-core se necessário para uma captura mais fina no futuro
+# from google.api_core.exceptions import ResourceExhausted, InvalidArgument, PermissionDenied
 
 from gerador_readme_ia_web.config import get_gemini_model, APP_NAME, APP_AUTHOR
 from gerador_readme_ia_web.constants_web import (
@@ -36,7 +39,7 @@ logger.info(f"Sistema Operacional detectado (os.name): {os.name}")
 app = FastAPI(
     title="Gerador de README.md API",
     description="API para gerar README.md com níveis de detalhe, informações opcionais, seleção de badges e modelos Gemini.",
-    version="1.4.1"
+    version="1.4.2"
 )
 
 app.add_middleware(
@@ -44,48 +47,29 @@ app.add_middleware(
     allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-# --- Configuração de Arquivos Estáticos ---
-# Define o caminho para o seu diretório de arquivos estáticos (agora chamado "public")
-public_dir = os.path.join(project_root_dir, "public") # ALTERADO
-
-# Cria o diretório "public" se ele não existir
+public_dir = os.path.join(project_root_dir, "public")
 if not os.path.exists(public_dir):
     os.makedirs(public_dir, exist_ok=True)
-    logger.info(f"Diretório público '{public_dir}' criado.") # ALTERADO (mensagem de log)
+    logger.info(f"Diretório público '{public_dir}' criado.")
+app.mount("/public", StaticFiles(directory=public_dir), name="public")
 
-# Monta o diretório "public" para ser servido no caminho de URL "/public"
-# Agora, arquivos como "public/style.css" serão acessíveis em "http://localhost:8000/public/style.css"
-app.mount("/public", StaticFiles(directory=public_dir), name="public") # ALTERADO
-# --- Fim da Configuração de Arquivos Estáticos ---
-
-
-# --- Configurações de Rate Limiting ---
-# Dicionário em memória para armazenar o estado do rate limit por IP
-# Formato: { "ip_address": { "requests": int, "first_request_time": float, "block_until": float, "offenses": int } }
 RATE_LIMIT_STORE = defaultdict(lambda: {"requests": 0, "first_request_time": 0.0, "block_until": 0.0, "offenses": 0})
-
-# Limites configuráveis
-RATE_LIMIT_REQUESTS = 5      # Número máximo de requisições
-RATE_LIMIT_PERIOD_SECONDS = 60 # Em segundos (1 minuto)
-BLOCK_TIME_INITIAL_SECONDS = 300 # Tempo de bloqueio inicial (5 minutos)
-BLOCK_TIME_MULTIPLIER = 2      # Multiplicador para bloqueios subsequentes
-MAX_BLOCK_TIME_SECONDS = 14400 # Bloqueio máximo de 4 horas
-
-# Limpeza de entradas antigas (para evitar que o dicionário cresça indefinidamente)
-CLEANUP_INTERVAL_SECONDS = 3600 # Limpar a cada hora
-
+RATE_LIMIT_REQUESTS = 5
+RATE_LIMIT_PERIOD_SECONDS = 60
+BLOCK_TIME_INITIAL_SECONDS = 300
+BLOCK_TIME_MULTIPLIER = 2
+MAX_BLOCK_TIME_SECONDS = 14400
+CLEANUP_INTERVAL_SECONDS = 3600
 last_cleanup_time = time.time()
 
 async def rate_limit_checker(request: Request):
     global last_cleanup_time
-
     client_ip = request.client.host
     current_time = time.time()
 
-    # Limpeza periódica de entradas antigas
     if current_time - last_cleanup_time > CLEANUP_INTERVAL_SECONDS:
         logger.info("Executando limpeza de entradas antigas do rate limit.")
-        ips_to_remove = [ip for ip, data in RATE_LIMIT_STORE.items() if data["block_until"] < current_time - MAX_BLOCK_TIME_SECONDS * 2] # Remove IPs muito antigos
+        ips_to_remove = [ip for ip, data in RATE_LIMIT_STORE.items() if data["block_until"] < current_time - MAX_BLOCK_TIME_SECONDS * 2]
         for ip in ips_to_remove:
             del RATE_LIMIT_STORE[ip]
         last_cleanup_time = current_time
@@ -93,41 +77,32 @@ async def rate_limit_checker(request: Request):
 
     ip_data = RATE_LIMIT_STORE[client_ip]
 
-    # 1. Verificar se o IP está atualmente bloqueado
     if ip_data["block_until"] > current_time:
         block_remaining = int(ip_data["block_until"] - current_time)
         logger.warning(f"IP {client_ip} bloqueado. Tempo restante: {block_remaining}s. Ofensas: {ip_data['offenses']}")
         raise HTTPException(
-            status_code=429, # Too Many Requests
+            status_code=429,
             detail=f"Você fez muitas requisições. Tente novamente em {block_remaining} segundos. Bloqueio progressivo ativo."
         )
 
-    # 2. Resetar contagem se o período de tempo expirou
     if current_time - ip_data["first_request_time"] > RATE_LIMIT_PERIOD_SECONDS:
         ip_data["requests"] = 0
         ip_data["first_request_time"] = current_time
 
-    # 3. Incrementar contagem de requisições
     ip_data["requests"] += 1
 
-    # 4. Verificar se o limite foi excedido
     if ip_data["requests"] > RATE_LIMIT_REQUESTS:
         ip_data["offenses"] += 1
-        
-        # Calcular o tempo de bloqueio baseado nas ofensas
         block_duration = BLOCK_TIME_INITIAL_SECONDS * (BLOCK_TIME_MULTIPLIER ** (ip_data["offenses"] - 1))
-        block_duration = min(block_duration, MAX_BLOCK_TIME_SECONDS) # Limitar o tempo máximo de bloqueio
-
+        block_duration = min(block_duration, MAX_BLOCK_TIME_SECONDS)
         ip_data["block_until"] = current_time + block_duration
-        ip_data["requests"] = 0 # Resetar contagem após o bloqueio
-        ip_data["first_request_time"] = current_time # Resetar o início do período
-
+        ip_data["requests"] = 0
+        ip_data["first_request_time"] = current_time
         logger.warning(f"IP {client_ip} excedeu o limite de requisições ({RATE_LIMIT_REQUESTS}/{RATE_LIMIT_PERIOD_SECONDS}s). Bloqueando por {block_duration}s. Total de ofensas: {ip_data['offenses']}")
         raise HTTPException(
             status_code=429,
             detail=f"Você excedeu o limite de requisições. Bloqueado por {int(block_duration)} segundos. O tempo de bloqueio aumenta a cada infração."
         )
-
     logger.debug(f"IP {client_ip} - Requisições no período: {ip_data['requests']}")
 
 
@@ -135,16 +110,11 @@ async def rate_limit_checker(request: Request):
 async def list_models_endpoint(
     user_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None
 ):
-    """
-    Lista os modelos Gemini disponíveis que suportam 'generateContent'.
-    Usa a X-API-Key fornecida pelo usuário no cabeçalho.
-    """
     if not user_api_key:
         logger.warning("X-API-Key não fornecida para /api/list-models.")
         raise HTTPException(status_code=401, detail="API Key não fornecida no cabeçalho X-API-Key para listar modelos.")
     try:
         genai_core.configure(api_key=user_api_key)
-
         models_data = []
         for model in genai_core.list_models():
             if 'generateContent' in model.supported_generation_methods:
@@ -157,7 +127,6 @@ async def list_models_endpoint(
         
         relevant_models_output = []
         default_model_from_env = get_gemini_model().replace("models/", "")
-
         default_model_info = next((m for m in models_data if m["id"] == default_model_from_env), None)
         if default_model_info:
             relevant_models_output.append(default_model_info)
@@ -169,14 +138,16 @@ async def list_models_endpoint(
         if not default_model_info and default_model_from_env:
                 relevant_models_output.insert(0, {"id": default_model_from_env, "name": f"{default_model_from_env} (Padrão do Sistema)", "full_name": f"models/{default_model_from_env}"})
 
-
         logger.info(f"Modelos Gemini listados para seleção (usando chave do usuário): {[m['id'] for m in relevant_models_output]}")
         return JSONResponse(content={"models": relevant_models_output})
     except Exception as e:
         logger.error(f"Erro ao listar modelos Gemini com chave do usuário: {e}", exc_info=True)
         detail_msg = f"Erro ao listar modelos: {str(e)}. Verifique se a API Key fornecida tem permissão para listar modelos."
-        if "API key not valid" in str(e).lower() or "permission denied" in str(e).lower():
-            raise HTTPException(status_code=401, detail="API Key inválida ou sem permissão para listar modelos.")
+        # Erros comuns da API Gemini para chaves inválidas ou sem permissão
+        if "API key not valid" in str(e).lower() or \
+           "API_KEY_INVALID" in str(e).upper() or \
+           ("PermissionDenied" in str(type(e).__name__) and "access model" in str(e).lower()):
+            raise HTTPException(status_code=401, detail="API Key inválida ou sem permissão para listar/acessar modelos.")
         raise HTTPException(status_code=500, detail=detail_msg)
 
 
@@ -192,36 +163,41 @@ async def get_request_specific_gemini_client(
         if model_to_use.startswith("models/"):
                 model_to_use = model_to_use.replace("models/","")
 
-        client = GeminiClient(api_key=x_api_key, model_name=model_to_use)
+        client = GeminiClient(api_key=x_api_key, model_name=model_to_use) # GeminiClient pode levantar ValueError ou ConnectionError
         logger.info(f"Cliente Gemini inicializado para a requisição com modelo: {client.model_name}.")
         return client
-    except ValueError as ve:
+    except ValueError as ve: # Erro na configuração do cliente (ex: modelo inválido, chave vazia)
         logger.error(f"Erro de valor ao criar cliente Gemini: {ve}", exc_info=True)
-        raise HTTPException(status_code=400, detail=str(ve))
-    except ConnectionError as ce:
+        raise HTTPException(status_code=400, detail=str(ve)) # Cliente pode ter validado a chave aqui.
+    except ConnectionError as ce: # Erro de conexão na inicialização do cliente (raro, mas possível)
         logger.critical(f"Erro de conexão ao criar cliente Gemini: {ce}", exc_info=True)
         raise HTTPException(status_code=503, detail=f"Erro ao configurar cliente da IA: {str(ce)}")
-    except Exception as e:
+    except Exception as e: # Outros erros inesperados na inicialização
+        # Tenta identificar se é um erro de API Key da própria configuração do genai_core
+        if "API key not valid" in str(e).lower() or "API_KEY_INVALID" in str(e).upper():
+            logger.error(f"API Key inválida detectada na configuração do cliente Gemini: {e}", exc_info=True)
+            raise HTTPException(status_code=401, detail="API Key do Gemini inválida.")
         logger.critical(f"Erro inesperado ao criar cliente Gemini: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Erro interno ao inicializar cliente da IA: {str(e)}")
+
 
 @app.post("/api/generate-readme")
 async def generate_readme_endpoint(
     project_zip: UploadFile = File(...),
     readme_level: str = Form("moderate"),
     repo_link: Optional[str] = Form(None),
+    project_link: Optional[str] = Form(None),
     linkedin_link: Optional[str] = Form(None),
     requested_badges: Optional[str] = Form(None),
     gemini_model_select: Optional[str] = Form(None),
     x_api_key_header: Annotated[str | None, Header(alias="X-API-Key")] = None,
-    # Adicionar a dependência do rate limit aqui
-    rate_limit_status: None = Depends(rate_limit_checker) 
+    rate_limit_status: None = Depends(rate_limit_checker)
 ):
-    logger.info(f"Solicitação para /api/generate-readme: arquivo={project_zip.filename}, nivel={readme_level}, repo={repo_link}, linkedin={linkedin_link}, badges={requested_badges}, modelo_selecionado='{gemini_model_select}'")
+    logger.info(f"Solicitação para /api/generate-readme: arquivo={project_zip.filename}, nivel={readme_level}, repo={repo_link}, projeto={project_link}, linkedin={linkedin_link}, badges={requested_badges}, modelo_selecionado='{gemini_model_select}'")
 
     try:
         gemini_client = await get_request_specific_gemini_client(x_api_key_header, gemini_model_select)
-    except HTTPException as http_exc_client_init:
+    except HTTPException as http_exc_client_init: # Erros da inicialização do cliente (400, 401, 503, 500)
         raise http_exc_client_init
 
     if not project_zip.filename or not project_zip.filename.endswith(".zip"):
@@ -270,6 +246,7 @@ O usuário solicitou que a seção de badges (se aplicável ao nível de README)
 
             base_user_instructions = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
                 repo_link=repo_link if repo_link else "Não fornecido",
+                project_link=project_link if project_link else "Não fornecido",
                 linkedin_link=linkedin_link if linkedin_link else "Não fornecido"
             )
             user_links_instructions_str = f"{base_user_instructions}{badges_instructions_for_ia}"
@@ -280,30 +257,72 @@ O usuário solicitou que a seção de badges (se aplicável ao nível de README)
             )
 
             logger.debug(f"Prompt selecionado (nível: {readme_level}, modelo: {gemini_client.model_name}). Tamanho aprox: {len(prompt):,} chars. Enviando para Gemini...")
-
-            readme_content = gemini_client.send_conversational_prompt(prompt)
+            readme_content = gemini_client.send_conversational_prompt(prompt) # Pode levantar ValueError ou ConnectionError
 
             if readme_content:
                 logger.info("README.md gerado com sucesso pela IA.")
                 return JSONResponse(content={"filename": project_zip.filename, "readme_content": readme_content})
-            else:
-                logger.error("Falha ao gerar README: IA não retornou conteúdo ou prompt foi bloqueado (ver logs anteriores).")
-                raise HTTPException(status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo ou o prompt pode ter sido bloqueado. Verifique os logs do servidor para mais detalhes.")
+            else: # Caso raro onde o cliente retorna None sem levantar exceção, mas deveria ser tratado por exceção.
+                logger.error("Falha ao gerar README: IA não retornou conteúdo, mas não levantou exceção.")
+                raise HTTPException(status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo.")
 
-    except HTTPException as http_exc:
-        logger.error(f"HTTPException no endpoint: {http_exc.status_code} - {http_exc.detail}", exc_info=True if http_exc.status_code >= 500 else False)
-        raise
-    except KeyError as ke:
+    except ValueError as ve: # Captura "PROMPT BLOQUEADO PELA IA" do GeminiClient ou outros ValueErrors de validação.
+        error_message = str(ve)
+        logger.error(f"ValueError no endpoint: {error_message}", exc_info=True)
+        if "PROMPT BLOQUEADO PELA IA" in error_message:
+            user_detail = error_message.replace("PROMPT BLOQUEADO PELA IA (Safety): ", "").replace("PROMPT BLOQUEADO PELA IA:", "")
+            raise HTTPException(status_code=400, detail=f"Solicitação rejeitada pela IA devido a filtros de conteúdo/segurança: {user_detail.strip()}")
+        raise HTTPException(status_code=400, detail=f"Erro nos dados da solicitação: {error_message}")
+
+    except ConnectionError as ce: # Captura "Falha na comunicação com a API Gemini" do GeminiClient
+        error_message = str(ce.args[0]) if ce.args else str(ce) # Mensagem que pode conter o erro original da API
+        logger.error(f"ConnectionError no endpoint (falha na comunicação com Gemini): {error_message}", exc_info=True)
+        
+        user_friendly_detail = "Ocorreu um problema ao se comunicar com a API Gemini."
+
+        # Tenta extrair informações mais específicas do erro original encapsulado
+        original_error_match = re.search(r"Falha na comunicação com a API Gemini:\s*(.+)", error_message, re.DOTALL)
+        original_error_str = original_error_match.group(1) if original_error_match else error_message
+
+        if "400" in original_error_str and ("API key not valid" in original_error_str or "API_KEY_INVALID" in original_error_str.upper()):
+            user_friendly_detail = "A API Key do Gemini fornecida é inválida. Verifique a chave e tente novamente."
+            raise HTTPException(status_code=400, detail=user_friendly_detail) # Gemini retorna 400 para chave inválida na geração
+        elif "PermissionDenied" in original_error_str and ("permission to access model" in original_error_str.lower() or "User location is not supported" in original_error_str):
+            user_friendly_detail = f"A API Key não tem permissão para usar o modelo Gemini selecionado ou sua região não é suportada. Verifique as configurações da sua chave e do modelo."
+            raise HTTPException(status_code=403, detail=user_friendly_detail)
+        elif ("429" in original_error_str and ("quota" in original_error_str.lower() or "ResourceExhausted" in original_error_str)) or "RESOURCE_EXHAUSTED" in original_error_str.upper() :
+            detail_for_user = "Você excedeu sua cota atual da API Gemini. "
+            if "migrate to" in original_error_str.lower():
+                detail_for_user += "Considere verificar as opções de modelos ou planos com limites de cota mais altos. "
+            else:
+                detail_for_user += "Por favor, tente novamente mais tarde. "
+            
+            retry_match = re.search(r"retry_delay\s*{\s*seconds:\s*(\d+)\s*}", original_error_str, re.IGNORECASE)
+            if retry_match:
+                detail_for_user += f"Você pode tentar novamente em aproximadamente {retry_match.group(1)} segundos. "
+            
+            detail_for_user += "Consulte a seção 'Informações sobre Modelos Gemini' no rodapé da página ou visite https://ai.google.dev/gemini-api/docs/rate-limits."
+            logger.warning(f"Cota da API Gemini excedida: {original_error_str}")
+            raise HTTPException(status_code=429, detail=detail_for_user)
+        elif "500" in original_error_str or "Internal error" in original_error_str or "unavailable" in original_error_str.lower():
+            user_friendly_detail = "A API Gemini reportou um erro interno ou está temporariamente indisponível. Tente novamente mais tarde."
+            raise HTTPException(status_code=502, detail=user_friendly_detail) # 502 Bad Gateway
+
+        # Fallback para outros erros de conexão/comunicação
+        raise HTTPException(status_code=503, detail=f"Serviço indisponível: Falha na comunicação com a API Gemini. Detalhes técnicos: {original_error_str}")
+
+    except KeyError as ke: # Erro de formatação do prompt (bug interno)
         logger.critical(f"KeyError ao formatar o prompt: '{ke}'. Placeholders no template: project_data, user_provided_links_instructions.", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Erro de formatação interna do prompt: Chave '{str(ke)}' ausente.")
-    except ValueError as ve:
-        logger.error(f"ValueError no endpoint: {ve}", exc_info=True)
-        if "PROMPT BLOQUEADO PELA IA" in str(ve):
-            raise HTTPException(status_code=400, detail=f"Solicitação rejeitada pela IA: {str(ve)}")
-        raise HTTPException(status_code=500, detail=f"Erro de valor durante o processamento: {str(ve)}")
-    except Exception as e:
-        logger.critical(f"Erro inesperado no endpoint /api/generate-readme: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro de formatação interna do prompt: Chave '{str(ke)}' ausente. Isso é um bug no template do prompt.")
+    
+    except HTTPException as http_exc: # Re-levantar HTTPExceptions que podem ter sido levantadas diretamente
+        logger.error(f"HTTPException pré-existente: {http_exc.status_code} - {http_exc.detail}", exc_info=True if http_exc.status_code >= 500 else False)
+        raise
+        
+    except Exception as e: # Fallback para erros verdadeiramente inesperados
+        logger.critical(f"Erro inesperado e não tratado no endpoint /api/generate-readme: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Erro interno inesperado no servidor. Por favor, contate o suporte se o problema persistir.")
+
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def get_root():

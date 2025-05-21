@@ -4,6 +4,7 @@ import { displayValidationError, clearValidationError } from './uiUtils.js';
 // IDs dos elementos de erro
 const API_KEY_ERROR_ID = 'apiKeyError';
 // const REPO_URL_ERROR_ID = 'repoUrlError'; (Será passado como parâmetro para a função genérica)
+// const PROJECT_URL_ERROR_ID = 'projectUrlError'; (Será passado como parâmetro)
 // const LINKEDIN_URL_ERROR_ID = 'linkedinUrlError';
 // const GEMINI_MODEL_ERROR_ID = 'geminiModelError';
 
@@ -29,8 +30,10 @@ export function validateApiKey(key, silent = false) {
 export function validateUrlField(inputElement, errorElementId, fieldName, allowedDomain = null, silent = false) {
     const url = inputElement.value.trim();
     if (!url) {
+        // Se o campo não for obrigatório e estiver vazio, é válido.
+        // A lógica de obrigatoriedade deve ser tratada fora, se necessário.
         if (!silent) clearValidationError(errorElementId);
-        return true; 
+        return true;
     }
     try {
         const urlObj = new URL(url);
@@ -39,13 +42,17 @@ export function validateUrlField(inputElement, errorElementId, fieldName, allowe
             return false;
         }
         if (allowedDomain) {
-            const hostname = urlObj.hostname;
-            if (allowedDomain === 'github.com' && !(hostname === 'github.com' || hostname === 'www.github.com')) {
-                if (!silent) displayValidationError(errorElementId, `Link do ${fieldName} deve ser um domínio github.com.`);
-                return false;
+            const hostname = urlObj.hostname.toLowerCase(); // Normalize to lowercase for comparison
+            const normalizedAllowedDomain = allowedDomain.toLowerCase();
+
+            // Check if the hostname is exactly the allowed domain or a www subdomain of it.
+            if (hostname === normalizedAllowedDomain || hostname === `www.${normalizedAllowedDomain}`) {
+                // Valid
+            } else if (normalizedAllowedDomain === 'linkedin.com' && hostname.endsWith('.linkedin.com')) {
+                // Also allow subdomains like 'br.linkedin.com' for LinkedIn
             }
-            if (allowedDomain === 'linkedin.com' && !hostname.includes('linkedin.com')) {
-                 if (!silent) displayValidationError(errorElementId, `Link do ${fieldName} deve ser um domínio linkedin.com.`);
+            else {
+                 if (!silent) displayValidationError(errorElementId, `Link do ${fieldName} deve ser um domínio ${allowedDomain}.`);
                  return false;
             }
         }

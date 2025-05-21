@@ -5,12 +5,13 @@ import { displayValidationError, clearValidationError, showStatus, escapeHtml } 
 import { listModels, generateReadme } from './apiService.js';
 
 // DOM Elements (precisam ser acessíveis)
-let apiKeyInput, geminiModelSelect, repoUrlInput, linkedinUrlInput, projectZipInput, generateButton;
+let apiKeyInput, geminiModelSelect, repoUrlInput, projectUrlInput, linkedinUrlInput, projectZipInput, generateButton; // Added projectUrlInput
 let fileNameDisplay, badgeSelectionContainer, outputSection, readmeContentElement;
 let originalButtonIconHTMLStorage, buttonIconSvgElement, buttonTextElement, loadingSpinnerElement; // Para o botão de gerar
 
 const API_KEY_ERROR_ID = 'apiKeyError';
 const REPO_URL_ERROR_ID = 'repoUrlError';
+const PROJECT_URL_ERROR_ID = 'projectUrlError'; // Added
 const LINKEDIN_URL_ERROR_ID = 'linkedinUrlError';
 const GEMINI_MODEL_ERROR_ID = 'geminiModelError';
 const PROJECT_ZIP_ERROR_ID = 'projectZipError';
@@ -31,11 +32,12 @@ const availableBadges = [  //
 function updateGenerateButtonState() { //
     const isApiKeyCurrentlyValid = validateApiKey(apiKeyInput.value, true); //
     const isRepoUrlCurrentlyValid = validateUrlField(repoUrlInput, REPO_URL_ERROR_ID, "GitHub", "github.com", true); //
+    const isProjectUrlCurrentlyValid = validateUrlField(projectUrlInput, PROJECT_URL_ERROR_ID, "Projeto", null, true); // Added projectUrl validation (null for any domain)
     const isLinkedinUrlCurrentlyValid = validateUrlField(linkedinUrlInput, LINKEDIN_URL_ERROR_ID, "LinkedIn", "linkedin.com", true); //
     const isZipFileSelected = projectZipInput.files && projectZipInput.files.length > 0; //
     const isModelSelectedValid = validateSelectedModel(geminiModelSelect, GEMINI_MODEL_ERROR_ID, true); //
 
-    if (isApiKeyCurrentlyValid && isRepoUrlCurrentlyValid && isLinkedinUrlCurrentlyValid && isZipFileSelected && isModelSelectedValid) { //
+    if (isApiKeyCurrentlyValid && isRepoUrlCurrentlyValid && isProjectUrlCurrentlyValid && isLinkedinUrlCurrentlyValid && isZipFileSelected && isModelSelectedValid) { // Added isProjectUrlCurrentlyValid
         generateButton.disabled = false; //
     } else { //
         generateButton.disabled = true; //
@@ -80,10 +82,10 @@ async function populateGeminiModels() { //
                 let displayName = model.name || model.id;
                 const modelIdLowerCase = model.id.toLowerCase();
 
-                if (modelIdLowerCase === 'gemini-1.5-flash-latest' || modelIdLowerCase === 'gemini-1.5-flash') {
-                    displayName = `${model.name || model.id} (Flash 1.5 Recomendado)`;
-                } else if (modelIdLowerCase === 'gemini-2.0-flash' || modelIdLowerCase === 'gemini-2.0-flash-latest') {
-                    displayName = `${model.name || model.id} (Flash 2.0 Recomendado)`;
+                if (modelIdLowerCase === 'gemini-2.5-pro-preview-03-25' || modelIdLowerCase === 'gemini-2.5-pro-preview-03-25') {
+                    displayName = `${model.name || model.id} (Recomendado p/ Projetos de Grande Escala)`;
+                } else if (modelIdLowerCase === 'gemini-2.0-flash' || modelIdLowerCase === 'gemini-2.0-flash') {
+                    displayName = `${model.name || model.id} (Recomendado)`;
                 }
                 option.textContent = displayName;
                 geminiModelSelect.appendChild(option);
@@ -169,6 +171,15 @@ function setupEventListeners() {
         updateGenerateButtonState(); //
     });
 
+    projectUrlInput.addEventListener('input', () => { // Added
+        clearValidationError(PROJECT_URL_ERROR_ID); // Added
+        updateGenerateButtonState(); // Added
+    });
+    projectUrlInput.addEventListener('blur', () => { // Added
+        validateUrlField(projectUrlInput, PROJECT_URL_ERROR_ID, "Projeto", null); // Added (null for any domain)
+        updateGenerateButtonState(); // Added
+    });
+
     linkedinUrlInput.addEventListener('input', () => { //
         clearValidationError(LINKEDIN_URL_ERROR_ID); //
         updateGenerateButtonState(); //
@@ -226,14 +237,15 @@ async function handleSubmit(event) { //
     
     const isApiKeyValidOnSubmit = validateApiKey(apiKeyInput.value); //
     const isRepoUrlValidOnSubmit = validateUrlField(repoUrlInput, REPO_URL_ERROR_ID, "GitHub", "github.com"); //
+    const isProjectUrlValidOnSubmit = validateUrlField(projectUrlInput, PROJECT_URL_ERROR_ID, "Projeto", null); // Added
     const isLinkedinUrlValidOnSubmit = validateUrlField(linkedinUrlInput, LINKEDIN_URL_ERROR_ID, "LinkedIn", "linkedin.com"); //
     const isModelSelectedOnSubmit = validateSelectedModel(geminiModelSelect, GEMINI_MODEL_ERROR_ID); //
     let isZipSelectedOnSubmit = projectZipInput.files && projectZipInput.files.length > 0; //
 
     if (!isZipSelectedOnSubmit) { //
-        displayValidationError(projectZipError, "Por favor, selecione um arquivo .zip."); //
+        displayValidationError(PROJECT_ZIP_ERROR_ID, "Por favor, selecione um arquivo .zip."); // Corrected to use constant
     } else { //
-        clearValidationError(projectZipError); //
+        clearValidationError(PROJECT_ZIP_ERROR_ID); // Corrected to use constant
     }
     
     updateGenerateButtonState(); //
@@ -243,6 +255,7 @@ async function handleSubmit(event) { //
         if (!document.getElementById(API_KEY_ERROR_ID).classList.contains('hidden')) apiKeyInput.focus(); //
         else if (!document.getElementById(GEMINI_MODEL_ERROR_ID).classList.contains('hidden')) geminiModelSelect.focus(); //
         else if (!document.getElementById(REPO_URL_ERROR_ID).classList.contains('hidden')) repoUrlInput.focus(); //
+        else if (!document.getElementById(PROJECT_URL_ERROR_ID).classList.contains('hidden')) projectUrlInput.focus(); // Added
         else if (!document.getElementById(LINKEDIN_URL_ERROR_ID).classList.contains('hidden')) linkedinUrlInput.focus(); //
         else if (!document.getElementById(PROJECT_ZIP_ERROR_ID).classList.contains('hidden')) projectZipInput.focus(); //
         return; //
@@ -250,6 +263,7 @@ async function handleSubmit(event) { //
     
     const trimmedApiKey = apiKeyInput.value.trim(); //
     const repoUrl = repoUrlInput.value.trim(); //
+    const projectUrl = projectUrlInput.value.trim(); // Added
     const linkedinUrl = linkedinUrlInput.value.trim(); //
     const selectedReadmeLevel = document.querySelector('input[name="readmeLevel"]:checked').value; //
     const selectedGeminiModel = geminiModelSelect.value; //
@@ -259,6 +273,7 @@ async function handleSubmit(event) { //
     formData.append('project_zip', projectZipInput.files[0]); //
     formData.append('readme_level', selectedReadmeLevel); //
     if (repoUrl) formData.append('repo_link', repoUrl); //
+    if (projectUrl) formData.append('project_link', projectUrl); // Added
     if (linkedinUrl) formData.append('linkedin_link', linkedinUrl); //
     if (selectedBadges.length > 0) { formData.append('requested_badges', selectedBadges.join(',')); } //
     if (selectedGeminiModel && selectedGeminiModel !== "DEFAULT_OPTION") { formData.append('gemini_model_select', selectedGeminiModel); } //
@@ -296,6 +311,7 @@ export function initForm() {
     apiKeyInput = document.getElementById('geminiApiKey');
     geminiModelSelect = document.getElementById('geminiModelSelect');
     repoUrlInput = document.getElementById('repoUrl');
+    projectUrlInput = document.getElementById('projectUrl'); // Added
     linkedinUrlInput = document.getElementById('linkedinUrl');
     projectZipInput = document.getElementById('projectZip');
     generateButton = document.getElementById('generateButton');
@@ -313,6 +329,7 @@ export function initForm() {
     // Configura localStorage para os campos principais
     setupLocalStorageItem('geminiApiKey', 'saveApiKey', 'geminiApiKey', 'apiKeyStatus', 'API Key carregada.');
     setupLocalStorageItem('repoUrl', 'saveRepoUrl', 'repoUrl');
+    setupLocalStorageItem('projectUrl', 'saveProjectUrl', 'projectUrl'); // Added
     setupLocalStorageItem('linkedinUrl', 'saveLinkedinUrl', 'linkedinUrl');
     
     // Carrega preferências de rádio e badges

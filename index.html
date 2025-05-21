@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Readme Generation</title>
     <link rel="stylesheet" href="/public/style.css">
-    <script src="https://cdn.tailwindcss.com"></script> 
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Configuração do Tailwind (pode ser removida se não usar classes utilitárias do Tailwind diretamente)
-        tailwind.config = { 
+        tailwind.config = {
             darkMode: 'class',
             theme: { extend: {} }
         }
@@ -21,7 +21,7 @@
 </head>
 <body class="bg-bg-primary-light dark:bg-bg-primary-dark text-text-primary-light dark:text-text-primary-dark">
     <div class="container mx-auto">
-        
+
         <header class="mb-10 text-center pt-8 sm:pt-12">
             <div class="flex justify-center sm:justify-end items-center mb-4 relative">
                 <button id="themeToggle" title="Alternar tema" class="button-icon absolute top-0 right-0 sm:relative">
@@ -40,7 +40,7 @@
                     <h2 class="section-title">1. Configurações Essenciais</h2>
                 </div>
                 <div class="section-content space-y-6">
-                    
+
                     <div class="form-group">
                         <div class="label-with-help">
                             <label for="geminiApiKey" class="label-form">Sua API Key do Gemini</label>
@@ -77,7 +77,7 @@
                             </div>
                         </div>
                         <select name="geminiModelSelect" id="geminiModelSelect" class="input-field">
-                            <option value="DEFAULT_OPTION">Insira a API Key para carregar</option> 
+                            <option value="DEFAULT_OPTION">Insira a API Key para carregar</option>
                         </select>
                         <p id="geminiModelError" class="error-message hidden"></p>
                          <div class="checkbox-container">
@@ -106,6 +106,28 @@
                             <label for="saveRepoUrl" class="checkbox-label">Salvar Link do Repositório</label>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <div class="label-with-help">
+                            <label for="projectUrl" class="label-form">Link do Projeto <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-project-url" title="Dúvidas">
+                                    <ion-icon name="help-circle-outline"></ion-icon>
+                                </button>
+                                <div id="tooltip-project-url" class="help-tooltip hidden" data-tooltip-id="tooltip-project-url">
+                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                    <h4>Link do Projeto</h4>
+                                    <p>Um link para o projeto em produção, uma demonstração ao vivo, página de download, ou qualquer outro recurso relevante que mostre o projeto em ação ou como obtê-lo. Ex: Vercel, Netlify, Itch.io, site oficial, Figma, etc.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="url" name="projectUrl" id="projectUrl" class="input-field" placeholder="https://seu-projeto.vercel.app">
+                        <p id="projectUrlError" class="error-message hidden"></p>
+                        <div class="checkbox-container">
+                            <input id="saveProjectUrl" name="saveProjectUrl" type="checkbox" class="checkbox-custom">
+                            <label for="saveProjectUrl" class="checkbox-label">Salvar Link do Projeto</label>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <div class="label-with-help">
                             <label for="linkedinUrl" class="label-form">Link do LinkedIn <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
@@ -194,27 +216,64 @@
                     </div>
                 </div>
             </section>
-            
+
             <details class="info-details">
                 <summary class="info-summary">
-                    <ion-icon name="information-circle-outline"></ion-icon> 
+                    <ion-icon name="information-circle-outline"></ion-icon>
                     Informações sobre Modelos Gemini, Limites e API Key
                 </summary>
                 <div class="info-content">
-                    <h4 class="font-semibold">✅ O que é o Gemini Flash?</h4>
-                    <p>O Gemini Flash é uma versão mais rápida e mais barata da inteligência artificial do Google. Ela é boa para tarefas simples e rápidas, como responder perguntas, gerar textos curtos e organizar dados.</p>
-                    <h4 class="font-semibold">🆓 Uso grátis (camada gratuita)</h4>
-                    <p>Você pode usar o Gemini sem pagar nada, com algumas limitações por dia (RPM - Requisições Por Minuto, RPD - Requisições Por Dia, TPM - Tokens Por Minuto):</p>
-                    <ul><li><strong>Gemini 1.5 Flash:</strong><ul><li>RPM: 15</li><li>RPD: 1500</li><li>TPM: 1.000.000 (para o modelo <code>gemini-1.5-flash-latest</code>)</li></ul></li><li>⚠️ Esses limites são por projeto do Google Cloud / conta do AI Studio. Se você usar a mesma chave em vários lugares, os limites são compartilhados.</li></ul>
-                    <h4 class="font-semibold">💳 Se você quiser usar mais que isso:</h4>
-                    <p>Você pode ativar o plano pago no Google Cloud, que aumenta esses limites. Mas aí precisa criar um projeto no Google Cloud, ativar a cobrança (com cartão de crédito) e usar a API por lá.</p>
-                    <h4 class="font-semibold">🧠 Qual modelo usar?</h4>
-                    <p>Para esta ferramenta, recomendamos o <strong>Gemini 1.5 Flash (geralmente <code>gemini-1.5-flash-latest</code>)</strong> para a maioria das tarefas, pois oferece um bom equilíbrio entre velocidade, custo (gratuito dentro dos limites) e capacidade. Outros modelos "Pro" podem ser mais poderosos para tarefas muito complexas, mas podem ter diferentes implicações de custo ou limites.</p>
-                    <h4 class="font-semibold">👨‍💻 Exemplo prático dos limites</h4>
-                    <p>Se você fizer um programa que envia comandos para o Gemini todo dia com o <code>gemini-1.5-flash-latest</code>:</p>
-                    <ul><li>Pode mandar até 1.500 comandos por dia de graça.</li><li>Não mais que 15 comandos em um minuto.</li><li>Se mandar mais, vai dar erro (geralmente 429 - limite atingido).</li><li>Para projetos pessoais e testes, isso costuma ser mais do que suficiente.</li></ul>
-                    <h4 class="font-semibold">🧩 Tutorial: Como pegar a chave de API do Gemini (Google AI Studio)</h4>
-                    <ol><li><strong>Pré-requisitos:</strong> Uma conta Google (Gmail normal já serve) e um navegador.</li><li><strong>Acesse o Google AI Studio:</strong> Vá para <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/app/apikey</a>.</li><li><strong>Faça login</strong> com sua conta Google e aceite os termos, se for seu primeiro acesso.</li><li>Clique em <strong>"Create API key"</strong> (Criar chave de API).</li><li>Pode ser solicitado que você crie um novo projeto no Google Cloud ou selecione um existente. Siga as instruções.</li><li><strong>Copie sua chave:</strong> Uma chave será gerada (algo como <code>AIzaSyA...</code>). Essa é sua chave secreta.</li><li><strong>Guarde com segurança:</strong> ⚠️ Não compartilhe essa chave publicamente!</li></ol>
+                    <h4 class="font-semibold">✅ O que é o Gemini 2.5 Pro Preview?</h4>
+                        <p>O modelo <code>gemini-2.5-pro-preview-03-25</code> é uma versão avançada e preliminar da série Pro, oferecendo desempenho de ponta em tarefas complexas, como interpretação de linguagem natural, raciocínio e geração de conteúdo mais sofisticado.</p>
+                        <p>⚠️ <strong>Recomendação:</strong> Este é um modelo recomendado apenas para quem precisa de alto desempenho. Seu uso é de responsabilidade do usuário, e pode envolver limites mais restritos ou custos maiores dependendo do ambiente (AI Studio ou Google Cloud).</p>
+
+                        <h4 class="font-semibold">✅ O que é o Gemini 2.0 Flash?</h4>
+                        <p>O <strong>Gemini 2.0 Flash</strong> é um modelo leve e rápido, ideal para tarefas cotidianas como geração de textos curtos, organização de informações, respostas objetivas e processamento rápido.</p>
+                        <p>⚠️ <strong>Recomendação:</strong> Este modelo é indicado para a maioria dos usuários por oferecer um bom equilíbrio entre desempenho e custo. Porém, o uso é de responsabilidade do usuário e deve considerar os limites diários e mensais.</p>
+
+                        <h4 class="font-semibold">🆓 Uso grátis (camada gratuita)</h4>
+                        <p>Ambos os modelos podem ser usados gratuitamente no Google AI Studio, com limites diários:</p>
+                        <ul>
+                        <li><strong>Gemini 2.0 Flash:</strong>
+                            <ul>
+                            <li>RPM: 15</li>
+                            <li>RPD: 1500</li>
+                            <li>TPM: 1.000.000 (para o modelo <code>gemini-2.0</code>)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Gemini 2.5 Pro Preview:</strong>
+                            <ul>
+                            <li>⚠️ Os limites podem variar e ser mais baixos, pois se trata de uma versão preview. Consulte a documentação do Google AI Studio para detalhes atualizados.</li>
+                            </ul>
+                        </li>
+                        <li>⚠️ Esses limites são por projeto do Google Cloud / conta do AI Studio. Se você usar a mesma chave em vários lugares, os limites são compartilhados.</li>
+                        </ul>
+
+                        <h4 class="font-semibold">💳 Se você quiser usar mais que isso:</h4>
+                        <p>Você pode ativar o plano pago no Google Cloud para aumentar os limites. Isso exige configurar cobrança com cartão de crédito e usar a API com um projeto do Google Cloud.</p>
+
+                        <h4 class="font-semibold">🧠 Qual modelo usar?</h4>
+                        <p>Para a maioria das tarefas, recomendamos começar com o <strong>Gemini 2.0 Flash</strong> (<code>gemini-2.0</code>), por ser gratuito dentro dos limites e rápido. Se você precisa de raciocínio mais avançado ou tarefas sofisticadas, pode testar o <strong>Gemini 2.5 Pro Preview</strong>, mas com cautela quanto ao uso e custos.</p>
+
+                        <h4 class="font-semibold">👨‍💻 Exemplo prático dos limites</h4>
+                        <p>Se você usa o modelo <code>gemini-2.0</code> em um app pessoal:</p>
+                        <ul>
+                        <li>Pode fazer até 1.500 requisições por dia sem pagar.</li>
+                        <li>Não mais que 15 por minuto.</li>
+                        <li>Se ultrapassar, vai receber erro (ex: código 429).</li>
+                        <li>Para projetos pessoais, testes e bots simples, geralmente é suficiente.</li>
+                        </ul>
+
+                        <h4 class="font-semibold">🧩 Tutorial: Como pegar a chave de API do Gemini (Google AI Studio)</h4>
+                        <ol>
+                        <li><strong>Pré-requisitos:</strong> Conta Google (Gmail) e um navegador.</li>
+                        <li><strong>Acesse:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/app/apikey</a></li>
+                        <li>Faça login com sua conta e aceite os termos, se necessário.</li>
+                        <li>Clique em <strong>"Create API key"</strong>.</li>
+                        <li>Você pode precisar criar um projeto novo no Google Cloud.</li>
+                        <li><strong>Copie a chave:</strong> Algo como <code>AIzaSyA...</code>.</li>
+                        <li><strong>Guarde com segurança:</strong> ⚠️ Não compartilhe essa chave!</li>
+                    </ol>
                 </div>
             </details>
 
@@ -242,7 +301,7 @@
             <section id="statusSection" class="mb-6 hidden">
                  <div id="statusMessage" class="status-message-base"></div>
             </section>
-            
+
             <section id="outputSection" class="section-card hidden">
                 <div class="section-header flex justify-between items-center">
                     <h2 class="section-title">4. README.md Gerado</h2>
@@ -261,7 +320,7 @@
             </section>
         </main>
 
-        <footer class="text-center"> 
+        <footer class="text-center">
             <p>&copy; <span id="currentYear"></span> Readme Generation. Todos os direitos reservados.</p>
             <p class="text-xs mt-1">Powered by Gemini & FastAPI.</p>
             <div class="developer-info mt-4">
