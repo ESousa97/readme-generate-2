@@ -75,17 +75,18 @@ O sistema "Readme Generation" é composto por três macrocomponentes principais:
 
 ```mermaid
 graph TD
-    Usuario[👤 Usuário] -- Interage via Navegador --> Frontend[🌐 Frontend (HTML, CSS, JS)]
-    Frontend -- Upload .zip, Envia Configs (API Key, Modelo, Links) --> API_Backend[⚙️ API Backend (FastAPI on Vercel)]
-    API_Backend -- Extrai Dados do .zip --> ProcessamentoZip[🧩 Módulo de Processamento .zip (utils.py)]
-    ProcessamentoZip -- Estrutura e Conteúdo do Projeto --> API_Backend
-    API_Backend -- Constrói Prompt com Dados e Instruções --> GeminiClient[🤖 Cliente Gemini (gemini_client_web.py)]
-    GeminiClient -- Envia Prompt e Dados do Projeto --> GeminiAPI[🧠 Google Gemini API]
-    GeminiAPI -- Retorna README.md Gerado --> GeminiClient
-    GeminiClient -- Retorna README.md --> API_Backend
-    API_Backend -- Retorna README.md em JSON --> Frontend
-    Frontend -- Exibe README.md e Permite Cópia --> Usuario
-    LocalStorage[💾 LocalStorage do Navegador] <--> Frontend -- Salva/Carrega Preferências (API Key, Modelo) --> LocalStorage
+    Usuario[👤 Usuário] -- "Interage via Navegador" --> Frontend["🌐 Frontend (HTML, CSS, JS)"]
+    Frontend -- "Upload .zip, Envia Configs (API Key, Modelo, Links)" --> API_Backend["⚙️ API Backend (FastAPI on Vercel)"]
+    API_Backend -- "Extrai Dados do .zip" --> ProcessamentoZip["🧩 Módulo de Processamento .zip (utils.py)"]
+    ProcessamentoZip -- "Estrutura e Conteúdo do Projeto" --> API_Backend
+    API_Backend -- "Constrói Prompt com Dados e Instruções" --> GeminiClient["🤖 Cliente Gemini (gemini_client_web.py)"]
+    GeminiClient -- "Envia Prompt e Dados do Projeto" --> GeminiAPI["🧠 Google Gemini API"]
+    GeminiAPI -- "Retorna README.md Gerado" --> GeminiClient
+    GeminiClient -- "Retorna README.md" --> API_Backend
+    API_Backend -- "Retorna README.md em JSON" --> Frontend
+    Frontend -- "Exibe README.md e Permite Cópia" --> Usuario
+    LocalStorage["💾 LocalStorage do Navegador"] <--> Frontend
+    Frontend -- "Salva/Carrega Preferências (API Key, Modelo)" --> LocalStorage
 ```
 
 **Componentes Detalhados:**
