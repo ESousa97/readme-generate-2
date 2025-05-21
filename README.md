@@ -6,8 +6,7 @@
 
 Este projeto propõe uma solução inovadora para o desafio da documentação de software, frequentemente negligenciada devido à sua complexidade e ao tempo demandado: uma aplicação web com uma API RESTful integrada, que utiliza inteligência artificial (IA) para gerar automaticamente arquivos `README.md` detalhados a partir do código-fonte de um projeto. A metodologia emprega a IA Gemini do Google para analisar a estrutura, as tecnologias utilizadas e a lógica do projeto, produzindo documentação concisa, completa e informativa. Os resultados esperados incluem uma redução significativa do tempo gasto com a documentação, uma melhoria na qualidade da mesma e a facilitação da colaboração em projetos de software. A principal contribuição deste projeto é a automatização inteligente da geração de documentação, tornando-a mais acessível e eficiente para desenvolvedores de todos os níveis de experiência, desde estudantes até profissionais experientes.
 
-[![Status da Build](https://img.shields.io/github/actions/workflow/status/ESousa97/readme-generate-2/main.yml?branch=main&style=for-the-badge)](https://github.com/ESousa97/readme-generate-2/actions)
-
+[![Licença](https://img.shields.io/github/license/ESousa97/readme-generate-2?style=for-the-badge)](./LICENSE.md)
 [![Linguagem Principal](https://img.shields.io/github/languages/top/ESousa97/readme-generate-2?style=for-the-badge)](https://github.com/ESousa97/readme-generate-2)
 [![Tamanho do Repositório](https://img.shields.io/github/repo-size/ESousa97/readme-generate-2?style=for-the-badge)](https://github.com/ESousa97/readme-generate-2)
 [![Último Commit](https://img.shields.io/github/last-commit/ESousa97/readme-generate-2?style=for-the-badge)](https://github.com/ESousa97/readme-generate-2/commits/main)
