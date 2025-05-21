@@ -3,7 +3,7 @@ import os
 import logging
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, Depends, Form, Request
 from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.staticfiles import StaticFiles # Importação correta
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from typing import Annotated, Optional
@@ -44,12 +44,20 @@ app.add_middleware(
     allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-static_dir = os.path.join(project_root_dir, "static")
-if not os.path.exists(static_dir):
-    os.makedirs(static_dir, exist_ok=True)
-    logger.info(f"Diretório estático '{static_dir}' criado.")
+# --- Configuração de Arquivos Estáticos ---
+# Define o caminho para o seu diretório de arquivos estáticos (agora chamado "public")
+public_dir = os.path.join(project_root_dir, "public") # ALTERADO
 
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Cria o diretório "public" se ele não existir
+if not os.path.exists(public_dir):
+    os.makedirs(public_dir, exist_ok=True)
+    logger.info(f"Diretório público '{public_dir}' criado.") # ALTERADO (mensagem de log)
+
+# Monta o diretório "public" para ser servido no caminho de URL "/public"
+# Agora, arquivos como "public/style.css" serão acessíveis em "http://localhost:8000/public/style.css"
+app.mount("/public", StaticFiles(directory=public_dir), name="public") # ALTERADO
+# --- Fim da Configuração de Arquivos Estáticos ---
+
 
 # --- Configurações de Rate Limiting ---
 # Dicionário em memória para armazenar o estado do rate limit por IP
@@ -60,7 +68,7 @@ RATE_LIMIT_STORE = defaultdict(lambda: {"requests": 0, "first_request_time": 0.0
 RATE_LIMIT_REQUESTS = 5      # Número máximo de requisições
 RATE_LIMIT_PERIOD_SECONDS = 60 # Em segundos (1 minuto)
 BLOCK_TIME_INITIAL_SECONDS = 300 # Tempo de bloqueio inicial (5 minutos)
-BLOCK_TIME_MULTIPLIER = 2    # Multiplicador para bloqueios subsequentes
+BLOCK_TIME_MULTIPLIER = 2      # Multiplicador para bloqueios subsequentes
 MAX_BLOCK_TIME_SECONDS = 14400 # Bloqueio máximo de 4 horas
 
 # Limpeza de entradas antigas (para evitar que o dicionário cresça indefinidamente)
@@ -159,7 +167,7 @@ async def list_models_endpoint(
                 relevant_models_output.append(model_info)
         
         if not default_model_info and default_model_from_env:
-             relevant_models_output.insert(0, {"id": default_model_from_env, "name": f"{default_model_from_env} (Padrão do Sistema)", "full_name": f"models/{default_model_from_env}"})
+                relevant_models_output.insert(0, {"id": default_model_from_env, "name": f"{default_model_from_env} (Padrão do Sistema)", "full_name": f"models/{default_model_from_env}"})
 
 
         logger.info(f"Modelos Gemini listados para seleção (usando chave do usuário): {[m['id'] for m in relevant_models_output]}")
@@ -182,7 +190,7 @@ async def get_request_specific_gemini_client(
     try:
         model_to_use = requested_model_name if requested_model_name and requested_model_name.strip() else get_gemini_model()
         if model_to_use.startswith("models/"):
-             model_to_use = model_to_use.replace("models/","")
+                model_to_use = model_to_use.replace("models/","")
 
         client = GeminiClient(api_key=x_api_key, model_name=model_to_use)
         logger.info(f"Cliente Gemini inicializado para a requisição com modelo: {client.model_name}.")

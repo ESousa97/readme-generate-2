@@ -1,4 +1,4 @@
-// static/js/themeManager.js
+// public/js/themeManager.js
 
 const themeToggleButton = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
