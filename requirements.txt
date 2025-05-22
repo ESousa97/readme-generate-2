@@ -1,5 +1,6 @@
 fastapi>=0.100.0
 uvicorn[standard]>=0.20.0  # Para rodar localmente com FastAPI
+gunicorn>=20.0.0
 python-multipart>=0.0.5    # Para upload de arquivos com FastAPI
 google-generativeai>=0.5.0 # SDK do Gemini
 python-dotenv>=1.0.0       # Para carregar .env em desenvolvimento local
