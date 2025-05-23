@@ -6,7 +6,7 @@
 
 O projeto "Readme Generation" é uma aplicação web inovadora projetada para simplificar e aprimorar drasticamente o processo de criação de arquivos README.md para projetos de software. No contexto atual de desenvolvimento ágil e colaborativo, uma documentação clara, concisa e abrangente é crucial, porém frequentemente negligenciada devido ao tempo e esforço exigidos. Este projeto aborda essa lacuna ao empregar a capacidade de modelos de linguagem de grande escala (LLMs), especificamente a API Gemini do Google, para analisar a estrutura e o conteúdo de um projeto de software (fornecido como um arquivo .zip) e gerar automaticamente um README.md.
 
-A solução proposta consiste em uma interface frontend intuitiva (HTML, CSS, JavaScript) onde o usuário pode fazer upload do seu projeto, fornecer sua chave de API do Gemini, selecionar o modelo Gemini desejado, o nível de detalhamento do README (Simples, Moderado, Completo), e informações contextuais adicionais como links para o repositório, projeto em produção e perfil do LinkedIn. O backend, construído com FastAPI (Python), processa esses inputs, extrai dados relevantes do projeto, constrói um prompt otimizado e interage com a API Gemini para gerar o conteúdo do README. O resultado é um arquivo Markdown bem estruturado, que pode ser customizado e utilizado imediatamente. A principal contribuição deste projeto reside na automação inteligente da documentação, visando economizar tempo dos desenvolvedores, padronizar a qualidade dos READMEs e facilitar a integração e compreensão de novos projetos.
+A solução consiste em uma interface frontend intuitiva (HTML, CSS, JavaScript) onde o usuário pode fazer upload do seu projeto, fornecer sua chave de API do Gemini, selecionar o modelo Gemini desejado (com o `gemini-1.5-flash-latest` como padrão recomendado), o nível de detalhamento do README (Simples, Moderado, Completo), e informações contextuais adicionais como links para o repositório, projeto em produção e perfil do LinkedIn. O backend, construído com FastAPI (Python), processa esses inputs, extrai dados relevantes do projeto (estrutura de diretórios e conteúdo de arquivos selecionados), constrói um prompt otimizado e interage com a API Gemini para gerar o conteúdo do README. O resultado é um arquivo Markdown bem estruturado, que pode ser customizado e utilizado imediatamente. A principal contribuição deste projeto reside na automação inteligente da documentação, visando economizar tempo dos desenvolvedores, padronizar a qualidade dos READMEs e facilitar a integração e compreensão de novos projetos.
 
 ## ✨ Badges Abrangentes
 
@@ -17,7 +17,7 @@ A solução proposta consiste em uma interface frontend intuitiva (HTML, CSS, Ja
 ![Linguagem Principal](https://img.shields.io/github/languages/top/ESousa97/readme-generate-2?style=for-the-badge)
 ![Tamanho do Código](https://img.shields.io/github/languages/code-size/ESousa97/readme-generate-2?style=for-the-badge)
 ![Contribuidores](https://img.shields.io/github/contributors/ESousa97/readme-generate-2?style=for-the-badge)
-![Status do Deploy Vercel](https://img.shields.io/website?url=https%3A%2F%2Freadme-generate-iota.vercel.app%2F&up_message=online&down_message=offline&style=for-the-badge&logo=vercel)
+![Status do Deploy Render](https://img.shields.io/website?url=https%3A%2F%2Freadme-generate-2.onrender.com%2F&up_message=online&down_message=offline&style=for-the-badge&logo=render)
 ![Python Version](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI Version](https://img.shields.io/badge/FastAPI-0.100%2B-05998b?style=for-the-badge&logo=fastapi)
 
@@ -31,7 +31,7 @@ A solução proposta consiste em uma interface frontend intuitiva (HTML, CSS, Ja
 *   [🔗 Link Principal / Acesso ao Projeto](#-link-principal--acesso-ao-projeto)
 *   [🏗️ Arquitetura do Sistema](#️-arquitetura-do-sistema)
 *   [💡 Decisões de Design Chave](#-decisões-de-design-chave)
-*   [🎯 Funcionalidades Detalhadas (com Casos de Uso)](#-funcionalidades-detalhadas-com-casos-de-uso)
+*   [✨ Funcionalidades Detalhadas (com Casos de Uso)](#-funcionalidades-detalhadas-com-casos-de-uso)
 *   [🛠️ Tech Stack Detalhado](#️-tech-stack-detalhado)
 *   [📂 Estrutura Detalhada do Código-Fonte](#-estrutura-detalhada-do-código-fonte)
 *   [📋 Pré-requisitos Avançados](#-pré-requisitos-avançados)
@@ -41,7 +41,7 @@ A solução proposta consiste em uma interface frontend intuitiva (HTML, CSS, Ja
 *   [🧪 Estratégia de Testes e Qualidade de Código](#-estratégia-de-testes-e-qualidade-de-código)
 *   [🚢 Deployment Detalhado e Escalabilidade](#-deployment-detalhado-e-escalabilidade)
 *   [🤝 Contribuição (Nível Avançado)](#-contribuição-nível-avançado)
-*   [⚖️ Licença e Aspectos Legais](#️-licença-e-aspectos-legais)
+*   [📜 Licença e Aspectos Legais](#-licença-e-aspectos-legais)
 *   [📚 Publicações, Artigos e Citações](#-publicações-artigos-e-citações)
 *   [👥 Equipe Principal e Colaboradores Chave](#-equipe-principal-e-colaboradores-chave)
 *   [🗺️ Roadmap Detalhado e Visão de Longo Prazo](#️-roadmap-detalhado-e-visão-de-longo-prazo)
@@ -54,385 +54,447 @@ A documentação de software, em particular o arquivo `README.md`, serve como o 
 
 Soluções existentes para a geração de documentação muitas vezes focam em aspectos específicos, como a documentação de APIs a partir de código-fonte (e.g., Swagger, Javadoc) ou são ferramentas genéricas de edição de texto. Poucas abordam a geração holística e inteligente do conteúdo narrativo e estrutural de um README com base na análise do próprio código e estrutura do projeto.
 
-O projeto "Readme Generation" surge como uma resposta inovadora a este desafio. A motivação central é alavancar os recentes avanços em Inteligência Artificial, especificamente modelos de linguagem de grande escala (LLMs) como o Gemini do Google, para automatizar a criação de READMEs. A proposta de valor única reside na capacidade da IA de "compreender" o contexto de um projeto através da análise de sua estrutura de diretórios e do conteúdo de arquivos selecionados. Com base nessa análise, e em parâmetros fornecidos pelo usuário (como nível de detalhe desejado e links contextuais), a ferramenta gera um README.md inicial que é significativamente mais completo e relevante do que um template vazio ou um esforço manual apressado.
+O projeto "Readme Generation" surge como uma resposta inovadora a este desafio. A motivação central é alavancar os recentes avanços em Inteligência Artificial, especificamente modelos de linguagem de grande escala (LLMs) como o Gemini do Google, para automatizar a criação de READMEs. A proposta de valor única reside na capacidade da IA de "compreender" o contexto de um projeto através da análise de sua estrutura de diretórios e do conteúdo de arquivos selecionados (extraídos de um arquivo .zip fornecido pelo usuário). Com base nessa análise, e em parâmetros fornecidos pelo usuário (como nível de detalhe desejado e links contextuais), a ferramenta gera um README.md inicial que é significativamente mais completo e relevante do que um template vazio ou um esforço manual apressado.
 
-Os objetivos de longo prazo incluem não apenas a economia de tempo para os desenvolvedores, mas também a elevação do padrão de documentação em projetos de software, promovendo maior clareza, colaboração e sustentabilidade no ecossistema de desenvolvimento. O impacto desejado é transformar a documentação de uma tarefa árdua em um processo assistido por IA, mais ágil e eficiente.
+Os objetivos de longo prazo incluem não apenas a economia de tempo para os desenvolvedores, mas também a elevação do padrão de documentação em projetos de software, promovendo maior clareza, colaboração e sustentabilidade no ecossistema de desenvolvimento. O impacto desejado é transformar a documentação de uma tarefa árdua e frequentemente negligenciada em um processo ágil, eficiente e integrado ao ciclo de vida do desenvolvimento de software.
 
 ## 🔗 Link Principal / Acesso ao Projeto
 
-🚀 **Acesse a Aplicação Web:** **[Readme Generation Live Demo](https://readme-generate-iota.vercel.app/)**
+🚀 **Acesse a Aplicação Web e Demonstração Online:**
 
-O link acima direciona para a demonstração ao vivo da aplicação "Readme Generation". Através desta interface, você pode:
-*   Fazer upload do arquivo `.zip` do seu projeto.
-*   Configurar sua chave de API do Google Gemini.
-*   Selecionar o modelo Gemini e o nível de detalhe desejado para o seu README.
-*   Fornecer links contextuais para enriquecer a geração.
-*   Gerar, visualizar e copiar o README.md resultante.
+*   **[Readme Generation App](https://readme-generate-2.onrender.com/)**
+
+Através deste link, você pode interagir diretamente com a aplicação, fazer upload do arquivo .zip do seu projeto, configurar os parâmetros desejados e gerar um README.md utilizando a inteligência artificial do Gemini.
 
 ## 🏗️ Arquitetura do Sistema
 
-O sistema "Readme Generation" é composto por três macrocomponentes principais: o Frontend (Interface do Usuário), o Backend (API de Geração) e o Serviço de Inteligência Artificial (Google Gemini API). A arquitetura foi projetada para ser modular, escalável e de fácil manutenção.
+O sistema "Readme Generation" é composto por três componentes principais que interagem para fornecer a funcionalidade de geração de READMEs: o Frontend, o Backend API e o Módulo Core de Geração, que por sua vez interage com a API externa do Google Gemini.
+
+1.  **Frontend (Cliente Web):**
+    *   **Tecnologias:** HTML5, CSS3 (com auxílio de classes utilitárias Tailwind CSS via CDN e estilos customizados em `style.css`), JavaScript (ES6+ modularizado).
+    *   **Responsabilidades:**
+        *   Apresentar a interface do usuário para coleta de dados: upload do arquivo .zip do projeto, chave API Gemini, seleção de modelo, nível de detalhe, links contextuais e badges.
+        *   Realizar validações de entrada no lado do cliente.
+        *   Comunicar-se com o Backend API para solicitar a listagem de modelos Gemini e a geração do README.
+        *   Exibir o README.md gerado e fornecer opções para cópia ou download.
+        *   Gerenciar o tema (claro/escuro) e o estado da aplicação (ex: salvar preferências no `localStorage`).
+
+2.  **Backend API (Servidor):**
+    *   **Tecnologias:** Python 3.9+, FastAPI, Uvicorn/Gunicorn.
+    *   **Responsabilidades:**
+        *   Expor endpoints RESTful para o frontend (`/api/list-models`, `/api/generate-readme`).
+        *   Receber e validar os dados da requisição (arquivo .zip, parâmetros de geração).
+        *   Implementar mecanismos de segurança como rate limiting para proteger a API.
+        *   Orquestrar o processo de geração do README, delegando tarefas ao Módulo Core.
+        *   Gerenciar a comunicação com a API do Google Gemini através do cliente específico.
+        *   Retornar o README.md gerado (ou mensagens de erro) para o frontend.
+
+3.  **Módulo Core de Geração (Lógica de Negócio Python):**
+    *   **Tecnologias:** Python 3.9+, `google-generativeai` SDK.
+    *   **Componentes Internos:**
+        *   `utils.py`: Funções para processar o arquivo .zip, extrair estrutura de diretórios e conteúdo de arquivos relevantes, aplicando filtros e limites.
+        *   `constants_web.py`: Contém os templates de prompts para a IA, adaptados para diferentes níveis de detalhe e para incluir os links fornecidos pelo usuário.
+        *   `gemini_client_web.py`: Um cliente encapsulado para interagir com a API do Google Gemini, configurando o modelo, enviando prompts e tratando respostas.
+        *   `config.py`: Gerencia configurações da aplicação, como o modelo Gemini padrão.
+        *   `logger_setup_web.py`: Configura o sistema de logging para monitoramento e depuração.
+    *   **Responsabilidades:**
+        *   Construir o prompt final para a IA com base nos dados extraídos do projeto, no nível de detalhe selecionado e nos links contextuais.
+        *   Invocar o cliente Gemini para enviar o prompt e receber a resposta.
+        *   Realizar qualquer pós-processamento necessário no texto do README retornado pela IA (embora o objetivo seja que a IA retorne o Markdown final).
+
+4.  **API Externa (Google Gemini):**
+    *   **Tecnologia:** API do Google Generative AI.
+    *   **Responsabilidade:** Receber o prompt construído pelo Módulo Core e gerar o conteúdo textual do README.md com base em sua capacidade de processamento de linguagem natural.
+
+**Diagrama de Arquitetura:**
 
 ```mermaid
 graph TD
-    Usuario[👤 Usuário] -- "Interage via Navegador" --> Frontend["🌐 Frontend (HTML, CSS, JS)"]
-    Frontend -- "Upload .zip, Envia Configs (API Key, Modelo, Links)" --> API_Backend["⚙️ API Backend (FastAPI on Vercel)"]
-    API_Backend -- "Extrai Dados do .zip" --> ProcessamentoZip["🧩 Módulo de Processamento .zip (utils.py)"]
-    ProcessamentoZip -- "Estrutura e Conteúdo do Projeto" --> API_Backend
-    API_Backend -- "Constrói Prompt com Dados e Instruções" --> GeminiClient["🤖 Cliente Gemini (gemini_client_web.py)"]
-    GeminiClient -- "Envia Prompt e Dados do Projeto" --> GeminiAPI["🧠 Google Gemini API"]
-    GeminiAPI -- "Retorna README.md Gerado" --> GeminiClient
-    GeminiClient -- "Retorna README.md" --> API_Backend
-    API_Backend -- "Retorna README.md em JSON" --> Frontend
-    Frontend -- "Exibe README.md e Permite Cópia" --> Usuario
-    LocalStorage["💾 LocalStorage do Navegador"] <--> Frontend
-    Frontend -- "Salva/Carrega Preferências (API Key, Modelo)" --> LocalStorage
+    Usuario[👤 Usuário] -->|Interage via Navegador| Frontend[🌐 Frontend (HTML, CSS, JS)];
+    Frontend -->|Upload .zip, API Key, Params| BackendAPI[⚙️ Backend API (FastAPI - api/index.py)];
+    
+    subgraph "Servidor da Aplicação (Python Backend)"
+        BackendAPI -->|Usa para Extrair Dados do ZIP| UtilsZip[📄 gerador_readme_ia_web/utils.py];
+        BackendAPI -->|Usa Templates para Construir Prompt de| PromptTemplates[📝 gerador_readme_ia_web/constants_web.py];
+        BackendAPI -->|Instancia e Utiliza Cliente Gemini de| GeminiClientModule[🤖 gerador_readme_ia_web/gemini_client_web.py];
+        BackendAPI -->|Obtém Configurações de| AppConfig[⚙️ gerador_readme_ia_web/config.py];
+        BackendAPI -->|Configura e Utiliza Logger de| LoggerSetup[📜 gerador_readme_ia_web/logger_setup_web.py];
+    end
+
+    GeminiClientModule -->|Envia Prompt Formatado| GoogleGeminiAPI[☁️ Google Gemini API];
+    GoogleGeminiAPI -->|Retorna README.md Gerado| GeminiClientModule;
+    GeminiClientModule -->|Entrega README.md para| BackendAPI;
+    
+    BackendAPI -->|Envia README.md ao Cliente| Frontend;
+    Frontend -->|Exibe/Permite Download| Usuario;
+
+    %% Estilos originais mantidos e aplicados
+    style Frontend fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
+    style BackendAPI fill:#D5E8D4,stroke:#82B366,stroke-width:2px
+    style UtilsZip fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
+    style PromptTemplates fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
+    style GeminiClientModule fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
+    style AppConfig fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
+    style LoggerSetup fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
+    style GoogleGeminiAPI fill:#F8CECC,stroke:#B85450,stroke-width:2px
 ```
 
-**Componentes Detalhados:**
+**Fluxo de Dados Principal:**
 
-1.  **Frontend (Cliente Web):**
-    *   **Tecnologias:** HTML5, CSS3 (com Tailwind CSS utilitário e CSS customizado), JavaScript Vanilla (ES6+ Modules).
-    *   **Responsabilidades:**
-        *   Renderizar a interface do usuário para coleta de inputs (arquivo .zip, API Key, modelo Gemini, nível de detalhe, links opcionais, seleção de badges).
-        *   Validar os inputs do usuário.
-        *   Gerenciar o estado da UI (ex: feedback de carregamento, mensagens de erro/sucesso).
-        *   Comunicar-se com o API Backend via requisições HTTP (Fetch API).
-        *   Exibir o README.md gerado e permitir que o usuário o copie.
-        *   Gerenciar o armazenamento local (LocalStorage) para persistir a API Key e a seleção de modelo do usuário, se permitido.
-        *   Gerenciar a alternância de tema (claro/escuro).
-
-2.  **API Backend (Servidor FastAPI):**
-    *   **Tecnologias:** Python 3.9+, FastAPI, Uvicorn (para desenvolvimento local).
-    *   **Responsabilidades:**
-        *   Expor endpoints RESTful para as funcionalidades da aplicação (ex: `/api/list-models`, `/api/generate-readme`).
-        *   Receber o arquivo .zip do projeto e os parâmetros de configuração do frontend.
-        *   Utilizar o `Módulo de Processamento .zip` (`utils.py`) para extrair a estrutura de diretórios e o conteúdo de arquivos relevantes do .zip.
-        *   Construir um prompt detalhado e contextualizado para a API Gemini, incorporando os dados extraídos do projeto e as instruções/preferências do usuário (nível de detalhe, links, etc., definidos em `constants_web.py`).
-        *   Interagir com o `Cliente Gemini` (`gemini_client_web.py`) para enviar o prompt à API Gemini e receber a resposta.
-        *   Implementar mecanismos de segurança, como rate limiting por IP, para proteger a API contra abuso.
-        *   Formatar a resposta (o README.md gerado) e enviá-la de volta ao frontend em formato JSON.
-        *   Servir os arquivos estáticos do frontend (`index.html`, `public/*`) quando acessado pela raiz.
-
-3.  **Cliente Gemini (Módulo Python):**
-    *   **Tecnologias:** SDK `google-generativeai` para Python.
-    *   **Responsabilidades:**
-        *   Encapsular a lógica de interação com a API Google Gemini.
-        *   Configurar o cliente da API com a chave fornecida pelo usuário e o modelo selecionado.
-        *   Enviar o prompt construído pelo backend para o modelo Gemini.
-        *   Receber e processar a resposta da API Gemini, extraindo o texto do README.md gerado.
-        *   Gerenciar erros de comunicação com a API Gemini e feedback de bloqueio de prompt.
-
-4.  **Google Gemini API (Serviço Externo):**
-    *   **Tecnologia:** Modelo de linguagem de grande escala (LLM) do Google.
-    *   **Responsabilidade:** Receber o prompt e os dados do projeto, analisar essas informações e gerar o conteúdo do arquivo README.md em Markdown, conforme as instruções fornecidas.
-
-5.  **Plataforma de Deployment (Vercel):**
-    *   **Responsabilidades:**
-        *   Hospedar os arquivos estáticos do frontend.
-        *   Executar o backend FastAPI como funções serverless.
-        *   Gerenciar o roteamento de requisições, SSL, e escalabilidade da aplicação.
-
-**Fluxo de Dados e Controle:**
-O usuário interage com o frontend, fornecendo os dados necessários. O frontend envia uma requisição para o backend. O backend processa o .zip, constrói um prompt e utiliza o cliente Gemini para consultar a API Gemini. A API Gemini retorna o README gerado, que é então retransmitido pelo backend ao frontend para exibição ao usuário.
+1.  O usuário acessa o `index.html` no navegador.
+2.  O usuário preenche o formulário (upload do .zip, API Key, modelo, nível de detalhe, links, badges).
+3.  O JavaScript do frontend valida os dados e envia uma requisição POST para o endpoint `/api/generate-readme` do Backend API, incluindo a API Key do usuário no cabeçalho `X-API-Key`.
+4.  O Backend API recebe a requisição, valida os parâmetros e o arquivo .zip.
+5.  O `utils.py` no Módulo Core é chamado para extrair a estrutura e o conteúdo relevante do .zip.
+6.  O `constants_web.py` fornece o template de prompt apropriado, que é preenchido com os dados extraídos e os links fornecidos pelo usuário.
+7.  O `gemini_client_web.py` é instanciado com a API Key do usuário e o modelo selecionado, e envia o prompt completo para a API do Google Gemini.
+8.  A API Gemini processa o prompt e retorna o conteúdo do README.md gerado.
+9.  O Backend API envia a resposta (o README.md) de volta para o frontend.
+10. O frontend exibe o README.md na interface, permitindo que o usuário o copie ou faça o download.
 
 ## 💡 Decisões de Design Chave
 
-Diversas decisões técnicas foram tomadas para moldar a arquitetura e funcionalidade do "Readme Generation":
+Diversas decisões de design foram tomadas para moldar a funcionalidade, usabilidade e manutenibilidade do "Readme Generation":
 
-1.  **FastAPI para o Backend:**
-    *   **Justificativa:** FastAPI foi escolhido por sua alta performance (assíncrono sobre ASGI), facilidade de uso, sistema de tipagem moderno com Pydantic para validação automática de dados, e geração automática de documentação de API (Swagger UI/OpenAPI). Sendo um projeto focado em Python para a interação com a IA, FastAPI ofereceu uma integração natural e eficiente.
-    *   **Trade-offs:** Curva de aprendizado ligeiramente maior para quem vem de frameworks síncronos como Flask/Django, mas os benefícios de performance e desenvolvimento rápido compensam.
+1.  **Backend com FastAPI (Python):**
+    *   **Justificativa:** FastAPI foi escolhido por sua alta performance (comparável a Node.js e Go), sintaxe moderna de Python com tipagem (Type Hints), facilidade de desenvolvimento, geração automática de documentação interativa da API (Swagger UI/ReDoc) e suporte nativo a programação assíncrona. Isso é ideal para operações I/O-bound como chamadas para APIs externas (Gemini).
+    *   **Alternativas Consideradas:** Flask (mais simples, mas menos funcionalidades out-of-the-box para APIs complexas), Django (mais robusto, porém overkill para este escopo de API).
 
-2.  **JavaScript Vanilla para o Frontend:**
-    *   **Justificativa:** Para a complexidade atual da interface do usuário, que é relativamente simples (formulários, chamadas AJAX, manipulação de DOM), JavaScript puro (com módulos ES6) oferece leveza, controle granular e evita a sobrecarga de frameworks mais pesados (React, Vue, Angular). Isso resulta em um carregamento mais rápido e menos dependências.
-    *   **Trade-offs:** Para UIs significativamente mais complexas, a ausência de um framework reativo poderia levar a um código de manipulação de estado mais verboso e difícil de gerenciar.
+2.  **Frontend com HTML, CSS Vanilla e JavaScript Modular:**
+    *   **Justificativa:** Para a complexidade atual da interface, uma abordagem com HTML semântico, CSS customizado (inspirado na paleta do Discord para um visual moderno e com variáveis CSS para fácil tematização) e JavaScript modular (dividido em arquivos como `apiService.js`, `formHandler.js`, `uiUtils.js`, etc.) oferece simplicidade, controle granular e bom desempenho sem a necessidade de um framework pesado. O uso de classes utilitárias do Tailwind CSS via CDN (`index.html`) agiliza a estilização de componentes específicos.
+    *   **Alternativas Consideradas:** Frameworks como React, Vue ou Angular seriam excessivos para a interface atual, adicionando complexidade de build e tamanho de bundle desnecessários.
 
-3.  **Google Gemini API como Motor de IA:**
-    *   **Justificativa:** Os modelos Gemini do Google oferecem capacidades avançadas de geração de texto e compreensão de contexto, adequadas para a tarefa de analisar código e gerar documentação. A disponibilidade de um SDK Python facilitou a integração. A flexibilidade na escolha de modelos (ex: Flash para rapidez/custo, Pro para maior capacidade) permite adaptar-se a diferentes necessidades.
-    *   **Trade-offs:** Dependência de um serviço de terceiros (Google) e seus custos associados (o usuário fornece sua própria API Key). A qualidade da geração depende da qualidade do prompt e das capacidades do modelo.
+3.  **Utilização da API Gemini do Google:**
+    *   **Justificativa:** A API Gemini oferece acesso a modelos de linguagem de grande escala poderosos, capazes de compreender contexto de código e gerar texto coerente e formatado em Markdown. A flexibilidade de seus modelos (como o `gemini-1.5-flash-latest` para um bom equilíbrio entre custo e performance) é uma vantagem.
+    *   **Alternativas Consideradas:** OpenAI GPT API (similar em capacidade, mas a escolha pode depender de familiaridade, custos ou funcionalidades específicas no momento da decisão).
 
-4.  **Deployment em Plataforma Serverless (Vercel):**
-    *   **Justificativa:** Vercel simplifica o processo de deployment para aplicações web modernas, especialmente aquelas com frontend estático e backend baseado em funções serverless (como FastAPI). Oferece CI/CD integrado com GitHub, escalabilidade automática e SSL gratuito.
-    *   **Trade-offs:** Limitações inerentes a ambientes serverless (ex: tempo máximo de execução de função, "cold starts"). Menos controle sobre a infraestrutura subjacente em comparação com VMs ou containers dedicados.
+4.  **Chave de API do Gemini Gerenciada pelo Usuário:**
+    *   **Justificativa:** Em vez de o serviço arcar com os custos da API Gemini para todos os usuários, cada usuário fornece sua própria chave. Isso torna o projeto mais sustentável para o desenvolvedor e dá ao usuário controle sobre seu uso e gastos com a API. A chave é enviada via cabeçalho `X-API-Key` e usada diretamente nas chamadas do backend para a API Gemini, não sendo armazenada permanentemente no servidor da aplicação. O frontend oferece a opção de salvar a chave localmente no navegador (`localStorage`) para conveniência do usuário.
+    *   **Trade-off:** Requer que o usuário tenha uma chave Gemini configurada.
 
-5.  **Upload de Arquivo .ZIP para Contexto do Projeto:**
-    *   **Justificativa:** Fornecer o projeto como um arquivo .zip é uma maneira conveniente e universal para o usuário disponibilizar o contexto completo (estrutura de diretórios e conteúdo de arquivos) para a IA, sem requerer integração direta com sistemas de controle de versão (Git) na primeira versão.
-    *   **Trade-offs:** Limitações no tamanho do .zip e no número de arquivos processados para evitar sobrecarga. A análise é estática, baseada no snapshot do .zip.
+5.  **Processamento de Arquivo .zip:**
+    *   **Justificativa:** O formato .zip é um padrão universal para agrupar múltiplos arquivos e pastas, facilitando o upload do projeto pelo usuário. O backend extrai a estrutura de diretórios e o conteúdo de arquivos textuais relevantes para fornecer contexto à IA.
+    *   **Implementação:** O módulo `utils.py` implementa a lógica para ler o .zip, filtrar arquivos por extensão e nome, ignorar diretórios comuns (ex: `node_modules`, `.git`), e truncar conteúdos longos para otimizar o tamanho do prompt.
 
-6.  **Rate Limiting no Backend:**
-    *   **Justificativa:** Implementado para proteger a API contra abuso e garantir a disponibilidade do serviço. O rate limiting é baseado em IP e utiliza um sistema de bloqueio progressivo.
-    *   **Trade-offs:** Pode impactar usuários legítimos com alto volume de requisições, mas é uma medida de segurança essencial.
+6.  **Prompts Estruturados e Níveis de Detalhe:**
+    *   **Justificativa:** Em vez de um prompt genérico, `constants_web.py` define templates de prompt específicos para diferentes níveis de detalhe (Simples, Moderado, Completo). Isso permite ao usuário controlar a verbosidade e o escopo do README gerado, e direciona a IA de forma mais eficaz. Os prompts incluem placeholders para os dados do projeto e os links fornecidos pelo usuário.
 
-7.  **Armazenamento Local (LocalStorage) para Preferências:**
-    *   **Justificativa:** Melhorar a experiência do usuário ao persistir a API Key do Gemini e a seleção de modelo no navegador do cliente, evitando que precisem ser inseridas repetidamente.
-    *   **Trade-offs:** A API Key é armazenada no lado do cliente; embora conveniente, o usuário deve estar ciente das implicações de segurança de armazenar chaves sensíveis no LocalStorage.
+7.  **Rate Limiting na API Backend:**
+    *   **Justificativa:** Para prevenir abuso e garantir a disponibilidade do serviço, a API implementa um mecanismo de rate limiting baseado no IP do cliente. Isso limita o número de requisições que um usuário pode fazer em um determinado período, com bloqueios progressivos em caso de excesso.
+    *   **Implementação:** Em `api/index.py`, usando um dicionário em memória para rastrear requisições por IP.
 
-## 🎯 Funcionalidades Detalhadas (com Casos de Uso)
+8.  **Deployment em Plataformas PaaS/Serverless:**
+    *   **Justificativa:** A aplicação (frontend e backend API) é projetada para ser facilmente implantável em plataformas como Render (onde a demo está hospedada) ou Render (mencionado na configuração de log do backend). Essas plataformas simplificam o deploy, gerenciamento de infraestrutura e escalabilidade.
+    *   **Benefícios:** SSL automático, CI/CD facilitado, escalabilidade sob demanda.
 
-1.  **Upload de Projeto (.zip):**
-    *   **Descrição:** O usuário pode selecionar e enviar um arquivo `.zip` contendo o código-fonte e outros artefatos do seu projeto.
-    *   **Caso de Uso:** Um desenvolvedor deseja gerar um README para seu novo projeto "WebAppX". Ele compacta a pasta raiz do projeto em `WebAppX.zip` e faz o upload através da interface.
+## ✨ Funcionalidades Detalhadas (com Casos de Uso)
 
-2.  **Configuração da API Key do Gemini:**
-    *   **Descrição:** O usuário insere sua chave de API pessoal do Google Gemini, necessária para autenticar e autorizar o uso dos modelos de IA.
-    *   **Caso de Uso:** Antes de gerar o README, o usuário acessa suas credenciais na Google AI Studio (ou Google Cloud Console) e copia sua API Key para o campo designado na aplicação. A opção "Salvar API Key" permite armazená-la localmente no navegador.
+O "Readme Generation" oferece um conjunto de funcionalidades focadas em facilitar e automatizar a criação de READMEs:
 
-3.  **Seleção de Modelo Gemini:**
-    *   **Descrição:** Após fornecer uma API Key válida, a aplicação lista os modelos Gemini disponíveis (ex: `gemini-1.5-flash-latest`, `gemini-1.5-pro-latest`). O usuário pode selecionar o modelo que melhor se adapta às suas necessidades de custo, velocidade e capacidade.
-    *   **Caso de Uso:** Para um projeto pequeno e um README simples, o usuário pode optar pelo `gemini-1.5-flash-latest` para uma geração mais rápida e econômica. Para um projeto complexo que exige um README completo, o `gemini-1.5-pro-latest` pode ser mais adequado.
+1.  **Upload de Projeto via Arquivo .zip:**
+    *   **Descrição:** O usuário pode fazer upload de seu projeto de software compactado em um arquivo .zip. A aplicação analisará a estrutura de diretórios e o conteúdo de arquivos selecionados deste .zip.
+    *   **Caso de Uso:** Um desenvolvedor finalizou uma versão inicial de seu projeto e deseja criar um README rapidamente. Ele compacta a pasta do projeto em um .zip e faz o upload na aplicação.
 
-4.  **Seleção do Nível de Detalhe do README:**
-    *   **Descrição:** O usuário escolhe entre três níveis de detalhe para o README a ser gerado: "Simples", "Moderado" ou "Completo". Cada nível utiliza um prompt diferente para instruir a IA sobre a profundidade e as seções a serem incluídas.
-    *   **Caso de Uso:** Um desenvolvedor experiente que precisa apenas de um README básico para iniciar rapidamente pode escolher "Simples". Para um projeto público que necessita de documentação abrangente, "Completo" seria a escolha.
+2.  **Configuração da API Gemini:**
+    *   **Descrição:** O usuário deve fornecer sua própria chave de API do Google Gemini. Há uma opção para salvar esta chave localmente no navegador (`localStorage`) para uso futuro, evitando a necessidade de inseri-la a cada sessão.
+    *   **Caso de Uso:** Ao usar a ferramenta pela primeira vez, o usuário insere sua chave API Gemini. Se marcar a opção "Salvar API Key", nas próximas visitas a chave já estará preenchida.
 
-5.  **Entrada de Links Contextuais Opcionais:**
-    *   **Descrição:** Campos opcionais para fornecer o link do repositório do projeto (GitHub, GitLab, etc.), o link do projeto em produção/demonstração e o link do perfil LinkedIn do autor.
-    *   **Caso de Uso:** Ao fornecer o link do repositório GitHub, a IA pode inferir o nome do usuário/projeto para gerar badges precisos e links de clone. O link do projeto permite adicionar uma seção de "Acesso ao Projeto". O link do LinkedIn pode ser usado na seção "Autores".
+3.  **Seleção Dinâmica de Modelo Gemini:**
+    *   **Descrição:** Após fornecer uma API Key válida, a aplicação consulta a API Gemini (através do backend) e lista os modelos disponíveis compatíveis com geração de conteúdo. O usuário pode selecionar o modelo desejado (ex: `gemini-1.5-flash-latest`, `gemini-1.5-pro-latest`). Uma opção "Usar modelo padrão do sistema" permite que o backend escolha o modelo configurado como padrão (atualmente `gemini-1.5-flash-latest`).
+    *   **Caso de Uso:** Um usuário avançado deseja testar um modelo Gemini mais potente para um projeto complexo, selecionando-o na lista. Para a maioria dos casos, o usuário pode deixar o padrão ou escolher o "flash" para rapidez e economia.
 
-6.  **Seleção de Badges:**
-    *   **Descrição:** O usuário pode selecionar quais badges (Shields.io) deseja incluir no README gerado (ex: Licença, Issues, Último Commit).
-    *   **Caso de Uso:** Um usuário quer destacar a licença MIT do seu projeto e o número de issues abertas, então seleciona esses badges específicos.
+4.  **Definição do Nível de Detalhamento do README:**
+    *   **Descrição:** O usuário pode escolher entre três níveis de detalhamento para o README gerado:
+        *   **Simples:** Foco no essencial para um desenvolvedor experiente entender e rodar o projeto.
+        *   **Moderado:** Documentação profissional e informativa, bem estruturada.
+        *   **Completo:** README exaustivo, com profundidade analítica, ideal para referência técnica.
+    *   **Caso de Uso:** Para um pequeno script utilitário, o desenvolvedor escolhe "Simples". Para um projeto open-source que busca colaboradores, ele opta por "Completo".
 
-7.  **Geração de README.md em Markdown:**
-    *   **Descrição:** Com todas as configurações e o .zip fornecidos, o usuário clica em "Gerar README". A aplicação processa os dados e envia para a API Gemini, que retorna o conteúdo do README em formato Markdown.
-    *   **Caso de Uso:** Após preencher todos os campos, o usuário inicia o processo de geração e aguarda o resultado.
+5.  **Fornecimento de Links Contextuais Opcionais:**
+    *   **Descrição:** O usuário pode fornecer links para o repositório do projeto (GitHub, GitLab, etc.), um link para o projeto em produção ou demonstração, e um link para seu perfil LinkedIn. Esses links são usados pela IA para enriquecer o README com badges, links diretos, informações de contato, etc.
+    *   **Caso de Uso:** Ao gerar um README para um projeto no GitHub, o usuário informa o link do repositório. A IA usará esse link para criar badges de licença, issues, e o comando `git clone` correto.
 
-8.  **Visualização e Cópia do README Gerado:**
-    *   **Descrição:** O README.md gerado é exibido em uma área de texto formatada na interface. Um botão "Copiar" permite ao usuário copiar facilmente todo o conteúdo para a área de transferência.
-    *   **Caso de Uso:** O usuário revisa o README gerado, faz pequenos ajustes se necessário (embora a edição direta na UI não seja o foco principal) e copia o conteúdo para colar em um arquivo `README.md` no seu projeto local.
+6.  **Seleção de Badges (Shields.io):**
+    *   **Descrição:** O usuário pode selecionar quais tipos de badges (ex: Licença, Issues Abertas, Último Commit) deseja incluir no README. A IA tentará gerar os badges correspondentes usando o link do repositório fornecido.
+    *   **Caso de Uso:** O desenvolvedor seleciona os badges "Licença", "Linguagem Principal" e "Issues Abertas" para incluir no topo do README.
 
-9.  **Persistência de Configurações no LocalStorage:**
-    *   **Descrição:** Se o usuário optar, a API Key do Gemini e a seleção de modelo podem ser salvas no LocalStorage do navegador para uso futuro, evitando a necessidade de reinseri-las a cada sessão.
-    *   **Caso de Uso:** Um usuário frequente da ferramenta marca as caixas "Salvar API Key" e "Salvar seleção de modelo" para agilizar o processo em visitas subsequentes.
+7.  **Geração Inteligente do README.md:**
+    *   **Descrição:** Com base em todas as entradas do usuário e na análise do .zip, a aplicação constrói um prompt detalhado e o envia para o modelo Gemini selecionado. A IA então gera o conteúdo do arquivo README.md.
+    *   **Caso de Uso:** Após preencher todos os campos, o usuário clica em "Gerar README". A aplicação processa os dados e, após alguns instantes, exibe o README gerado pela IA.
 
-10. **Tema Claro/Escuro:**
-    *   **Descrição:** A interface possui um botão para alternar entre um tema visual claro e um escuro, adaptando-se à preferência do usuário e salvando a escolha no LocalStorage.
-    *   **Caso de Uso:** Um usuário que prefere interfaces escuras pode alternar o tema para maior conforto visual durante o uso da aplicação.
+8.  **Visualização e Download do README:**
+    *   **Descrição:** O README.md gerado é exibido em uma área de texto formatada na interface. O usuário pode copiar o conteúdo ou clicar em um botão para fazer o download do arquivo `README.md`.
+    *   **Caso de Uso:** O usuário revisa o README gerado, copia o conteúdo para a área de transferência e cola no arquivo `README.md` de seu projeto local, ou faz o download direto.
+
+9.  **Interface Responsiva com Tema Claro/Escuro:**
+    *   **Descrição:** A interface da aplicação é responsiva e se adapta a diferentes tamanhos de tela. Possui um seletor de tema que permite ao usuário alternar entre um modo claro e um modo escuro, com preferência salva no `localStorage`.
+    *   **Caso de Uso:** O usuário prefere trabalhar com interfaces escuras e ativa o tema escuro na aplicação.
+
+10. **Tooltips de Ajuda Contextual:**
+    *   **Descrição:** Vários campos do formulário possuem ícones de ajuda que, ao serem clicados, exibem tooltips com explicações sobre o propósito e o uso do campo específico.
+    *   **Caso de Uso:** Um usuário novo não tem certeza sobre o que é o "Nível de Detalhamento" e clica no ícone de ajuda para obter uma explicação.
+
+11. **Validação de Formulário e Feedback ao Usuário:**
+    *   **Descrição:** A aplicação realiza validações nos campos do formulário (ex: formato da API Key, validade de URLs) e exibe mensagens de erro ou status para guiar o usuário.
+    *   **Caso de Uso:** O usuário digita uma API Key em formato incorreto e recebe uma mensagem de erro indicando o problema antes de tentar gerar o README.
 
 ## 🛠️ Tech Stack Detalhado
 
-A tabela abaixo detalha as tecnologias utilizadas no projeto "Readme Generation":
+A tabela abaixo detalha as principais tecnologias utilizadas no desenvolvimento do "Readme Generation":
 
-| Categoria          | Tecnologia             | Versão Específica (se aplicável) | Propósito no Projeto                                                                | Justificativa da Escolha                                                                                                                                                              |
-| :----------------- | :--------------------- | :----------------------------- | :---------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Backend**        | Python                 | 3.10                          | Linguagem principal para a lógica do servidor e interação com a API Gemini.         | Ecossistema robusto para IA/ML, bibliotecas maduras, sintaxe clara.                                                                                                                   |
-|                    | FastAPI                | >=0.100.0                      | Framework web para construir a API RESTful.                                         | Alta performance, desenvolvimento rápido, validação de dados com Pydantic, documentação automática.                                                                                  |
-|                    | Uvicorn                | >=0.20.0                       | Servidor ASGI para rodar FastAPI localmente durante o desenvolvimento.              | Padrão para aplicações ASGI como FastAPI.                                                                                                                                             |
-|                    | `google-generativeai`  | >=0.5.0                        | SDK oficial do Google para interagir com a API Gemini.                              | Abstrai a complexidade da comunicação com a API Gemini, facilitando o envio de prompts e recebimento de respostas.                                                                  |
-|                    | `python-dotenv`        | >=1.0.0                        | Carregar variáveis de ambiente de um arquivo `.env` em desenvolvimento local.     | Facilita a configuração de variáveis como `GEMINI_MODEL_NAME` sem hardcoding.                                                                                                         |
-|                    | `python-multipart`     | >=0.0.5                        | Suporte para upload de arquivos (formulários `multipart/form-data`) com FastAPI.    | Necessário para receber o arquivo .zip do projeto enviado pelo frontend.                                                                                                              |
-| **Frontend**       | HTML5                  | N/A                            | Estrutura semântica da página web.                                                  | Padrão universal para conteúdo web.                                                                                                                                                   |
-|                    | CSS3                   | N/A                            | Estilização da interface do usuário.                                                | Padrão universal para design web. Uso de variáveis CSS para theming.                                                                                                                  |
-|                    | JavaScript (Vanilla)   | ES6+ Modules                   | Lógica do lado do cliente, manipulação do DOM, chamadas AJAX, interatividade.       | Leveza, controle total, sem necessidade de um framework pesado para a complexidade atual da UI. Módulos ES6 para organização do código.                                                |
-|                    | Tailwind CSS           | (via CDN)                      | Framework CSS utilitário para estilização rápida (usado de forma leve).             | Agiliza a criação de layouts e componentes básicos, embora o estilo principal seja customizado em `style.css`.                                                                          |
-| **IA**             | Google Gemini API      | (ex: gemini-1.5-flash)         | Modelo de linguagem de grande escala para gerar o conteúdo do README.               | Capacidades avançadas de geração de texto e compreensão de contexto. Flexibilidade de modelos.                                                                                       |
-| **DevOps & Deploy**| Git                    | N/A                            | Sistema de controle de versão.                                                      | Padrão da indústria para gerenciamento de código-fonte e colaboração.                                                                                                                 |
-|                    | GitHub                 | N/A                            | Plataforma de hospedagem para o repositório Git e colaboração.                      | Integração com Vercel para CI/CD, gerenciamento de issues e PRs.                                                                                                                      |
-|                    | Vercel                 | N/A                            | Plataforma para deployment do frontend estático e backend serverless (FastAPI).     | Facilidade de deployment, CI/CD integrado, escalabilidade automática, SSL. Ideal para este tipo de aplicação.                                                                       |
+| Categoria     | Tecnologia             | Versão Específica (ou mínima) | Propósito no Projeto                                                                 | Justificativa da Escolha                                                                                                |
+|---------------|------------------------|-------------------------------|--------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| **Backend**   | Python                 | >=3.9                         | Linguagem principal para toda a lógica do servidor e interação com a IA.               | Vasto ecossistema, sintaxe clara, forte suporte para desenvolvimento web e IA (biblioteca `google-generativeai`).         |
+|               | FastAPI                | >=0.100.0                     | Framework web assíncrono para construir a API RESTful.                                 | Alta performance, facilidade de uso, tipagem de dados, documentação automática (Swagger/ReDoc).                         |
+|               | Uvicorn                | >=0.20.0                      | Servidor ASGI para rodar FastAPI em desenvolvimento e produção.                        | Implementação leve e rápida de ASGI, recomendada para FastAPI.                                                          |
+|               | Gunicorn               | >=20.0.0                      | Servidor de aplicação WSGI/ASGI para produção (usado com Uvicorn workers).             | Robusto e amplamente utilizado para deploy de aplicações Python em produção.                                            |
+|               | google-generativeai    | >=0.5.0                       | SDK oficial do Google para interagir com a API Gemini.                                 | Simplifica a comunicação com os modelos Gemini, gerenciamento de API Key e tratamento de respostas.                     |
+|               | python-multipart       | >=0.0.5                       | Necessário para o FastAPI manipular uploads de arquivos (`UploadFile`).                | Padrão para lidar com dados `multipart/form-data` em FastAPI.                                                           |
+|               | python-dotenv          | >=1.0.0                       | Carrega variáveis de ambiente de um arquivo `.env` durante o desenvolvimento local.    | Facilita a configuração de variáveis sensíveis ou específicas do ambiente sem hardcoding.                             |
+| **Frontend**  | HTML5                  | N/A                           | Estrutura semântica das páginas web.                                                   | Padrão fundamental da web.                                                                                              |
+|               | CSS3                   | N/A                           | Estilização visual da interface do usuário, incluindo temas claro/escuro.              | Padrão para design web, uso de variáveis CSS para tematização eficiente.                                                |
+|               | JavaScript (ES6+)      | N/A                           | Lógica do lado do cliente, interatividade, chamadas à API, manipulação do DOM.         | Linguagem padrão para desenvolvimento web frontend, funcionalidades modernas com ES6+.                                   |
+|               | Tailwind CSS (utility) | Via CDN                       | Classes utilitárias para estilização rápida de componentes específicos no `index.html`.  | Agiliza o desenvolvimento de UI sem a necessidade de escrever CSS customizado extensivo para tudo.                      |
+|               | Ionicons               | ^7.1.0 (via CDN)              | Biblioteca de ícones vetoriais para a interface do usuário.                            | Oferece uma variedade de ícones de alta qualidade e fáceis de integrar.                                                 |
+| **API Externa**| Google Gemini API      | N/A                           | Modelo de linguagem de grande escala para a geração do conteúdo do README.             | Capacidade avançada de processamento de linguagem natural e geração de texto contextualizado.                           |
+| **Deployment**| Render.com             | N/A                           | Plataforma como Serviço (PaaS) para hospedar a aplicação web (frontend e backend).     | Suporte integrado para aplicações Python (FastAPI), SSL automático, CI/CD, escalabilidade. (Inferido do link do projeto) |
+|               | Render (potencial)     | N/A                           | Plataforma para deploy de frontends e funções serverless (mencionada no log da API).   | Facilidade de deploy para funções Python serverless, ideal para APIs.                                                   |
 
 ## 📂 Estrutura Detalhada do Código-Fonte
 
-A organização do código-fonte do projeto "Readme Generation" visa a modularidade e clareza, separando as responsabilidades do backend, frontend e lógica de negócios principal.
+O projeto "Readme Generation" é organizado da seguinte forma, visando modularidade e clareza:
 
 ```
 readme-generate-2/
-├── api/                        # Contém a lógica do backend da API.
-│   └── index.py                # Ponto de entrada da aplicação FastAPI, define os endpoints da API.
-├── gerador_readme_ia_web/      # Pacote Python com a lógica central de geração do README.
-│   ├── __init__.py             # Inicializador do pacote.
-│   ├── config.py               # Configurações da aplicação (ex: nome do modelo Gemini padrão).
-│   ├── constants_web.py        # Constantes, incluindo os templates dos prompts para a IA.
-│   ├── gemini_client_web.py    # Cliente para interagir com a API Google Gemini.
-│   ├── logger_setup_web.py     # Configuração do sistema de logging.
-│   └── utils.py                # Funções utilitárias, como a extração de dados do arquivo .zip.
-├── public/                     # Contém os ativos estáticos do frontend.
-│   ├── js/                     # Arquivos JavaScript modulares.
-│   │   ├── apiService.js       # Lógica para chamadas à API backend.
-│   │   ├── formHandler.js      # Gerenciamento do formulário principal e lógica de geração.
-│   │   ├── localStorageManager.js # Gerenciamento do LocalStorage para preferências.
-│   │   ├── script.js           # Ponto de entrada principal do JS, inicializa módulos.
-│   │   ├── themeManager.js     # Lógica para alternância de tema (claro/escuro).
-│   │   ├── tooltipManager.js   # Gerenciamento dos tooltips de ajuda.
-│   │   ├── uiUtils.js          # Funções utilitárias para manipulação da UI (erros, status).
-│   │   └── validationUtils.js  # Funções de validação para campos do formulário.
-│   └── style.css               # Folha de estilo principal da aplicação.
-├── .gitignore                  # Especifica arquivos e pastas ignorados pelo Git.
-├── index.html                  # Arquivo HTML principal da interface do usuário.
-├── LICENSE.md                  # Arquivo de licença do projeto (MIT License).
-├── README.md                   # Este arquivo de documentação.
-├── requirements.txt            # Lista de dependências Python para o backend.
-└── vercel.json                 # Configuração de deployment para a plataforma Vercel.
+├── api/                            # Contém a lógica da API backend (FastAPI)
+│   └── index.py                    # Ponto de entrada principal da API, define endpoints, rate limiting.
+├── gerador_readme_ia_web/          # Módulo Python principal com a lógica de negócio da aplicação web
+│   ├── __init__.py                 # Inicializador do pacote Python.
+│   ├── config.py                   # Gerencia configurações da aplicação (ex: modelo Gemini padrão).
+│   ├── constants_web.py            # Contém os templates de prompts para a IA e instruções de links.
+│   ├── gemini_client_web.py        # Cliente encapsulado para interagir com a API Google Gemini.
+│   ├── logger_setup_web.py         # Configuração do sistema de logging para a aplicação.
+│   └── utils.py                    # Funções utilitárias (ex: extração de dados de arquivos .zip).
+├── public/                         # Arquivos estáticos servidos ao cliente (frontend)
+│   ├── assets/                     # Recursos visuais estáticos
+│   │   └── favicon.png             # Ícone da aplicação.
+│   ├── js/                         # Scripts JavaScript modulares para o frontend
+│   │   ├── apiService.js           # Funções para realizar chamadas à API backend.
+│   │   ├── formHandler.js          # Lógica principal de manipulação do formulário e geração.
+│   │   ├── localStorageManager.js  # Gerenciamento de dados salvos no localStorage do navegador.
+│   │   ├── script.js               # Ponto de entrada principal do JavaScript, inicializações.
+│   │   ├── themeManager.js         # Lógica para alternar e persistir o tema (claro/escuro).
+│   │   ├── tooltipManager.js       # Gerenciamento da exibição de tooltips de ajuda.
+│   │   ├── uiUtils.js              # Funções utilitárias para interações com a UI (ex: mostrar status).
+│   │   └── validationUtils.js      # Funções para validação de campos do formulário.
+│   └── style.css                   # Folha de estilos CSS customizada para a aplicação.
+├── index.html                      # Arquivo HTML principal da interface do usuário.
+├── LICENSE.md                      # Arquivo de licença do projeto (MIT License).
+├── README.md                       # Este arquivo de documentação.
+└── requirements.txt                # Lista de dependências Python para o backend.
 ```
 
-**Filosofia da Estrutura:**
+**Explicação dos Diretórios e Arquivos Chave:**
 
-*   **Separação de Interesses:** O backend (`api/`, `gerador_readme_ia_web/`) está claramente separado do frontend (`public/`, `index.html`).
-*   **Modularidade no Backend:** A lógica de negócios (`gerador_readme_ia_web/`) é um pacote Python coeso, com submódulos para configuração, constantes, cliente da IA, logging e utilitários. Isso facilita a manutenção e testes.
-*   **Modularidade no Frontend:** O JavaScript é organizado em módulos (`public/js/`), cada um com uma responsabilidade específica (serviço de API, manipulação de formulário, gerenciamento de tema, etc.), promovendo um código mais limpo e reutilizável.
-*   **Configuração Explícita:** Dependências (`requirements.txt`) e configurações de deploy (`vercel.json`) são explícitas e versionadas.
+*   **`api/index.py`**: Coração do backend. Define todos os endpoints da API (`/list-models`, `/generate-readme`), implementa a lógica de rate limiting e orquestra a chamada aos módulos em `gerador_readme_ia_web` para processar a requisição e interagir com a API Gemini.
+*   **`gerador_readme_ia_web/`**: Este pacote Python encapsula a lógica central da aplicação que não está diretamente ligada ao framework FastAPI.
+    *   `config.py`: Centraliza configurações, como o nome padrão do modelo Gemini, facilitando alterações.
+    *   `constants_web.py`: Fundamental para a qualidade da geração, pois armazena os prompts detalhados que guiam a IA, incluindo placeholders para dados dinâmicos.
+    *   `gemini_client_web.py`: Abstrai a complexidade da comunicação com a API Gemini, tratando da configuração do modelo, envio de prompts e recebimento de respostas.
+    *   `logger_setup_web.py`: Essencial para depuração e monitoramento, configura um logging consistente para a aplicação.
+    *   `utils.py`: Contém a lógica crucial de análise do arquivo .zip, selecionando e lendo arquivos relevantes para fornecer contexto à IA.
+*   **`public/`**: Contém todos os ativos do frontend. A separação em subdiretórios (`assets/`, `js/`) e a modularização dos scripts JavaScript (`apiService.js`, `formHandler.js`, etc.) promovem uma melhor organização e manutenibilidade do código cliente.
+*   **`index.html`**: A única página HTML da Single Page Application (SPA), onde toda a interação do usuário ocorre.
+*   **`requirements.txt`**: Define as bibliotecas Python necessárias para que o backend funcione corretamente, permitindo a fácil recriação do ambiente.
+*   **`LICENSE.md`**: Especifica os termos legais sob os quais o software é distribuído.
+
+Essa estrutura visa separar as preocupações (backend, frontend, lógica de IA) e facilitar o desenvolvimento e a manutenção do projeto.
 
 ## 📋 Pré-requisitos Avançados
 
-Para instalar, configurar e executar o projeto "Readme Generation" localmente, os seguintes pré-requisitos são necessários:
+Para instalar, configurar e executar o projeto "Readme Generation" em um ambiente de desenvolvimento local, os seguintes pré-requisitos são necessários:
 
 1.  **Python:**
     *   Versão: 3.9 ou superior.
-    *   Verifique com: `python --version`
-2.  **pip (Python Package Installer):**
-    *   Geralmente incluído com as instalações modernas de Python.
-    *   Verifique com: `pip --version`
-3.  **Git:**
-    *   Necessário para clonar o repositório.
-    *   Verifique com: `git --version`
-4.  **Navegador Web Moderno:**
-    *   Exemplos: Google Chrome, Mozilla Firefox, Microsoft Edge, Safari.
-    *   Necessário para interagir com a interface do usuário.
-5.  **Chave de API do Google Gemini:**
-    *   Essencial para a funcionalidade de geração de README.
-    *   Pode ser obtida na [Google AI Studio](https://aistudio.google.com/app/apikey) ou através do Google Cloud Console se você tiver um projeto configurado para usar a API Gemini.
-6.  **(Opcional) Ambiente Virtual Python:**
-    *   Altamente recomendado para isolar as dependências do projeto. Ferramentas como `venv` (embutida no Python) ou `conda` podem ser usadas.
+    *   É recomendado o uso de um ambiente virtual Python (como `venv` ou `conda`) para isolar as dependências do projeto.
 
-**Variáveis de Ambiente (para desenvolvimento local do backend, se aplicável):**
-O arquivo `gerador_readme_ia_web/config.py` pode carregar variáveis de um arquivo `.env` na raiz do projeto. A principal variável que pode ser configurada via `.env` é:
-*   `GEMINI_MODEL_NAME`: Define o modelo Gemini padrão a ser usado se nenhum for selecionado pelo usuário ou se a API de listagem de modelos falhar. Ex: `GEMINI_MODEL_NAME="gemini-1.5-flash-latest"`
+2.  **pip:**
+    *   O gerenciador de pacotes Python, geralmente instalado junto com o Python. Usado para instalar as dependências listadas em `requirements.txt`.
 
-A chave de API do Gemini **não é** configurada via variável de ambiente no backend, pois é fornecida pelo usuário através do frontend e passada via header `X-API-Key` nas requisições.
+3.  **Navegador Web Moderno:**
+    *   Para interagir com a interface frontend (ex: Chrome, Firefox, Edge, Safari).
+    *   Deve ter suporte a JavaScript ES6+ e `localStorage`.
+
+4.  **Chave de API do Google Gemini:**
+    *   Uma chave de API válida do Google AI Studio (para a API Gemini) é **essencial**. O usuário precisará fornecer esta chave na interface da aplicação para que a geração de README funcione.
+    *   Instruções para obter uma chave podem ser encontradas na [documentação oficial do Google AI Studio](https://ai.google.dev/).
+
+5.  **Git (Opcional, mas Recomendado):**
+    *   Para clonar o repositório do projeto a partir do GitHub.
+
+6.  **Conexão com a Internet:**
+    *   Necessária para baixar dependências, carregar recursos de CDNs (Tailwind CSS, Ionicons) e para que a aplicação se comunique com a API do Google Gemini.
+
+Não há necessidade de compilação explícita para o código Python ou JavaScript, pois são linguagens interpretadas. As dependências de frontend (Tailwind, Ionicons) são carregadas via CDN, simplificando a configuração local.
 
 ## 🚀 Guia de Instalação e Configuração Avançada
 
 Siga os passos abaixo para configurar e executar o projeto "Readme Generation" em seu ambiente de desenvolvimento local.
 
-1.  **Clonar o Repositório:**
+**1. Clonar o Repositório:**
+
+```bash
+git clone https://github.com/ESousa97/readme-generate-2.git
+cd readme-generate-2
+```
+
+**2. Configurar Ambiente Virtual Python (Recomendado):**
+
+É uma boa prática usar um ambiente virtual para isolar as dependências do projeto.
+
+*   Crie um ambiente virtual (substitua `venv` pelo nome que preferir):
     ```bash
-    git clone https://github.com/ESousa97/readme-generate-2.git
-    cd readme-generate-2
+    python -m venv venv
     ```
 
-2.  **Configurar o Backend (Python/FastAPI):**
-
-    a.  **Criar e Ativar um Ambiente Virtual (Recomendado):**
-        *   No Linux/macOS:
-            ```bash
-            python3 -m venv venv
-            source venv/bin/activate
-            ```
-        *   No Windows (PowerShell/CMD):
-            ```bash
-            python -m venv venv
-            .\venv\Scripts\activate
-            ```
-
-    b.  **Instalar Dependências Python:**
+*   Ative o ambiente virtual:
+    *   No macOS e Linux:
         ```bash
-        pip install -r requirements.txt
+        source venv/bin/activate
         ```
-
-    c.  **(Opcional) Configurar Variáveis de Ambiente Locais:**
-        Crie um arquivo chamado `.env` na raiz do projeto (`readme-generate-2/.env`). Você pode definir o modelo Gemini padrão, por exemplo:
-        ```env
-        # .env
-        # APP_NAME="MeuGeradorREADME" # Opcional, para logs
-        # APP_AUTHOR="MeuAutor"       # Opcional, para logs
-        GEMINI_MODEL_NAME="gemini-1.5-flash-latest"
-        ```
-        Este passo é opcional, pois o modelo pode ser selecionado na UI.
-
-    d.  **Executar o Servidor Backend FastAPI:**
-        A partir da raiz do projeto (`readme-generate-2/`), execute:
+    *   No Windows (Git Bash ou PowerShell):
         ```bash
-        uvicorn api.index:app --reload --port 8000
+        # Git Bash
+        source venv/Scripts/activate
+        # PowerShell
+        .\venv\Scripts\Activate.ps1
         ```
-        *   `api.index:app`: Indica ao Uvicorn para encontrar o objeto `app` (instância FastAPI) no arquivo `api/index.py`.
-        *   `--reload`: Habilita o recarregamento automático do servidor quando arquivos Python são alterados (útil para desenvolvimento).
-        *   `--port 8000`: Define a porta em que o servidor será executado (padrão é 8000).
+    Você deverá ver o nome do ambiente virtual no seu prompt (ex: `(venv)`).
 
-        O backend estará acessível em `http://127.0.0.1:8000`. A API estará em `http://127.0.0.1:8000/api/...`.
+**3. Instalar Dependências Python:**
 
-3.  **Acessar o Frontend:**
-    O backend FastAPI também está configurado para servir o `index.html` da raiz e os arquivos estáticos da pasta `public/`.
-    *   Abra seu navegador web e navegue para `http://127.0.0.1:8000`.
-    *   Você deverá ver a interface do usuário da aplicação "Readme Generation".
+Com o ambiente virtual ativado, instale as bibliotecas Python necessárias:
 
-4.  **Utilizar a Aplicação:**
-    *   Insira sua chave de API do Google Gemini no campo apropriado.
-    *   Selecione o modelo Gemini desejado (a lista será carregada após inserir a API Key).
-    *   Faça upload do arquivo `.zip` do seu projeto.
-    *   Escolha o nível de detalhe e outras opções.
-    *   Clique em "Gerar README".
+```bash
+pip install -r requirements.txt
+```
 
-**Observações sobre Docker/Containerização:**
-Este projeto não inclui um `Dockerfile` ou configuração `docker-compose.yml` na estrutura fornecida. Para containerizar:
-*   Um `Dockerfile` para o backend Python/FastAPI seria criado, instalando dependências e expondo a porta apropriada.
-*   O frontend, sendo estático, poderia ser servido por um servidor web leve como Nginx dentro de outro container, ou o próprio FastAPI poderia continuar servindo-o.
-*   Para um setup com Docker Compose, seriam definidos serviços para o backend e, potencialmente, para um proxy reverso (Nginx) se desejado.
+**4. Configuração de Variáveis de Ambiente (Opcional para Backend):**
+
+O backend (`api/index.py`) utiliza a API Key fornecida pelo usuário através do cabeçalho `X-API-Key` nas requisições do frontend. No entanto, o arquivo `gerador_readme_ia_web/config.py` pode ler a variável de ambiente `GEMINI_MODEL_NAME` para definir um modelo Gemini padrão diferente do codificado (`gemini-1.5-flash-latest`).
+
+Se desejar definir um modelo padrão diferente para o sistema via variável de ambiente:
+*   Crie um arquivo `.env` na raiz do projeto (`readme-generate-2/.env`).
+*   Adicione a seguinte linha, substituindo pelo modelo desejado:
+    ```env
+    GEMINI_MODEL_NAME="gemini-1.5-pro-latest" 
+    ```
+    O `python-dotenv` carregará esta variável quando a aplicação iniciar.
+
+**5. Executar o Servidor da API Backend (FastAPI):**
+
+O backend é uma aplicação FastAPI. Para executá-lo localmente:
+
+```bash
+uvicorn api.index:app --reload --port 8000
+```
+
+*   `uvicorn`: O servidor ASGI.
+*   `api.index:app`: Aponta para o arquivo `index.py` dentro da pasta `api` e para a instância `app` do FastAPI.
+*   `--reload`: Habilita o recarregamento automático do servidor quando arquivos Python são alterados (útil para desenvolvimento).
+*   `--port 8000`: Define a porta em que o servidor irá escutar. O frontend está configurado para fazer chamadas para `http://127.0.0.1:8000/api` em ambiente de desenvolvimento.
+
+Após iniciar, você deverá ver mensagens no console indicando que o servidor está rodando, por exemplo: `Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)`.
+
+**6. Acessar a Interface Frontend:**
+
+Abra o arquivo `index.html` diretamente em seu navegador web:
+
+*   Navegue até a pasta do projeto no seu explorador de arquivos e dê um duplo clique em `index.html`.
+*   Ou, no terminal, use um comando como `open index.html` (macOS) ou `start index.html` (Windows).
+
+A página da aplicação "Readme Generation" será carregada.
+
+**7. Utilizar a Aplicação:**
+
+*   Na interface carregada no navegador, insira sua **Chave de API do Google Gemini** no campo correspondente.
+*   Selecione o modelo Gemini, nível de detalhe, etc.
+*   Faça upload do arquivo `.zip` do seu projeto.
+*   Clique em "Gerar README".
+
+O frontend fará as chamadas para o backend FastAPI rodando localmente na porta 8000.
+
+**Observações sobre Docker (Não incluído no projeto atual):**
+Este projeto não inclui um `Dockerfile` ou configuração `docker-compose.yml`. Se a containerização fosse desejada, seria necessário:
+1.  Criar um `Dockerfile` para o backend Python/FastAPI, instalando dependências e expondo a porta 8000.
+2.  Decidir como servir o frontend:
+    *   Incluí-lo na mesma imagem Docker do backend usando `StaticFiles` do FastAPI.
+    *   Criar um container separado para o frontend (ex: com Nginx) e usar `docker-compose` para orquestrar ambos.
 
 ## ⚙️ Uso Avançado e Exemplos
 
-Para tirar o máximo proveito do "Readme Generation", considere os seguintes aspectos e exemplos:
+Além do fluxo básico de upload e geração, o "Readme Generation" oferece nuances que podem ser exploradas para otimizar os resultados:
 
-1.  **Qualidade do Input (.zip):**
-    *   A IA analisa a estrutura de pastas e o conteúdo dos arquivos. Certifique-se de que o `.zip` contém os arquivos de código-fonte mais relevantes, arquivos de configuração importantes (ex: `requirements.txt`, `package.json`), e idealmente, um esqueleto de README se já existir.
-    *   Evite incluir pastas muito grandes e irrelevantes (ex: `node_modules`, `venv`, `build/`, `.git/`) no .zip, pois podem exceder os limites de processamento ou diluir a relevância dos dados analisados. A função `extract_project_data_from_zip` já tenta ignorar alguns desses diretórios.
+1.  **Impacto do Nível de Detalhamento:**
+    *   **Simples:** Ideal para projetos pequenos, scripts ou quando se deseja um ponto de partida minimalista. A IA focará em: título, descrição curta, tecnologias, pré-requisitos, instalação e execução.
+    *   **Moderado:** Bom para a maioria dos projetos que precisam de uma documentação profissional. A IA incluirá seções como badges, sumário, introdução mais elaborada, funcionalidades principais, estrutura do projeto, e como contribuir.
+    *   **Completo:** Recomendado para projetos complexos, bibliotecas, frameworks ou quando se busca uma documentação de referência. A IA tentará preencher todas as seções detalhadas especificadas no prompt, incluindo arquitetura, decisões de design, API reference (se aplicável), estratégia de testes, etc.
+    *   **Exemplo:** Se você tem um projeto com uma API bem definida, escolher o nível "Completo" dará à IA a instrução para tentar gerar a seção "API Reference".
 
-2.  **Escolha do Nível de Detalhe:**
-    *   **Simples:** Ideal para um README inicial rápido, focando no essencial: o que é o projeto, como instalar e rodar. Útil para desenvolvedores experientes que precisam de um ponto de partida mínimo.
-    *   **Moderado:** Um bom equilíbrio, gerando um README profissional com seções comuns como descrição, funcionalidades, tecnologias, instalação, uso e contribuição. Adequado para a maioria dos projetos.
-    *   **Completo (como este que você está lendo):** Para documentação exaustiva, incluindo arquitetura, decisões de design, API reference, roadmap, etc. Use este nível quando uma compreensão profunda do projeto é necessária.
+2.  **Aproveitando os Links Contextuais:**
+    *   **Link do Repositório:** Crucial para a geração de badges precisos (licença, issues, stars, etc.), o comando `git clone` correto, e links para contribuição. Sem ele, a IA usará placeholders.
+    *   **Link do Projeto (Demonstração/Produção):** Permite à IA criar uma seção "Acesso ao Projeto" ou "Demonstração Online", tornando o README mais útil para usuários finais.
+    *   **Link do LinkedIn:** Usado para enriquecer a seção de "Autores" ou "Contato", especialmente no nível "Completo".
+    *   **Exemplo:** Fornecer `https://github.com/seu-usuario/seu-projeto` permitirá que badges como `![Issues](https://img.shields.io/github/issues/seu-usuario/seu-projeto?style=for-the-badge)` sejam gerados corretamente.
 
-3.  **Aproveitando os Links Contextuais:**
-    *   **Link do Repositório:** Crucial para gerar badges precisos (Licença, Issues, etc.) e o comando `git clone` correto. A IA usará este link para inferir `USUARIO/PROJETO`.
-    *   **Link do Projeto:** Se seu projeto tem uma demo online, site oficial ou documentação externa, forneça este link. Ele será incluído em uma seção proeminente, facilitando o acesso.
-    *   **Link do LinkedIn:** Útil para a seção "Autores" ou "Contato", especialmente para projetos pessoais ou de código aberto onde o reconhecimento do autor é importante.
+3.  **Seleção de Modelo Gemini:**
+    *   A lista de modelos é carregada dinamicamente após a inserção da API Key. Modelos como `gemini-1.5-flash-latest` são geralmente mais rápidos e econômicos, ideais para a maioria das tarefas de geração de README. Modelos como `gemini-1.5-pro-latest` podem oferecer resultados mais detalhados ou nuances em projetos muito complexos, mas podem ser mais lentos e ter um custo de API maior.
+    *   A opção "Usar modelo padrão do sistema" (que aponta para `gemini-1.5-flash-latest` por padrão na configuração atual) é uma escolha segura.
+    *   **Exemplo:** Para um projeto com muitos arquivos de código e uma estrutura complexa, experimentar o `gemini-1.5-pro-latest` (se disponível para sua chave) pode, teoricamente, render uma análise mais profunda, embora o `flash` seja otimizado para tarefas de resumo e geração como esta.
 
-4.  **Seleção de Badges:**
-    *   Escolha badges que sejam relevantes para o seu projeto e que possam ser inferidos a partir do link do repositório (se fornecido). Badges como "Licença", "Issues", "Linguagem Principal" são geralmente aplicáveis.
+4.  **Qualidade do Arquivo .zip:**
+    *   A IA baseia sua análise no conteúdo do .zip. Um .zip bem organizado, contendo os arquivos de código-fonte principais, arquivos de configuração (ex: `requirements.txt`, `package.json`), e talvez um `LICENSE` ou `CONTRIBUTING.md` preexistente, fornecerá mais material para a IA trabalhar.
+    *   Arquivos binários, `node_modules`, `.git`, e outros diretórios/arquivos comumente ignorados são filtrados pelo `utils.py` para otimizar o prompt.
+    *   **Exemplo:** Incluir um `requirements.txt` claro ajudará a IA a listar corretamente as dependências Python na seção "Tech Stack".
 
-5.  **Interpretação da API Key e Modelo Gemini:**
-    *   A API Key é enviada diretamente para a API do Google via frontend e backend, não sendo armazenada permanentemente no servidor (exceto em logs de requisição, se o logging estiver em modo DEBUG, o que deve ser evitado em produção para chaves).
-    *   Se a API Key for salva localmente, ela fica no LocalStorage do seu navegador, sob sua responsabilidade.
-    *   A seleção de modelo permite experimentar. Modelos "Flash" são geralmente mais rápidos e baratos. Modelos "Pro" são mais poderosos, mas podem ter um custo maior e latência.
+5.  **Iteração e Refinamento:**
+    *   O README gerado é um ponto de partida. É altamente recomendável revisá-lo, refinar o texto, adicionar informações que a IA possa ter omitido ou corrigir imprecisões.
+    *   Você pode experimentar diferentes níveis de detalhe ou ajustar os links contextuais e gerar novamente se o primeiro resultado não for o ideal.
 
-6.  **Rate Limiting:**
-    *   O backend implementa um sistema de rate limiting por IP (`RATE_LIMIT_REQUESTS = 5` requisições em `RATE_LIMIT_PERIOD_SECONDS = 60` segundos, com bloqueio progressivo). Se você fizer muitas requisições em um curto período, poderá ser temporariamente bloqueado. Isso é para proteger o serviço.
+6.  **Uso dos Badges Selecionados:**
+    *   A seleção de badges na interface instrui a IA sobre quais tipos de badges incluir. A IA tentará construí-los usando o link do repositório. Se o link do repositório não for fornecido, ou se um tipo de badge não for aplicável (ex: "Pull Requests" para um repositório sem PRs abertos), ele poderá ser omitido.
+    *   **Exemplo:** Se você selecionar "Licença" e "Linguagem Principal" e fornecer um link de repositório GitHub válido, o README gerado provavelmente incluirá os badges correspondentes.
 
-7.  **Exemplo de Chamada de API (via cURL, para fins de depuração):**
-    Supondo que o backend esteja rodando localmente e você tenha um arquivo `meuprojeto.zip`:
-    ```bash
-    curl -X POST "http://127.0.0.1:8000/api/generate-readme" \
-         -H "X-API-Key: SUA_CHAVE_API_GEMINI_AQUI" \
-         -F "project_zip=@meuprojeto.zip" \
-         -F "readme_level=Moderate" \
-         -F "gemini_model=gemini-1.5-flash-latest" \
-         -F "badges=License" \
-         -F "badges=Issues" \
-         -F "repo_url=https://github.com/seu_usuario/seu_projeto"
-    ```
-    Isso retornaria um JSON contendo o `readme_content`.
+Ao entender essas nuances, os usuários podem maximizar a eficácia da ferramenta "Readme Generation" para produzir documentação de alta qualidade e relevante para seus projetos.
 
 ## 🔧 API Reference
 
-A aplicação expõe os seguintes endpoints de API, todos prefixados com `/api`.
+O projeto "Readme Generation" expõe uma API backend construída com FastAPI. Abaixo estão os detalhes dos endpoints principais:
+
+**Base URL da API (Desenvolvimento Local):** `http://127.0.0.1:8000/api`
+**Base URL da API (Produção - Exemplo Render):** `/api` (relativo ao domínio da aplicação)
+
+---
 
 ### 1. Listar Modelos Gemini
 
-*   **Endpoint:** `GET /api/list-models`
-*   **Descrição:** Lista os modelos Gemini disponíveis para geração de conteúdo que são compatíveis e relevantes para a aplicação. Requer uma API Key válida do Gemini.
-*   **Headers:**
-    *   `X-API-Key`: (Obrigatório) Sua chave de API do Google Gemini.
-*   **Resposta de Sucesso (200 OK):**
+*   **Endpoint:** `GET /list-models`
+*   **Descrição:** Retorna uma lista de modelos Gemini disponíveis e compatíveis com geração de conteúdo, com base na API Key fornecida.
+*   **Autenticação:** Requer a API Key do Gemini no cabeçalho da requisição.
+    *   **Header:** `X-API-Key: SUA_CHAVE_API_GEMINI`
+*   **Parâmetros:** Nenhum.
+*   **Resposta de Sucesso (Código 200 OK):**
     ```json
     {
         "models": [
             {
                 "id": "gemini-1.5-flash-latest",
-                "name": "Gemini 1.5 Flash Latest",
+                "name": "Gemini 1.5 Flash",
                 "full_name": "models/gemini-1.5-flash-latest"
             },
             {
                 "id": "gemini-1.5-pro-latest",
-                "name": "Gemini 1.5 Pro Latest",
+                "name": "Gemini 1.5 Pro",
                 "full_name": "models/gemini-1.5-pro-latest"
             }
             // ... outros modelos
@@ -446,249 +508,286 @@ A aplicação expõe os seguintes endpoints de API, todos prefixados com `/api`.
         ```
         ou
         ```json
-        { "detail": "A API Key fornecida é inválida ou não tem permissão para listar modelos." }
+        { "detail": "Erro ao listar modelos: API key not valid. Please pass a valid API key. [...]." }
         ```
-    *   `500 Internal Server Error`: Erro ao comunicar com a API Gemini.
-        ```json
-        { "detail": "Erro ao listar modelos: [mensagem de erro da API Gemini]. Verifique se a API Key fornecida tem permissão para listar modelos." }
-        ```
+    *   `500 Internal Server Error`: Outro erro ao tentar listar os modelos.
 
-### 2. Gerar README
+---
 
-*   **Endpoint:** `POST /api/generate-readme`
-*   **Descrição:** Gera o conteúdo do README.md com base no arquivo .zip do projeto, nível de detalhe, modelo Gemini e outras configurações.
-*   **Headers:**
-    *   `X-API-Key`: (Obrigatório) Sua chave de API do Google Gemini.
-    *   `Content-Type`: `multipart/form-data` (automaticamente definido pelo cliente ao enviar formulário com arquivo).
-*   **Corpo da Requisição (FormData):**
-    *   `project_zip`: (Obrigatório) O arquivo `.zip` contendo o projeto.
-    *   `readme_level`: (Obrigatório) String indicando o nível de detalhe. Valores possíveis: `Simple`, `Moderate`, `Complete`.
-    *   `gemini_model`: (Opcional) String com o ID do modelo Gemini a ser usado (ex: `gemini-1.5-flash-latest`). Se omitido, usa o padrão do sistema (configurado em `gerador_readme_ia_web/config.py` ou via variável de ambiente `GEMINI_MODEL_NAME`).
-    *   `badges`: (Opcional, pode ser repetido) Strings indicando os badges selecionados (ex: `License`, `Issues`).
-    *   `repo_url`: (Opcional) String com a URL do repositório do projeto.
-    *   `project_url`: (Opcional) String com a URL do projeto/demo.
-    *   `linkedin_url`: (Opcional) String com a URL do perfil LinkedIn do autor.
-*   **Resposta de Sucesso (200 OK):**
+### 2. Gerar README.md
+
+*   **Endpoint:** `POST /generate-readme`
+*   **Descrição:** Processa o arquivo .zip do projeto e os parâmetros fornecidos para gerar um arquivo README.md usando a API Gemini.
+*   **Autenticação:** Requer a API Key do Gemini no cabeçalho da requisição.
+    *   **Header:** `X-API-Key: SUA_CHAVE_API_GEMINI`
+*   **Corpo da Requisição:** `multipart/form-data`
+    *   `project_zip` (Obrigatório): `File` - O arquivo .zip contendo o projeto.
+    *   `readme_level` (Obrigatório): `String` - O nível de detalhamento desejado para o README. Valores possíveis: `"simple"`, `"moderate"`, `"complete"`.
+    *   `gemini_model` (Opcional): `String` - O ID do modelo Gemini a ser usado (ex: `"gemini-1.5-flash-latest"`). Se não fornecido, o backend usará o modelo padrão do sistema (configurado em `gerador_readme_ia_web/config.py`).
+    *   `repo_url` (Opcional): `String` - URL do repositório do projeto (ex: GitHub, GitLab).
+    *   `project_url` (Opcional): `String` - URL do projeto em demonstração ou produção.
+    *   `linkedin_url` (Opcional): `String` - URL do perfil LinkedIn do autor/contato.
+    *   `selected_badges[]` (Opcional): `Array[String]` - Lista dos valores dos badges selecionados (ex: `selected_badges=License&selected_badges=Issues`).
+*   **Resposta de Sucesso (Código 200 OK):**
     ```json
     {
-        "readme_content": "# Título do Projeto Gerado\n\n## Descrição\n\nEste é um README gerado pela IA...\n...",
-        "filename": "README_nome-do-zip_timestamp.md"
+        "readme_content": "# Título do Projeto Gerado...\n\n## Descrição...",
+        "filename": "README_gerado_projetoX.md" 
     }
     ```
+    *Nota: O `filename` é uma sugestão, o frontend atualmente usa "README.md" para download.*
 *   **Respostas de Erro:**
-    *   `400 Bad Request`: Faltam campos obrigatórios, arquivo .zip inválido, ou prompt bloqueado pela IA.
+    *   `400 Bad Request`: Parâmetros inválidos ou ausentes, ou erro na lógica de geração (ex: prompt bloqueado pela IA).
         ```json
-        { "detail": "Arquivo .zip do projeto é obrigatório." }
+        { "detail": "Nível de detalhe do README inválido: [valor_invalido]" }
         ```
+        ou
         ```json
-        { "detail": "PROMPT BLOQUEADO PELA IA. Razão: [razão do bloqueio]" }
+        { "detail": "PROMPT BLOQUEADO PELA IA. Razão: [motivo_do_bloqueio]" }
         ```
     *   `401 Unauthorized`: API Key não fornecida ou inválida.
         ```json
-        { "detail": "API Key não fornecida no cabeçalho X-API-Key." }
+        { "detail": "API Key inválida ou não autorizada para geração." }
         ```
-    *   `422 Unprocessable Entity`: Erro na validação dos tipos de dados (geralmente tratado pelo FastAPI antes).
+    *   `422 Unprocessable Entity`: Erro de validação do FastAPI para os tipos de dados.
     *   `429 Too Many Requests`: Limite de taxa de requisições excedido.
         ```json
-        { "detail": "Você excedeu o limite de requisições. Bloqueado por X segundos. O tempo de bloqueio aumenta a cada infração." }
+        { "detail": "Você excedeu o limite de requisições. Bloqueado por X segundos." }
         ```
-    *   `500 Internal Server Error`: Erro interno no servidor, falha ao processar o ZIP, ou erro na comunicação com a API Gemini.
+    *   `500 Internal Server Error`: Erro inesperado durante o processamento ou comunicação com a API Gemini.
         ```json
-        { "detail": "Erro ao gerar README: [mensagem de erro específica]." }
+        { "detail": "Erro interno ao gerar README: [mensagem_do_erro]" }
         ```
+
+---
+
+A API é protegida por um mecanismo de rate limiting baseado em IP, configurado em `api/index.py`, para prevenir abusos.
 
 ## 🧪 Estratégia de Testes e Qualidade de Código
 
-Atualmente, o projeto não possui uma suíte de testes automatizados formal (`tests/` diretório) visível na estrutura fornecida. No entanto, uma estratégia de testes robusta seria crucial para garantir a qualidade, confiabilidade e manutenibilidade da aplicação.
+A estratégia de testes e qualidade de código para o "Readme Generation" combina abordagens manuais e automáticas (ou planejadas), com foco na robustez do backend e na usabilidade do frontend.
 
-**Filosofia de Testes (Proposta):**
-A filosofia seria adotar uma abordagem de pirâmide de testes, com uma base sólida de testes unitários, complementada por testes de integração e, no topo, alguns testes end-to-end.
+**1. Frontend (HTML, CSS, JavaScript):**
 
-**Tipos de Testes a Serem Implementados:**
+*   **Testes Manuais de UI/UX:**
+    *   Verificação da responsividade da interface em diferentes tamanhos de tela (desktop, tablet, mobile).
+    *   Teste de usabilidade dos formulários, botões, seletores de tema e tooltips.
+    *   Validação do fluxo completo do usuário: upload, preenchimento de campos, seleção de opções, geração e visualização/download do README.
+    *   Teste em múltiplos navegadores modernos (Chrome, Firefox, Edge) para garantir compatibilidade.
+*   **Validação de Entrada no Cliente:**
+    *   Os scripts JavaScript (`validationUtils.js`, `formHandler.js`) implementam validações para campos como API Key (formato, comprimento), URLs (formato básico), e seleção de modelo. Mensagens de erro são exibidas diretamente na UI.
+*   **Qualidade de Código Frontend:**
+    *   **Modularização:** O código JavaScript é dividido em módulos por funcionalidade (`apiService.js`, `themeManager.js`, etc.), melhorando a organização e manutenibilidade.
+    *   **Linting (Sugerido):** Uso de ferramentas como ESLint e Prettier para padronizar o estilo do código JavaScript e HTML, garantindo consistência.
+    *   **Acessibilidade (Ações Futuras):** Revisão para garantir conformidade com as diretrizes WCAG (ex: contraste de cores, navegação por teclado, atributos ARIA).
 
-1.  **Testes Unitários:**
-    *   **Backend (Python/FastAPI):**
-        *   **`gerador_readme_ia_web/utils.py`:** Testar a função `extract_project_data_from_zip` com diferentes arquivos .zip (válidos, inválidos, vazios, com estruturas diversas, com arquivos grandes/pequenos, diferentes encodings). Mockar o logger.
-        *   **`gerador_readme_ia_web/gemini_client_web.py`:** Mockar as chamadas à API `google-generativeai`. Testar a inicialização do cliente, o envio de prompts, o tratamento de respostas (sucesso, erro, prompt bloqueado) e a função `test_connection`.
-        *   **`gerador_readme_ia_web/config.py`:** Testar a lógica de obtenção do nome do modelo Gemini (com e sem variáveis de ambiente).
-        *   **`api/index.py` (Lógica de Rate Limiting):** Testar o comportamento do `rate_limit_checker` em diferentes cenários (primeira requisição, dentro do limite, excedendo o limite, bloqueio progressivo, limpeza de IPs antigos).
-        *   **Ferramentas:** `pytest` para execução dos testes, `unittest.mock` para mocking.
-    *   **Frontend (JavaScript):**
-        *   **`public/js/validationUtils.js`:** Testar as funções de validação (`validateApiKey`, `validateUrlField`, `validateSelectedModel`) com diversos inputs válidos e inválidos.
-        *   **`public/js/localStorageManager.js`:** Testar o salvamento e carregamento de dados do LocalStorage. Mockar o `localStorage`.
-        *   **`public/js/apiService.js`:** Mockar a `fetch` API para testar a lógica de chamada aos endpoints do backend e tratamento de respostas.
-        *   **Ferramentas:** `Jest` ou `Mocha` com `Chai` para asserções. `jsdom` para simular ambiente de navegador se necessário para manipulação de DOM.
+**2. Backend (Python/FastAPI):**
 
-2.  **Testes de Integração (Backend):**
-    *   Testar os endpoints da API FastAPI (`/api/list-models`, `/api/generate-readme`) de ponta a ponta, sem mockar o cliente Gemini, mas possivelmente mockando a chamada real à API externa para evitar custos e dependência de rede.
-    *   Usar o `TestClient` do FastAPI para simular requisições HTTP e verificar respostas, status codes e conteúdo.
-    *   Testar a integração entre os diferentes módulos do backend (ex: `api/index.py` chamando `gemini_client_web.py` que usa `config.py`).
+*   **Tratamento de Erros e Validação:**
+    *   FastAPI utiliza Pydantic para validação automática de tipos de dados em requests e responses.
+    *   A API implementa tratamento específico para exceções comuns (ex: API Key inválida, erro na API Gemini, prompt bloqueado) e retorna códigos de status HTTP e mensagens de erro apropriadas.
+    *   O `api/index.py` inclui um robusto sistema de rate limiting para proteger contra abusos.
+*   **Logging:**
+    *   O módulo `logger_setup_web.py` configura um sistema de logging detalhado para o backend, registrando informações, avisos e erros. Isso é crucial para depuração e monitoramento em produção (logs são enviados para `stdout`, capturados por plataformas como Render).
+*   **Testes Unitários (Planejado/Sugerido):**
+    *   **Ferramenta:** `pytest`.
+    *   **Escopo:**
+        *   Funções em `gerador_readme_ia_web/utils.py` (ex: extração de dados do ZIP, filtragem de arquivos).
+        *   Lógica em `gerador_readme_ia_web/gemini_client_web.py` (mockando as chamadas à API Gemini para testar a construção do cliente e o tratamento de respostas).
+        *   Funções de configuração em `gerador_readme_ia_web/config.py`.
+*   **Testes de Integração (Planejado/Sugerido):**
+    *   **Ferramenta:** `pytest` com `HTTPX` ou o `TestClient` do FastAPI.
+    *   **Escopo:** Testar os endpoints da API (`/list-models`, `/generate-readme`) de ponta a ponta (sem chamar a API Gemini real, usando mocks), verificando:
+        *   Validação de entrada e respostas de erro corretas.
+        *   Fluxo de dados correto através dos módulos do backend.
+        *   Funcionamento do rate limiting.
+*   **Qualidade de Código Backend:**
+    *   **Tipagem Estática:** Uso extensivo de type hints em Python, aproveitado pelo FastAPI e útil para análise estática com MyPy.
+    *   **Linting e Formatação:** Uso de ferramentas como Flake8 (para linting) e Black (para formatação automática de código) para manter a consistência e aderência ao PEP 8.
+    *   **Modularidade:** A lógica de negócio está separada em `gerador_readme_ia_web`, desacoplada da camada de API (FastAPI).
 
-3.  **Testes End-to-End (E2E):**
-    *   Simular o fluxo completo do usuário na interface web.
-    *   Exemplos de cenários:
-        *   Usuário insere API Key válida -> lista de modelos é carregada.
-        *   Usuário faz upload de .zip, preenche campos, clica em "Gerar" -> README é exibido.
-        *   Usuário tenta gerar README com API Key inválida -> mensagem de erro é exibida.
-    *   **Ferramentas:** `Cypress`, `Playwright` ou `Selenium`.
+**3. CI/CD (Integração Contínua/Entrega Contínua) - Potencial:**
 
-**Qualidade de Código:**
+*   **Plataformas:** GitHub Actions, Render CI/CD, Render CI/CD.
+*   **Fluxo Sugerido:**
+    1.  Push para o repositório GitHub.
+    2.  Gatilho do GitHub Actions para:
+        *   Executar linters (Flake8, Black, ESLint, Prettier).
+        *   Executar testes unitários e de integração (pytest).
+        *   (Opcional) Construir a aplicação (se necessário para algum tipo de deploy).
+    3.  Se todos os passos passarem, permitir o merge para a branch principal.
+    4.  Deploy automático para a plataforma de hospedagem (Render) ao fazer merge na branch principal ou criar uma tag de release.
 
-*   **Linters e Formatadores:**
-    *   Python: `Black` para formatação, `Flake8` ou `Pylint` para linting.
-    *   JavaScript: `Prettier` para formatação, `ESLint` para linting.
-*   **Análise Estática:** Ferramentas como `SonarQube` ou `CodeClimate` poderiam ser integradas para monitorar a qualidade do código, complexidade, duplicação e vulnerabilidades.
-*   **Convenções de Código:** Adoção de guias de estilo (ex: PEP 8 para Python).
-
-**CI/CD (Integração Contínua / Entrega Contínua):**
-*   Configurar um pipeline de CI/CD (ex: GitHub Actions) que automaticamente:
-    *   Execute linters e formatadores.
-    *   Rode todos os testes automatizados a cada push ou Pull Request.
-    *   Construa a aplicação (se houver passos de build).
-    *   (Opcional) Implante em um ambiente de staging para testes adicionais.
-*   O deployment para produção na Vercel já é facilitado pela integração com o GitHub, que pode ser acionado após a passagem bem-sucedida dos testes no pipeline de CI.
-
-Atualmente, a qualidade é mantida principalmente através de revisões manuais de código e testes funcionais durante o desenvolvimento. A implementação da estratégia acima seria um passo fundamental para aumentar a robustez do projeto.
+Atualmente, a maior parte dos testes é manual, especialmente no frontend. A implementação de testes automatizados para o backend e a formalização de um pipeline de CI/CD são os próximos passos lógicos para aumentar a robustez e a confiabilidade do projeto.
 
 ## 🚢 Deployment Detalhado e Escalabilidade
 
-O projeto "Readme Generation" é implantado na plataforma **Vercel**, que oferece um ambiente otimizado para aplicações web modernas, incluindo frontends estáticos e backends serverless.
+O projeto "Readme Generation" é projetado para ser implantado em plataformas modernas de PaaS (Platform as a Service) ou ambientes serverless, que oferecem facilidade de deploy, gerenciamento e escalabilidade.
 
-**Processo de Deployment na Vercel:**
+**Plataforma de Hospedagem Atual (Demonstração):**
 
-1.  **Conexão com Repositório Git:** O projeto na Vercel é conectado diretamente ao repositório GitHub `ESousa97/readme-generate-2`.
-2.  **Configuração do Build:** O arquivo `vercel.json` na raiz do projeto instrui a Vercel sobre como construir e servir a aplicação:
-    ```json
-    {
-      "version": 2,
-      "builds": [
-        {
-          "src": "api/index.py",
-          "use": "@vercel/python",
-          "config": { "maxLambdaSize": "50mb" }
-        }
-      ],
-      "routes": [
-        {
-          "src": "/api/(.*)",
-          "dest": "/api/index.py"
-        },
-        {
-          "src": "/(.*)",
-          "dest": "/api/index.py"
-        }
-      ]
-    }
-    ```
-    *   **`builds`**: Define que o arquivo `api/index.py` deve ser tratado como uma função serverless Python (`@vercel/python`). `maxLambdaSize` é configurado para permitir um tamanho maior para a função, se necessário.
-    *   **`routes`**:
-        *   Requisições para `/api/(.*)` são direcionadas para a função serverless `api/index.py`.
-        *   Requisições para qualquer outro caminho (`/(.*)`) também são direcionadas para `api/index.py`. Isso permite que o FastAPI sirva o `index.html` (da raiz do projeto) e os arquivos estáticos da pasta `public/` quando a aplicação é acessada pela URL base (ex: `https://readme-generate-iota.vercel.app/`).
+*   **Render.com:** A aplicação de demonstração ([https://readme-generate-2.onrender.com/](https://readme-generate-2.onrender.com/)) está hospedada no Render.
+    *   **Tipo de Serviço:** Provavelmente como um "Web Service" no Render, que pode executar aplicações Python/FastAPI.
+    *   **Processo de Deploy (Típico no Render):**
+        1.  Conectar a conta do Render ao repositório GitHub (`ESousa97/readme-generate-2`).
+        2.  Configurar o serviço web:
+            *   **Ambiente:** Python.
+            *   **Comando de Build:** `pip install -r requirements.txt` (geralmente detectado automaticamente).
+            *   **Comando de Start:** `gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.index:app` (um exemplo comum para FastAPI/Gunicorn em produção). O `api.index:app` refere-se ao arquivo `index.py` no diretório `api` e à instância `app` do FastAPI.
+            *   **Variáveis de Ambiente:** Nenhuma variável de ambiente crítica é *obrigatoriamente* necessária no servidor para a funcionalidade principal, já que a API Key do Gemini é fornecida pelo cliente. `GEMINI_MODEL_NAME` pode ser configurada se um padrão diferente do codificado for desejado.
+        3.  O Render lida com a construção da imagem, deploy e fornecimento de um URL público com SSL.
+        4.  O frontend (arquivos em `public/` e `index.html`) pode ser servido pelo mesmo serviço FastAPI usando `StaticFiles` ou como um "Static Site" separado no Render, com regras de reescrita para a API, se necessário. A estrutura atual sugere que o FastAPI serve o `index.html` e os arquivos estáticos.
 
-3.  **CI/CD Automático:** A Vercel automaticamente aciona um novo build e deployment sempre que há um push para a branch principal (ou outras branches configuradas) no repositório GitHub.
-    *   Durante o build, a Vercel instala as dependências Python listadas em `requirements.txt`.
-    *   Os arquivos estáticos do frontend (`index.html`, `public/`) são otimizados e distribuídos globalmente via CDN da Vercel.
+**Outras Opções de Deployment:**
 
-**Link de Produção:**
-O projeto está acessível em: **[https://readme-generate-iota.vercel.app/](https://readme-generate-iota.vercel.app/)**
+*   **Render:**
+    *   **Backend API:** O diretório `api/` com `index.py` está estruturado de forma compatível com o deploy de Serverless Functions Python na Render. A Render detectaria `api/index.py` e o implantaria como uma função.
+    *   **Frontend:** O `index.html` e o diretório `public/` podem ser implantados como um site estático na Render.
 
-**Considerações sobre Escalabilidade:**
+*   **AWS (EC2, ECS, Lambda):**
+    *   **Lambda + API Gateway:** Para uma arquitetura serverless, o backend FastAPI poderia ser empacotado (ex: com Serverless Framework ou AWS SAM) e implantado como uma função Lambda, exposta via API Gateway.
+    *   **ECS/EKS (Containers):** O backend poderia ser containerizado com Docker e implantado em ECS (Elastic Container Service) ou EKS (Elastic Kubernetes Service) para maior controle e escalabilidade.
+    *   **EC2:** Implantação tradicional em uma máquina virtual, exigindo mais gerenciamento de infraestrutura.
 
-*   **Frontend:** Sendo arquivos estáticos servidos pela CDN da Vercel, o frontend é altamente escalável e resiliente a picos de tráfego.
-*   **Backend (Funções Serverless):**
-    *   **Escalabilidade Horizontal Automática:** A Vercel gerencia automaticamente a escalabilidade das funções serverless. Se houver um aumento na demanda, a Vercel provisiona mais instâncias da função para lidar com as requisições.
-    *   **"Cold Starts":** Funções serverless podem ter "cold starts" se não forem invocadas por um tempo, resultando em uma latência inicial maior na primeira requisição após um período de inatividade. Para uma aplicação como esta, onde o tempo de geração pela IA já é significativo, um cold start pode ser menos perceptível ou pode ser mitigado com estratégias de provisionamento de concorrência (se suportado/necessário).
-    *   **Limites de Execução:** Funções serverless têm limites de tempo de execução. A geração do README, especialmente para projetos grandes ou modelos de IA mais lentos, deve ser concluída dentro desses limites (o padrão da Vercel é geralmente suficiente, mas pode ser configurado).
-*   **API Gemini:** A escalabilidade da API Gemini é gerenciada pelo Google. O projeto está sujeito aos limites de taxa e quotas da API Key do usuário.
-*   **Rate Limiting Interno:** O rate limiting implementado na API (`api/index.py`) ajuda a proteger o backend contra sobrecarga e abuso, contribuindo para a estabilidade geral, mas não é uma solução de escalabilidade em si.
+*   **Google Cloud (Cloud Run, App Engine):**
+    *   **Cloud Run:** Ideal para aplicações containerizadas (como o backend FastAPI). Oferece escalabilidade automática baseada em requisições.
+    *   **App Engine:** Plataforma PaaS que suporta aplicações Python, abstraindo grande parte da infraestrutura.
+
+**Escalabilidade:**
+
+*   **Horizontal:**
+    *   Plataformas como Render (para serverless functions), Cloud Run e App Engine geralmente fornecem escalabilidade horizontal automática, criando mais instâncias da aplicação conforme a demanda aumenta.
+    *   Se usando Gunicorn, o número de workers (`-w 4`) pode ser ajustado.
+*   **Vertical:**
+    *   Em plataformas PaaS/IaaS, pode-se aumentar os recursos (CPU, memória) das instâncias/containers.
+*   **Rate Limiting:** O rate limiting implementado na API (`api/index.py`) ajuda a proteger a aplicação contra picos de tráfego súbitos ou abusivos, contribuindo para a estabilidade.
+*   **API Gemini:** A escalabilidade da API Gemini é gerenciada pelo Google. É importante estar ciente dos limites de cota da API Gemini associados à chave do usuário.
+*   **Stateless Backend:** O backend FastAPI é projetado para ser stateless (não armazena estado da sessão entre requisições, exceto pelo rate limiter em memória que tem um escopo por instância), o que facilita a escalabilidade horizontal.
 
 **Monitoramento e Logging:**
 
-*   **Vercel Dashboard:** A Vercel fornece um painel com logs em tempo real das invocações de funções, métricas de performance e erros.
-*   **Logging da Aplicação:** O `logger_setup_web.py` configura o logging para enviar saídas para `stdout`/`stderr`, que são capturadas pela Vercel e visíveis em seu painel de logs. Em desenvolvimento local, também pode logar para um arquivo.
-*   Para monitoramento avançado de performance (APM), logging centralizado em larga escala e sistemas de alerting, seria necessário integrar ferramentas de terceiros (ex: Sentry, Datadog, New Relic).
+*   **Logging:** A aplicação utiliza o módulo `logging` do Python, configurado em `logger_setup_web.py`. Em plataformas como Render, os logs enviados para `stdout`/`stderr` são automaticamente coletados e podem ser visualizados através do dashboard da plataforma.
+*   **Monitoramento de Performance:** As plataformas de hospedagem geralmente oferecem métricas básicas de performance (tempo de resposta, uso de CPU/memória, erros). Ferramentas de APM (Application Performance Monitoring) como Sentry, Datadog ou New Relic poderiam ser integradas para um monitoramento mais aprofundado.
 
-Em resumo, a arquitetura serverless na Vercel proporciona uma base sólida para escalabilidade e facilidade de manutenção, adequada para a natureza desta aplicação.
+A arquitetura atual é bem adequada para implantação em nuvem e aproveita os benefícios de escalabilidade e gerenciamento oferecidos pelas plataformas modernas.
 
 ## 🤝 Contribuição (Nível Avançado)
 
-Agradecemos o seu interesse em contribuir para o "Readme Generation"! Contribuições da comunidade são essenciais para tornar esta ferramenta ainda melhor. Siga estas diretrizes para facilitar o processo:
+Agradecemos o seu interesse em contribuir para o "Readme Generation"! Contribuições da comunidade são essenciais para tornar este projeto ainda melhor. Siga estas diretrizes para facilitar o processo:
 
-1.  **Encontrando Algo para Contribuir:**
-    *   Verifique a seção de [Issues](https://github.com/ESousa97/readme-generate-2/issues) no GitHub para bugs relatados, solicitações de funcionalidades ou tarefas conhecidas.
-    *   Se você tem uma nova ideia ou encontrou um bug não listado, sinta-se à vontade para [abrir uma nova Issue](https://github.com/ESousa97/readme-generate-2/issues/new/choose) para discussão.
+**1. Configurando o Ambiente de Desenvolvimento:**
 
-2.  **Configurando o Ambiente de Desenvolvimento:**
-    *   Siga o [Guia de Instalação e Configuração Avançada](#-guia-de-instalação-e-configuração-avançada) para ter o projeto rodando localmente.
+*   Siga o [Guia de Instalação e Configuração Avançada](#-guia-de-instalação-e-configuração-avançada) para ter o projeto rodando localmente.
 
-3.  **Processo de Contribuição (GitHub Flow):**
-    *   **Fork o Repositório:** Crie um fork do repositório `ESousa97/readme-generate-2` para sua própria conta no GitHub.
-    *   **Clone seu Fork:**
-        ```bash
-        git clone https://github.com/SEU_USUARIO/readme-generate-2.git
-        cd readme-generate-2
-        ```
-    *   **Crie uma Branch para sua Feature/Correção:**
-        Nomeie sua branch de forma descritiva (ex: `feature/nova-funcionalidade` ou `fix/corrige-bug-xyz`).
-        ```bash
-        git checkout -b feature/minha-nova-feature
-        ```
-    *   **Faça suas Alterações:** Implemente sua funcionalidade ou correção de bug. Certifique-se de seguir as convenções de código e estilo do projeto (veja abaixo).
-    *   **Teste suas Alterações:** Adicione testes unitários e/ou de integração para suas alterações, se aplicável. Execute todos os testes para garantir que nada foi quebrado.
-    *   **Faça Commit das suas Alterações:** Use mensagens de commit claras e descritivas. Recomendamos o uso de [Conventional Commits](https://www.conventionalcommits.org/).
-        Exemplo:
-        ```bash
-        git add .
-        git commit -m "feat: Adiciona suporte para upload de arquivos SVG no .zip"
-        # ou
-        git commit -m "fix: Corrige cálculo de rate limit para IPs IPv6"
-        ```
-    *   **Faça Push para sua Branch no Fork:**
-        ```bash
-        git push origin feature/minha-nova-feature
-        ```
-    *   **Abra um Pull Request (PR):** Vá para o repositório original (`ESousa97/readme-generate-2`) no GitHub e abra um Pull Request da sua branch no seu fork para a branch `main` (ou a branch de desenvolvimento principal) do repositório original.
-        *   No PR, descreva claramente as alterações que você fez e o motivo. Se estiver relacionado a uma Issue existente, mencione-a (ex: `Closes #123`).
+**2. Encontrando Algo para Trabalhar:**
 
-4.  **Convenções de Código e Estilo:**
-    *   **Python:** Siga o guia de estilo PEP 8. Considere usar `Black` para formatação automática e `Flake8` para linting.
-    *   **JavaScript:** Use `Prettier` para formatação e `ESLint` para linting (configurações a serem definidas/fornecidas).
-    *   **Comentários:** Comente seu código onde necessário para explicar lógica complexa.
+*   Verifique a seção de [Issues](https://github.com/ESousa97/readme-generate-2/issues) no GitHub:
+    *   Procure por issues marcadas com `good first issue` se você é novo no projeto.
+    *   Procure por `help wanted` para tarefas que precisam de atenção.
+    *   Se você tem uma nova ideia ou encontrou um bug não reportado, sinta-se à vontade para criar uma nova issue, descrevendo-a detalhadamente.
 
-5.  **Processo de Code Review:**
-    *   Um ou mais mantenedores do projeto revisarão seu Pull Request.
-    *   Esteja preparado para discutir suas alterações e fazer ajustes com base no feedback recebido.
-    *   Assim que o PR for aprovado e passar em quaisquer verificações de CI, ele será mesclado.
+**3. Modelo de Branching (GitHub Flow Simplificado):**
 
-6.  **Comunicação:**
-    *   Para discussões gerais ou dúvidas, use a seção de [Discussions](https://github.com/ESousa97/readme-generate-2/discussions) (se habilitada) ou as Issues.
+1.  **Fork o Repositório:** Crie um fork do repositório `ESousa97/readme-generate-2` para sua conta pessoal no GitHub.
+2.  **Clone seu Fork:**
+    ```bash
+    git clone https://github.com/SEU-USUARIO/readme-generate-2.git
+    cd readme-generate-2
+    ```
+3.  **Adicione o Repositório Original como Upstream:**
+    ```bash
+    git remote add upstream https://github.com/ESousa97/readme-generate-2.git
+    ```
+4.  **Crie uma Nova Branch:** A partir da branch `main` (certifique-se de que sua `main` local está atualizada com `upstream/main`), crie uma branch para sua feature ou correção:
+    ```bash
+    git fetch upstream
+    git checkout main
+    git rebase upstream/main # Ou git merge upstream/main
+    git checkout -b nome-descritivo-da-sua-branch 
+    # Ex: feature/adicionar-novo-badge ou fix/corrigir-validacao-url
+    ```
+5.  **Faça suas Alterações:** Implemente sua feature ou correção de bug.
+
+**4. Convenções de Commit (Sugestão: Conventional Commits):**
+
+Para manter um histórico de commits claro e consistente, sugerimos o uso do padrão [Conventional Commits](https://www.conventionalcommits.org/).
+*   Formato: `<tipo>[escopo opcional]: <descrição>`
+*   Exemplos:
+    *   `feat: adicionar suporte para upload de arquivos .tar.gz`
+    *   `fix(api): corrigir tratamento de erro na listagem de modelos`
+    *   `docs: atualizar seção de instalação no README`
+    *   `style(frontend): refatorar CSS do formulário principal`
+    *   `refactor: otimizar lógica de extração de dados do ZIP`
+    *   `test: adicionar testes unitários para o gemini_client`
+
+**5. Guia de Estilo de Código:**
+
+*   **Python (Backend):**
+    *   Siga o [PEP 8](https://www.python.org/dev/peps/pep-0008/).
+    *   Use [Black](https://github.com/psf/black) para formatação automática do código.
+    *   Use [Flake8](https://flake8.pycqa.org/en/latest/) para linting.
+    *   Utilize type hints sempre que possível.
+*   **JavaScript (Frontend):**
+    *   Use [Prettier](https://prettier.io/) para formatação automática.
+    *   Considere o uso de [ESLint](https://eslint.org/) para linting.
+*   **HTML/CSS:**
+    *   Mantenha o código limpo, semântico e bem formatado.
+
+**6. Executando Testes (se aplicável):**
+
+*   Se você adicionar ou modificar código que possui testes associados (ou deveria ter), certifique-se de que todos os testes passam.
+*   Para o backend Python, se testes `pytest` forem adicionados, execute-os com:
+    ```bash
+    pytest
+    ```
+
+**7. Processo de Pull Request (PR):**
+
+1.  **Commit e Push:** Faça commit das suas alterações para a sua branch no seu fork:
+    ```bash
+    git add .
+    git commit -m "feat: sua mensagem de commit detalhada"
+    git push origin nome-descritivo-da-sua-branch
+    ```
+2.  **Abra um Pull Request:**
+    *   Vá para o seu fork no GitHub.
+    *   Clique no botão "Compare & pull request" para a branch que você acabou de enviar.
+    *   Selecione a branch `main` do repositório `ESousa97/readme-generate-2` como base.
+    *   Forneça um título claro e uma descrição detalhada do seu PR:
+        *   O que foi alterado e por quê.
+        *   Como testar as alterações.
+        *   Se o PR resolve alguma issue existente, mencione-a (ex: `Closes #123`).
+3.  **Code Review:**
+    *   Um dos mantenedores revisará seu PR. Esteja preparado para discutir suas alterações e fazer ajustes se necessário.
+    *   Aguarde a aprovação e o merge do seu PR.
+
+**8. Manter seu Fork Atualizado:**
+
+Antes de iniciar uma nova contribuição, atualize sua branch `main` local com as últimas alterações do repositório `upstream`:
+
+```bash
+git checkout main
+git fetch upstream
+git rebase upstream/main # Ou git merge upstream/main
+git push origin main
+```
 
 Agradecemos antecipadamente por suas contribuições!
 
-## ⚖️ Licença e Aspectos Legais
+## 📜 Licença e Aspectos Legais
 
 Este projeto é distribuído sob os termos da **Licença MIT**.
 
-**Resumo da Licença MIT:**
-A Licença MIT é uma licença de software livre permissiva, originária do Massachusetts Institute of Technology (MIT). Ela é simples e permite grande liberdade no uso do software.
+Você pode encontrar o texto completo da licença no arquivo [LICENSE.md](LICENSE.md) neste repositório.
 
-*   **Permissões:**
-    *   Uso comercial
-    *   Modificação
-    *   Distribuição
-    *   Uso privado
-    *   Sublicenciamento
-*   **Condições:**
-    *   Incluir o aviso de direitos autorais e o texto da licença em todas as cópias ou partes substanciais do Software.
-*   **Limitações:**
-    *   Sem garantia (o software é fornecido "COMO ESTÁ")
-    *   Sem responsabilidade (os autores ou detentores dos direitos autorais não são responsáveis por quaisquer danos)
+**Principais Permissões e Condições da Licença MIT:**
 
-O texto completo da licença pode ser encontrado no arquivo [LICENSE.md](https://github.com/ESousa97/readme-generate-2/blob/main/LICENSE.md) neste repositório.
+*   **Permissão:** A licença concede permissão, gratuitamente, a qualquer pessoa que obtenha uma cópia deste software e dos arquivos de documentação associados (o "Software"), para lidar com o Software sem restrição, incluindo, sem limitação, os direitos de usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou vender cópias do Software.
+*   **Condição:** O aviso de direitos autorais (`Copyright (c) 2025 Enoque Sousa`) e este aviso de permissão devem ser incluídos em todas as cópias ou partes substanciais do Software.
+*   **Sem Garantia:** O SOFTWARE É FORNECIDO "COMO ESTÁ", SEM GARANTIA DE QUALQUER TIPO, EXPRESSA OU IMPLÍCITA.
+*   **Sem Responsabilidade:** EM NENHUM CASO OS AUTORES OU DETENTORES DOS DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER RECLAMAÇÃO, DANOS OU OUTRA RESPONSABILIDADE DECORRENTE DO SOFTWARE.
 
-Copyright (c) 2025 Enoque Sousa.
-
-Ao contribuir para este projeto, você concorda que suas contribuições serão licenciadas sob os mesmos termos da Licença MIT.
+Ao usar, contribuir ou distribuir este software, você concorda em cumprir os termos desta licença.
 
 ## 📚 Publicações, Artigos e Citações
 
@@ -696,88 +795,97 @@ Não aplicável a este projeto neste momento.
 
 ## 👥 Equipe Principal e Colaboradores Chave
 
-O projeto "Readme Generation" foi idealizado e é mantido principalmente por:
+Este projeto é mantido principalmente por:
 
 *   **Enoque Sousa**
     *   GitHub: [ESousa97](https://github.com/ESousa97)
     *   LinkedIn: [Enoque Sousa](https://www.linkedin.com/in/enoque-sousa-bb89aa168/)
 
-Agradecimentos a quaisquer futuros contribuidores que ajudarem a moldar e melhorar esta ferramenta.
+Agradecimentos a todos os futuros contribuidores que ajudarem a melhorar este projeto!
 
 ## 🗺️ Roadmap Detalhado e Visão de Longo Prazo
 
-O "Readme Generation" tem um potencial significativo para evoluir e se tornar uma ferramenta ainda mais poderosa e indispensável para desenvolvedores.
+**Visão de Longo Prazo:** Tornar o "Readme Generation" uma ferramenta de referência para desenvolvedores que buscam uma maneira rápida, inteligente e personalizável de criar documentação inicial de alta qualidade para seus projetos, integrando-se possivelmente com plataformas de desenvolvimento e expandindo suas capacidades analíticas.
 
-**Curto Prazo (Próximos 3-6 meses):**
+**Roadmap:**
 
-1.  **Melhoria Contínua dos Prompts:** Refinamento iterativo dos prompts (`PROMPT_README_SIMPLE`, `PROMPT_README_MODERATE`, `PROMPT_README_COMPLETE`) com base em feedback e testes para melhorar a qualidade e relevância dos READMEs gerados.
-2.  **Suporte a Mais Tipos de Arquivos no .zip:** Expandir a análise para incluir mais tipos de arquivos de configuração, metadados de projeto e formatos de código menos comuns.
-3.  **Controle Granular de Seções:** Permitir que o usuário selecione/desselecione seções específicas que deseja incluir no README gerado, além dos níveis de detalhe predefinidos.
-4.  **UI/UX Enhancements:**
-    *   Melhor feedback visual durante o processo de upload e geração.
-    *   Editor Markdown básico na UI para pequenos ajustes antes de copiar.
-    *   Pré-visualização do README renderizado.
-5.  **Internacionalização (i18n):** Suporte para gerar READMEs em outros idiomas (ex: Inglês), permitindo ao usuário escolher o idioma de saída.
-6.  **Documentação Aprimorada para Contribuidores:** Expandir a documentação sobre como contribuir, configurar o ambiente de desenvolvimento para testes, etc.
+**🎯 Curto Prazo (Próximos 1-3 meses):**
 
-**Médio Prazo (6-12 meses):**
+*   **Melhorias na UI/UX:**
+    *   Refinamento visual da interface para maior intuitividade.
+    *   Feedback mais detalhado durante o processo de geração (ex: status de análise do ZIP, comunicação com a IA).
+    *   Melhoria na apresentação do README gerado (ex: pré-visualização Markdown mais fiel).
+*   **Aprimoramento da Extração de Dados do ZIP:**
+    *   Suporte a mais tipos de arquivos relevantes para análise (ex: arquivos de configuração de build, Dockerfiles mais complexos).
+    *   Melhor heurística para identificar o "coração" do projeto dentro do ZIP.
+*   **Opções de Personalização do Prompt:**
+    *   Permitir que o usuário adicione instruções customizadas ou seções específicas ao prompt enviado à IA.
+*   **Internacionalização (i18n):**
+    *   Preparar a estrutura do frontend para suportar múltiplos idiomas, começando com Inglês além do Português do Brasil.
+*   **Testes Automatizados:**
+    *   Implementar suíte inicial de testes unitários para o backend (módulos em `gerador_readme_ia_web`).
 
-1.  **Integração Direta com Repositórios Git:** Permitir que o usuário forneça a URL de um repositório Git público (ou privado com autenticação) para análise, em vez de exigir o upload de um .zip.
-2.  **Histórico de Gerações:** Permitir que usuários (potencialmente com autenticação) salvem e acessem READMEs gerados anteriormente.
-3.  **Templates de README Customizáveis:** Permitir que usuários criem e salvem seus próprios templates de prompt ou estruturas de README.
-4.  **Análise de Dependências Mais Profunda:** Extrair informações mais detalhadas de arquivos como `package.json`, `pom.xml`, `build.gradle` para enriquecer a seção "Tech Stack".
-5.  **Feedback do Usuário na Geração:** Implementar um sistema onde o usuário possa avaliar a qualidade do README gerado e fornecer feedback, que pode ser usado para aprimorar os prompts.
+**🎯 Médio Prazo (Próximos 3-9 meses):**
 
-**Longo Prazo (1 ano+):**
+*   **Integração Direta com Repositórios Git:**
+    *   Permitir que o usuário forneça um URL de repositório Git (público) em vez de um arquivo .zip. A aplicação clonaria o repositório temporariamente para análise.
+    *   (Avançado) Autenticação com GitHub/GitLab para analisar repositórios privados (com permissão do usuário).
+*   **Suporte a Outros Modelos de LLM:**
+    *   Abstrair o cliente de IA para facilitar a integração com outros provedores de LLM (ex: OpenAI, Claude) como opção para o usuário.
+*   **Templates de README Customizáveis:**
+    *   Permitir que usuários criem ou selecionem diferentes templates estruturais para seus READMEs, além dos níveis de detalhe.
+*   **Análise de Histórico de Commits (se integrado com Git):**
+    *   Utilizar o histórico de commits para inferir contribuidores chave, frequência de atividade, etc.
+*   **Pipeline de CI/CD Robusto:**
+    *   Configurar GitHub Actions para linting, testes automatizados e (potencialmente) deploy.
 
-1.  **Suporte a Múltiplos Modelos de IA:** Integrar outros LLMs (além do Gemini) para oferecer mais opções aos usuários.
-2.  **Geração Contínua/Automática:** Para projetos conectados via Git, oferecer a opção de sugerir atualizações no README quando mudanças significativas forem detectadas no código.
-3.  **Recursos Colaborativos:** Se a aplicação evoluir para uma plataforma com contas de usuário, permitir que equipes colaborem na geração e manutenção de READMEs.
-4.  **Análise Semântica Avançada:** Utilizar técnicas de NLP mais avançadas para entender melhor a intenção e a funcionalidade do código, levando a READMEs ainda mais perspicazes.
-5.  **Plugins e Extensões:** Possibilidade de um sistema de plugins para estender as capacidades de análise ou os formatos de saída.
+**🎯 Longo Prazo (9+ meses):**
 
-**Visão de Longo Prazo:**
-A visão é que o "Readme Generation" se torne o assistente de IA de referência para documentação de projetos, não apenas para READMEs, mas potencialmente para outras formas de documentação técnica, ajudando a criar um ecossistema de software mais bem documentado e acessível.
+*   **Plugin para IDEs:**
+    *   Desenvolver extensões para IDEs populares (ex: VS Code) que permitam gerar READMEs diretamente do ambiente de desenvolvimento.
+*   **Análise Semântica Avançada do Código:**
+    *   Ir além da análise textual e estrutural, tentando entender a funcionalidade principal do código para gerar descrições mais precisas.
+*   **Recursos Comunitários:**
+    *   Permitir que usuários compartilhem templates de prompt ou configurações de README bem-sucedidas.
+*   **Versão "Pro" ou Hospedada com Recursos Adicionais:**
+    *   Considerar um modelo de serviço onde a aplicação lida com as chaves de API (com cotas de uso) ou oferece funcionalidades premium.
+
+Este roadmap é flexível e será adaptado com base no feedback da comunidade e nas tendências tecnológicas.
 
 ## ❓ FAQ (Perguntas Frequentes)
 
-1.  **De onde obtenho uma API Key do Google Gemini?**
-    *   Você pode gerar uma API Key gratuita para os modelos Gemini na [Google AI Studio](https://aistudio.google.com/app/apikey). Siga as instruções fornecidas pela Google.
+1.  **P: A minha chave de API do Gemini é armazenada no servidor? É seguro usá-la?**
+    R: Não, sua chave de API do Gemini **não é armazenada permanentemente no servidor** da aplicação "Readme Generation". Ela é enviada do seu navegador para o nosso backend via HTTPS e usada exclusivamente para fazer a requisição à API do Google Gemini em seu nome durante aquela sessão de geração. Se você marcar a opção "Salvar API Key", ela será salva apenas localmente no `localStorage` do seu navegador, para sua conveniência. O backend não a retém após o processamento da sua solicitação.
 
-2.  **Minha API Key do Gemini é armazenada no servidor?**
-    *   Não. Sua API Key é enviada do seu navegador para o nosso backend e, em seguida, diretamente para a API do Google Gemini para autenticar sua requisição. Ela não é armazenada permanentemente em nossos servidores. Se você optar por "Salvar API Key" na interface, ela será armazenada localmente no `LocalStorage` do seu navegador, sob sua responsabilidade.
+2.  **P: Por que preciso fornecer minha própria chave de API do Gemini?**
+    R: O uso da API do Google Gemini pode incorrer em custos dependendo do volume de uso e do modelo escolhido. Para tornar este serviço acessível e sustentável, a aplicação requer que os usuários utilizem suas próprias chaves, gerenciando assim seus próprios custos e cotas de uso com o Google.
 
-3.  **Quais tipos de projeto funcionam melhor com o gerador?**
-    *   Projetos que possuem uma estrutura de código clara e arquivos de texto legíveis (código-fonte, arquivos de configuração como `requirements.txt`, `package.json`, etc.) tendem a produzir melhores resultados. Projetos muito pequenos, ofuscados ou com muitos arquivos binários podem ser mais desafiadores para a IA analisar.
+3.  **P: Quais arquivos dentro do meu .zip são analisados pela IA?**
+    R: A aplicação foca em arquivos de texto que são relevantes para entender a estrutura e o propósito do projeto. Isso inclui arquivos de código-fonte comuns (ex: `.py`, `.js`, `.java`, `.html`, `.css`), arquivos de configuração importantes (ex: `requirements.txt`, `package.json`, `pom.xml`), e arquivos de documentação existentes (ex: `README.md`, `LICENSE`). Arquivos binários, diretórios como `node_modules` ou `.git`, e arquivos muito grandes são geralmente ignorados ou truncados para otimizar o prompt enviado à IA. Consulte `gerador_readme_ia_web/utils.py` para detalhes sobre os filtros.
 
-4.  **A geração do README é gratuita?**
-    *   O uso da aplicação "Readme Generation" em si é gratuito. No entanto, a geração do README consome recursos da API Google Gemini, que são cobrados de acordo com a política de preços do Google e são debitados da sua cota/créditos associados à API Key que você fornece. Verifique os [preços da API Gemini](https://ai.google.dev/pricing) para mais detalhes.
+4.  **P: O código do meu projeto (do arquivo .zip) é armazenado nos servidores do "Readme Generation"?**
+    R: Não. O arquivo .zip é processado em memória ou armazenado temporariamente no servidor apenas durante o tempo necessário para extrair os dados e gerar o README. Após a conclusão da sua solicitação, o arquivo .zip e seu conteúdo extraído são descartados. Não armazenamos seu código-fonte.
 
-5.  **Por que fui bloqueado por "excesso de requisições"? (Rate Limiting)**
-    *   Para garantir a estabilidade e o uso justo do serviço, implementamos um limite de taxa (atualmente, 5 requisições por minuto por endereço IP). Se você exceder esse limite, será temporariamente bloqueado. O tempo de bloqueio aumenta progressivamente a cada infração. Por favor, aguarde o tempo indicado antes de tentar novamente.
+5.  **P: O que acontece se o README gerado não for perfeito?**
+    R: O README gerado pela IA é um excelente ponto de partida, mas pode não ser perfeito ou capturar todas as nuances do seu projeto. É altamente recomendável que você revise o conteúdo gerado, faça ajustes, adicione informações específicas ou corrija quaisquer imprecisões. A ferramenta visa economizar tempo significativo, não substituir completamente a revisão humana.
 
-6.  **O que acontece se meu .zip for muito grande ou tiver muitos arquivos?**
-    *   A função de extração de dados do .zip (`utils.py`) tem limites para o tamanho total do conteúdo de cada arquivo (`max_content_length_per_file`) e para o número total de arquivos processados (`max_total_files_to_process`) para evitar sobrecarga e manter o prompt para a IA gerenciável. Se esses limites forem atingidos, a análise será parcial, e um aviso será incluído nos dados enviados à IA.
+6.  **P: Posso usar a aplicação para projetos em qualquer linguagem de programação?**
+    R: Sim. A IA é treinada em uma vasta gama de linguagens de programação e tipos de projeto. Desde que seu .zip contenha arquivos de texto que descrevam o projeto (código, configurações, etc.), a ferramenta deve ser capaz de gerar um README útil.
 
-7.  **O conteúdo do meu código é enviado para algum lugar?**
-    *   Sim. Para que a IA possa gerar um README contextualizado, a estrutura de diretórios e trechos do conteúdo dos arquivos do seu projeto (extraídos do .zip) são enviados para a API Google Gemini como parte do prompt. Consulte a política de privacidade e os termos de serviço da API Google Gemini para entender como seus dados são tratados por eles.
+7.  **P: O que fazer se eu encontrar um bug ou tiver uma sugestão de melhoria?**
+    R: Por favor, reporte bugs ou sugira melhorias abrindo uma [Issue no GitHub](https://github.com/ESousa97/readme-generate-2/issues). Sua contribuição é muito bem-vinda!
 
-8.  **Posso usar a aplicação para projetos privados?**
-    *   Sim, você pode fazer upload de um .zip do seu projeto privado. Lembre-se da questão acima sobre o envio de dados para a API Gemini. A aplicação em si não armazena seu código após o processamento da requisição.
+8.  **P: Existe um limite para o tamanho do arquivo .zip que posso enviar?**
+    R: Sim, o servidor de hospedagem (Render, etc.) terá um limite para o tamanho do corpo da requisição HTTP, o que indiretamente limita o tamanho do .zip. Além disso, a aplicação em si possui lógicas em `utils.py` para limitar o número total de arquivos processados e o tamanho do conteúdo extraído de cada arquivo para evitar prompts excessivamente longos para a IA. Tente manter o .zip focado nos arquivos mais relevantes.
 
 ## 📞 Contato e Suporte
 
-Se você tiver dúvidas, sugestões, encontrar bugs ou precisar de suporte relacionado ao projeto "Readme Generation", por favor, utilize os seguintes canais:
+Se você tiver dúvidas, precisar de suporte, quiser relatar um problema ou discutir o projeto, utilize os seguintes canais:
 
-*   **Relatar Bugs ou Sugerir Funcionalidades:**
-    Abra uma [Issue no GitHub](https://github.com/ESousa97/readme-generate-2/issues). Forneça o máximo de detalhes possível, incluindo passos para reproduzir o problema (se for um bug) ou uma descrição clara da sua sugestão.
+*   **Reportar Bugs ou Sugerir Funcionalidades:**
+    *   Abra uma [**Issue no GitHub**](https://github.com/ESousa97/readme-generate-2/issues). Este é o canal preferencial para questões técnicas e sugestões que podem beneficiar toda a comunidade.
 
-*   **Discussões Gerais:**
-    Participe das [Discussões no GitHub](https://github.com/ESousa97/readme-generate-2/discussions) (se habilitado) para perguntas gerais, compartilhar ideias ou interagir com a comunidade.
+*   **Contato com o Mantenedor Principal:**
+    *   Para questões mais diretas ou colaborações, você pode contatar Enoque Sousa através do [LinkedIn](https://www.linkedin.com/in/enoque-sousa-bb89aa168/).
 
-*   **Contato com o Autor:**
-    *   **Enoque Sousa**
-        *   GitHub: [@ESousa97](https://github.com/ESousa97)
-        *   LinkedIn: [Enoque Sousa](https://www.linkedin.com/in/enoque-sousa-bb89aa168/)
-
-Faremos o possível para responder prontamente!
+Por favor, forneça o máximo de detalhes possível ao relatar problemas, incluindo passos para reproduzir o erro, mensagens de erro exatas e informações sobre seu ambiente (navegador, sistema operacional), se relevante.
