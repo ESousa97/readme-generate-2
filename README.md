@@ -110,23 +110,23 @@ O sistema "Readme Generation" é composto por três componentes principais que i
 
 ```mermaid
 graph TD
-    Usuario[👤 Usuário] -->|Interage via Navegador| Frontend[🌐 Frontend (HTML, CSS, JS)];
-    Frontend -->|Upload .zip, API Key, Params| BackendAPI[⚙️ Backend API (FastAPI - api/index.py)];
+    Usuario["👤 Usuário"] -- "Interage via Navegador" --> Frontend["🌐 Frontend (HTML, CSS, JS)"]
+    Frontend -- "Upload .zip, API Key, Params" --> BackendAPI["⚙️ Backend API (FastAPI - api/index.py)"]
     
     subgraph "Servidor da Aplicação (Python Backend)"
-        BackendAPI -->|Usa para Extrair Dados do ZIP| UtilsZip[📄 gerador_readme_ia_web/utils.py];
-        BackendAPI -->|Usa Templates para Construir Prompt de| PromptTemplates[📝 gerador_readme_ia_web/constants_web.py];
-        BackendAPI -->|Instancia e Utiliza Cliente Gemini de| GeminiClientModule[🤖 gerador_readme_ia_web/gemini_client_web.py];
-        BackendAPI -->|Obtém Configurações de| AppConfig[⚙️ gerador_readme_ia_web/config.py];
-        BackendAPI -->|Configura e Utiliza Logger de| LoggerSetup[📜 gerador_readme_ia_web/logger_setup_web.py];
+        BackendAPI -- "Usa para Extrair Dados do ZIP" --> UtilsZip["📄 gerador_readme_ia_web/utils.py"]
+        BackendAPI -- "Usa Templates para Construir Prompt de" --> PromptTemplates["📝 gerador_readme_ia_web/constants_web.py"]
+        BackendAPI -- "Instancia e Utiliza Cliente Gemini de" --> GeminiClientModule["🤖 gerador_readme_ia_web/gemini_client_web.py"]
+        BackendAPI -- "Obtém Configurações de" --> AppConfig["⚙️ gerador_readme_ia_web/config.py"]
+        BackendAPI -- "Configura e Utiliza Logger de" --> LoggerSetup["📜 gerador_readme_ia_web/logger_setup_web.py"]
     end
 
-    GeminiClientModule -->|Envia Prompt Formatado| GoogleGeminiAPI[☁️ Google Gemini API];
-    GoogleGeminiAPI -->|Retorna README.md Gerado| GeminiClientModule;
-    GeminiClientModule -->|Entrega README.md para| BackendAPI;
+    GeminiClientModule -- "Envia Prompt Formatado" --> GoogleGeminiAPI["☁️ Google Gemini API"]
+    GoogleGeminiAPI -- "Retorna README.md Gerado" --> GeminiClientModule
+    GeminiClientModule -- "Entrega README.md para" --> BackendAPI
     
-    BackendAPI -->|Envia README.md ao Cliente| Frontend;
-    Frontend -->|Exibe/Permite Download| Usuario;
+    BackendAPI -- "Envia README.md ao Cliente" --> Frontend
+    Frontend -- "Exibe/Permite Download" --> Usuario
 
     %% Estilos originais mantidos e aplicados
     style Frontend fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
