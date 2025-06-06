@@ -110,33 +110,38 @@ O sistema "Readme Generation" é composto por três componentes principais que i
 
 ```mermaid
 graph TD
-    Usuario["👤 Usuário"] -- "Interage via Navegador" --> Frontend["🌐 Frontend (HTML, CSS, JS)"]
-    Frontend -- "Upload .zip, API Key, Params" --> BackendAPI["⚙️ Backend API (FastAPI - api/index.py)"]
+    Usuario["👤 Usuário"] -- "Acessa via Browser" --> Frontend["🌐 Frontend (React App)"]
+    Frontend -- "Requisições HTTPS/API" --> BackendAPI["⚙️ Backend API (Render.com)"]
     
-    subgraph "Servidor da Aplicação (Python Backend)"
-        BackendAPI -- "Usa para Extrair Dados do ZIP" --> UtilsZip["📄 gerador_readme_ia_web/utils.py"]
-        BackendAPI -- "Usa Templates para Construir Prompt de" --> PromptTemplates["📝 gerador_readme_ia_web/constants_web.py"]
-        BackendAPI -- "Instancia e Utiliza Cliente Gemini de" --> GeminiClientModule["🤖 gerador_readme_ia_web/gemini_client_web.py"]
-        BackendAPI -- "Obtém Configurações de" --> AppConfig["⚙️ gerador_readme_ia_web/config.py"]
-        BackendAPI -- "Configura e Utiliza Logger de" --> LoggerSetup["📜 gerador_readme_ia_web/logger_setup_web.py"]
+    subgraph "Aplicação Frontend (React)"
+        Frontend -- "Gerencia Rotas" --> Router["🔀 React Router DOM"]
+        Router -- "Renderiza Estrutura" --> Layout["📐 Layout Components"]
+        Layout -- "Carrega Páginas" --> Pages["📄 Pages (Login, Dashboard, Home)"]
+        Pages -- "Utiliza Componentes" --> Components["🧩 Functional Components"]
+        Components -- "Gerencia Estado Global" --> Contexts["🔄 Context API (Auth, Theme, Feedback)"]
+        Components -- "Faz Chamadas HTTP" --> ApiService["📡 Axios Service (api.js)"]
     end
-
-    GeminiClientModule -- "Envia Prompt Formatado" --> GoogleGeminiAPI["☁️ Google Gemini API"]
-    GoogleGeminiAPI -- "Retorna README.md Gerado" --> GeminiClientModule
-    GeminiClientModule -- "Entrega README.md para" --> BackendAPI
     
-    BackendAPI -- "Envia README.md ao Cliente" --> Frontend
-    Frontend -- "Exibe/Permite Download" --> Usuario
+    ApiService -- "Envia Requisições para" --> BackendAPI
+    BackendAPI -- "Armazena/Consulta Dados" --> Database["🗄️ Banco de Dados"]
+    BackendAPI -- "Gerencia Upload/Download" --> FileStorage["📁 File Storage (Imagens)"]
+    
+    BackendAPI -- "Retorna Dados JSON" --> ApiService
+    ApiService -- "Atualiza Estado da Aplicação" --> Components
+    Components -- "Renderiza Interface" --> Frontend
+    Frontend -- "Exibe Conteúdo" --> Usuario
 
-    %% Estilos originais mantidos e aplicados
-    style Frontend fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
-    style BackendAPI fill:#D5E8D4,stroke:#82B366,stroke-width:2px
-    style UtilsZip fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style PromptTemplates fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style GeminiClientModule fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style AppConfig fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style LoggerSetup fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style GoogleGeminiAPI fill:#F8CECC,stroke:#B85450,stroke-width:2px
+    %% Estilos para diferentes camadas
+    style Frontend fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px,color:#000
+    style BackendAPI fill:#D5E8D4,stroke:#82B366,stroke-width:2px,color:#000
+    style Router fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style Layout fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style Pages fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style Components fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style Contexts fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style ApiService fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000
+    style Database fill:#F8CECC,stroke:#B85450,stroke-width:2px,color:#000
+    style FileStorage fill:#F8CECC,stroke:#B85450,stroke-width:2px,color:#000
 ```
 
 **Fluxo de Dados Principal:**
