@@ -106,13 +106,12 @@ O sistema "Readme Generation" é composto por três componentes principais que i
     *   **Tecnologia:** API do Google Generative AI.
     *   **Responsabilidade:** Receber o prompt construído pelo Módulo Core e gerar o conteúdo textual do README.md com base em sua capacidade de processamento de linguagem natural.
 
-**Diagrama de Arquitetura:**
-
+Diagrama de Arquitetura:
 ```mermaid
 graph TD
     Usuario["👤 Usuário"] -- "Interage via Navegador" --> Frontend["🌐 Frontend (HTML, CSS, JS)"]
     Frontend -- "Upload .zip, API Key, Params" --> BackendAPI["⚙️ Backend API (FastAPI - api/index.py)"]
-    
+
     subgraph "Servidor da Aplicação (Python Backend)"
         BackendAPI -- "Usa para Extrair Dados do ZIP" --> UtilsZip["📄 gerador_readme_ia_web/utils.py"]
         BackendAPI -- "Usa Templates para Construir Prompt de" --> PromptTemplates["📝 gerador_readme_ia_web/constants_web.py"]
@@ -120,23 +119,37 @@ graph TD
         BackendAPI -- "Obtém Configurações de" --> AppConfig["⚙️ gerador_readme_ia_web/config.py"]
         BackendAPI -- "Configura e Utiliza Logger de" --> LoggerSetup["📜 gerador_readme_ia_web/logger_setup_web.py"]
     end
-
     GeminiClientModule -- "Envia Prompt Formatado" --> GoogleGeminiAPI["☁️ Google Gemini API"]
     GoogleGeminiAPI -- "Retorna README.md Gerado" --> GeminiClientModule
     GeminiClientModule -- "Entrega README.md para" --> BackendAPI
-    
+
     BackendAPI -- "Envia README.md ao Cliente" --> Frontend
     Frontend -- "Exibe/Permite Download" --> Usuario
-
     %% Estilos originais mantidos e aplicados
-    style Frontend fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px
-    style BackendAPI fill:#D5E8D4,stroke:#82B366,stroke-width:2px
-    style UtilsZip fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style PromptTemplates fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style GeminiClientModule fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style AppConfig fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style LoggerSetup fill:#FFF2CC,stroke:#D6B656,stroke-width:2px
-    style GoogleGeminiAPI fill:#F8CECC,stroke:#B85450,stroke-width:2px
+    style Frontend fill:
+#DAE8FC,stroke:
+#6C8EBF,stroke-width:2px
+    style BackendAPI fill:
+#D5E8D4,stroke:
+#82B366,stroke-width:2px
+    style UtilsZip fill:
+#FFF2CC,stroke:
+#D6B656,stroke-width:2px
+    style PromptTemplates fill:
+#FFF2CC,stroke:
+#D6B656,stroke-width:2px
+    style GeminiClientModule fill:
+#FFF2CC,stroke:
+#D6B656,stroke-width:2px
+    style AppConfig fill:
+#FFF2CC,stroke:
+#D6B656,stroke-width:2px
+    style LoggerSetup fill:
+#FFF2CC,stroke:
+#D6B656,stroke-width:2px
+    style GoogleGeminiAPI fill:
+#F8CECC,stroke:
+#B85450,stroke-width:2px
 ```
 
 **Fluxo de Dados Principal:**
