@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/public/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Configuração do Tailwind (pode ser removida se não usar classes utilitárias do Tailwind diretamente)
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: {} }
@@ -22,11 +21,10 @@
 </head>
 <body class="bg-bg-primary-light dark:bg-bg-primary-dark text-text-primary-light dark:text-text-primary-dark">
     <div class="container mx-auto">
-
         <header class="mb-10 text-center pt-8 sm:pt-12">
             <div class="flex justify-center sm:justify-end items-center mb-4 relative">
                 <button id="themeToggle" title="Alternar tema" class="button-icon absolute top-0 right-0 sm:relative">
-                    <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg>
+                    <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
                 </button>
             </div>
             <h1 class="text-3xl sm:text-4xl font-bold" style="color: var(--bg-accent-light);">Readme Generation</h1>
@@ -36,247 +34,236 @@
         </header>
 
         <main class="main-content-wrapper">
-            <section id="initialConfigSection" class="section-card">
-                <div class="section-header">
-                    <h2 class="section-title">1. Configurações Essenciais</h2>
-                </div>
-                <div class="section-content space-y-6">
-
-                    <div class="form-group">
-                        <div class="label-with-help">
-                            <label for="geminiApiKey" class="label-form">Sua API Key do Gemini</label>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-api-key" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-gemini-api-key" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-api-key">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>API Key do Gemini</h4>
-                                    <p>Sua chave secreta para acessar a inteligência artificial do Google. É como uma senha para usar os recursos do Gemini. Mantenha-a segura!</p>
+            <!-- FLEX responsivo para dividir lado a lado em md+ -->
+            <div class="flex flex-col md:flex-row md:space-x-8">
+                <!-- Configurações Essenciais -->
+                <section id="initialConfigSection" class="section-card flex-1 mb-8 md:mb-0">
+                    <div class="section-header">
+                        <h2 class="section-title">1. Configurações Essenciais</h2>
+                    </div>
+                    <div class="section-content space-y-6">
+                        <!-- API Key do Gemini -->
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <label for="geminiApiKey" class="label-form">Sua API Key do Gemini</label>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-api-key" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-gemini-api-key" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-api-key">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>API Key do Gemini</h4>
+                                        <p>Sua chave secreta para acessar a inteligência artificial do Google. É como uma senha para usar os recursos do Gemini. Mantenha-a segura!</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="password" name="geminiApiKey" id="geminiApiKey" class="input-field" placeholder="AIzaSy...">
+                            <p id="apiKeyError" class="error-message hidden"></p>
+                            <div class="checkbox-container">
+                                <input id="saveApiKey" name="saveApiKey" type="checkbox" class="checkbox-custom">
+                                <label for="saveApiKey" class="checkbox-label">Salvar API Key (localmente)</label>
+                            </div>
+                            <p id="apiKeyStatus" class="status-text-xs"></p>
+                        </div>
+                        <!-- Modelo Gemini -->
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <label for="geminiModelSelect" class="label-form">Modelo Gemini</label>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-model" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-gemini-model" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-model">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Modelo Gemini</h4>
+                                        <p>Define qual 'cérebro' do Gemini será usado. O <strong>Flash</strong> é mais rápido e econômico para a maioria dos READMEs. Outros modelos podem ser mais poderosos, mas podem ter custos diferentes.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <select name="geminiModelSelect" id="geminiModelSelect" class="input-field">
+                                <option value="DEFAULT_OPTION">Insira a API Key para carregar</option>
+                            </select>
+                            <p id="geminiModelError" class="error-message hidden"></p>
+                            <div class="checkbox-container">
+                                <input id="saveGeminiModel" name="saveGeminiModel" type="checkbox" class="checkbox-custom">
+                                <label for="saveGeminiModel" class="checkbox-label">Salvar seleção de modelo</label>
+                            </div>
+                        </div>
+                        <!-- Link do Repositório -->
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <label for="repoUrl" class="label-form">Link do Repositório <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-repo-url" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-repo-url" class="help-tooltip hidden" data-tooltip-id="tooltip-repo-url">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Link do Repositório</h4>
+                                        <p>O link do seu projeto no GitHub, GitLab ou similar. Ajuda o Gemini a entender o código e a estrutura do projeto para gerar um README mais preciso e relevante.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="url" name="repoUrl" id="repoUrl" class="input-field" placeholder="https://github.com/seu-usuario/seu-projeto">
+                            <p id="repoUrlError" class="error-message hidden"></p>
+                            <div class="checkbox-container">
+                                <input id="saveRepoUrl" name="saveRepoUrl" type="checkbox" class="checkbox-custom">
+                                <label for="saveRepoUrl" class="checkbox-label">Salvar Link do Repositório</label>
+                            </div>
+                        </div>
+                        <!-- Link do Projeto -->
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <label for="projectUrl" class="label-form">Link do Projeto <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-project-url" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-project-url" class="help-tooltip hidden" data-tooltip-id="tooltip-project-url">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Link do Projeto</h4>
+                                        <p>Um link para o projeto em produção, uma demonstração ao vivo, página de download, ou qualquer outro recurso relevante que mostre o projeto em ação ou como obtê-lo. Ex: Vercel, Netlify, Itch.io, site oficial, Figma, etc.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="url" name="projectUrl" id="projectUrl" class="input-field" placeholder="https://seu-projeto.vercel.app">
+                            <p id="projectUrlError" class="error-message hidden"></p>
+                            <div class="checkbox-container">
+                                <input id="saveProjectUrl" name="saveProjectUrl" type="checkbox" class="checkbox-custom">
+                                <label for="saveProjectUrl" class="checkbox-label">Salvar Link do Projeto</label>
+                            </div>
+                        </div>
+                        <!-- LinkedIn -->
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <label for="linkedinUrl" class="label-form">Link do LinkedIn <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-linkedin-url" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-linkedin-url" class="help-tooltip hidden" data-tooltip-id="tooltip-linkedin-url">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Link do LinkedIn</h4>
+                                        <p>O link para o seu perfil no LinkedIn. Ele será incluído na seção de contato do README, permitindo que as pessoas te encontrem e se conectem profissionalmente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="url" name="linkedinUrl" id="linkedinUrl" class="input-field" placeholder="https://linkedin.com/in/seu-perfil">
+                            <p id="linkedinUrlError" class="error-message hidden"></p>
+                            <div class="checkbox-container">
+                                <input id="saveLinkedinUrl" name="saveLinkedinUrl" type="checkbox" class="checkbox-custom">
+                                <label for="saveLinkedinUrl" class="checkbox-label">Salvar Link do LinkedIn</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Detalhes do README -->
+                <section class="section-card flex-1">
+                    <div class="section-header">
+                        <h2 class="section-title">2. Detalhes do README</h2>
+                    </div>
+                    <div class="section-content space-y-6">
+                        <!-- Nível de Detalhe -->
+                        <div>
+                            <div class="label-with-help">
+                                <h3 class="label-form mb-3">Nível de Detalhe</h3>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-readme-level" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-readme-level" class="help-tooltip hidden" data-tooltip-id="tooltip-readme-level">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Nível de Detalhe do README</h4>
+                                        <p>Escolha o quão completo você quer que seu README seja:</p>
+                                        <ul>
+                                            <li><strong>Simples:</strong> Um README mais curto, com o essencial.</li>
+                                            <li><strong>Moderado:</strong> Um bom equilíbrio, com as seções mais comuns.</li>
+                                            <li><strong>Completo:</strong> Um README detalhado, com várias seções e informações aprofundadas.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="radio-group">
+                                <div>
+                                    <input type="radio" name="readmeLevel" id="levelSimple" value="simple" class="sr-only">
+                                    <label for="levelSimple" class="radio-label">
+                                        <span class="icon-wrapper"><ion-icon name="document-text-outline"></ion-icon></span>
+                                        <span class="radio-text-main">Simples</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="readmeLevel" id="levelModerate" value="moderate" class="sr-only" checked>
+                                    <label for="levelModerate" class="radio-label">
+                                        <span class="icon-wrapper"><ion-icon name="newspaper-outline"></ion-icon></span>
+                                        <span class="radio-text-main">Moderado</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" name="readmeLevel" id="levelComplete" value="complete" class="sr-only">
+                                    <label for="levelComplete" class="radio-label">
+                                        <span class="icon-wrapper"><ion-icon name="library-outline"></ion-icon></span>
+                                        <span class="radio-text-main">Completo</span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
-                        <input type="password" name="geminiApiKey" id="geminiApiKey" class="input-field" placeholder="AIzaSy...">
-                        <p id="apiKeyError" class="error-message hidden"></p>
-                        <div class="checkbox-container">
-                            <input id="saveApiKey" name="saveApiKey" type="checkbox" class="checkbox-custom">
-                            <label for="saveApiKey" class="checkbox-label">Salvar API Key (localmente)</label>
-                        </div>
-                        <p id="apiKeyStatus" class="status-text-xs"></p>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-with-help">
-                            <label for="geminiModelSelect" class="label-form">Modelo Gemini</label>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-model" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-gemini-model" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-model">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Modelo Gemini</h4>
-                                    <p>Define qual 'cérebro' do Gemini será usado. O <strong>Flash</strong> é mais rápido e econômico para a maioria dos READMEs. Outros modelos podem ser mais poderosos, mas podem ter custos diferentes.</p>
+                        <!-- Badges -->
+                        <div id="badgeSelectionSection">
+                            <div class="label-with-help">
+                                <h3 class="label-form mb-3">Badges Opcionais</h3>
+                                <div class="help-tooltip-wrapper">
+                                    <button type="button" class="help-button" data-tooltip-target="tooltip-badges" title="Dúvidas">
+                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                    </button>
+                                    <div id="tooltip-badges" class="help-tooltip hidden" data-tooltip-id="tooltip-badges">
+                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <h4>Badges Opcionais</h4>
+                                        <p>São pequenos ícones que você pode adicionar ao seu README para mostrar informações rápidas sobre o projeto, como a licença, o status do build, a versão da linguagem, etc.</p>
+                                    </div>
                                 </div>
                             </div>
+                            <div id="badgeSelectionContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
                         </div>
-                        <select name="geminiModelSelect" id="geminiModelSelect" class="input-field">
-                            <option value="DEFAULT_OPTION">Insira a API Key para carregar</option>
-                        </select>
-                        <p id="geminiModelError" class="error-message hidden"></p>
-                         <div class="checkbox-container">
-                            <input id="saveGeminiModel" name="saveGeminiModel" type="checkbox" class="checkbox-custom">
-                            <label for="saveGeminiModel" class="checkbox-label">Salvar seleção de modelo</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-with-help">
-                            <label for="repoUrl" class="label-form">Link do Repositório <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-repo-url" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-repo-url" class="help-tooltip hidden" data-tooltip-id="tooltip-repo-url">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Link do Repositório</h4>
-                                    <p>O link do seu projeto no GitHub, GitLab ou similar. Ajuda o Gemini a entender o código e a estrutura do projeto para gerar um README mais preciso e relevante.</p>
-                                </div>
+                        <!-- INÍCIO DA SEÇÃO INFO GEMINI -->
+                        <div class="rounded-lg bg-slate-100 dark:bg-slate-800/70 p-4 mt-2 text-xs leading-relaxed border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <div class="flex items-center mb-2">
+                                <ion-icon name="information-circle-outline" class="text-sky-600 dark:text-sky-400 mr-2 text-base"></ion-icon>
+                                <span class="font-semibold text-slate-800 dark:text-slate-100">Informações sobre Modelos Gemini, Limites e API Key</span>
                             </div>
-                        </div>
-                        <input type="url" name="repoUrl" id="repoUrl" class="input-field" placeholder="https://github.com/seu-usuario/seu-projeto">
-                        <p id="repoUrlError" class="error-message hidden"></p>
-                        <div class="checkbox-container">
-                            <input id="saveRepoUrl" name="saveRepoUrl" type="checkbox" class="checkbox-custom">
-                            <label for="saveRepoUrl" class="checkbox-label">Salvar Link do Repositório</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-with-help">
-                            <label for="projectUrl" class="label-form">Link do Projeto <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-project-url" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-project-url" class="help-tooltip hidden" data-tooltip-id="tooltip-project-url">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Link do Projeto</h4>
-                                    <p>Um link para o projeto em produção, uma demonstração ao vivo, página de download, ou qualquer outro recurso relevante que mostre o projeto em ação ou como obtê-lo. Ex: Vercel, Netlify, Itch.io, site oficial, Figma, etc.</p>
+                            <div class="space-y-2">
+                                <div>
+                                    <span class="font-semibold">Gemini 2.0 Flash:</span> modelo rápido e leve para textos curtos, respostas objetivas e baixo custo.<br>
+                                    <span class="font-semibold">Gemini 2.5 Pro Preview:</span> modelo avançado, indicado para tarefas complexas e raciocínio profundo.
                                 </div>
-                            </div>
-                        </div>
-                        <input type="url" name="projectUrl" id="projectUrl" class="input-field" placeholder="https://seu-projeto.vercel.app">
-                        <p id="projectUrlError" class="error-message hidden"></p>
-                        <div class="checkbox-container">
-                            <input id="saveProjectUrl" name="saveProjectUrl" type="checkbox" class="checkbox-custom">
-                            <label for="saveProjectUrl" class="checkbox-label">Salvar Link do Projeto</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="label-with-help">
-                            <label for="linkedinUrl" class="label-form">Link do LinkedIn <span class="text-xs" style="color: var(--text-muted-light);">(Opcional)</span></label>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-linkedin-url" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-linkedin-url" class="help-tooltip hidden" data-tooltip-id="tooltip-linkedin-url">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Link do LinkedIn</h4>
-                                    <p>O link para o seu perfil no LinkedIn. Ele será incluído na seção de contato do README, permitindo que as pessoas te encontrem e se conectem profissionalmente.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <input type="url" name="linkedinUrl" id="linkedinUrl" class="input-field" placeholder="https://linkedin.com/in/seu-perfil">
-                        <p id="linkedinUrlError" class="error-message hidden"></p>
-                        <div class="checkbox-container">
-                            <input id="saveLinkedinUrl" name="saveLinkedinUrl" type="checkbox" class="checkbox-custom">
-                            <label for="saveLinkedinUrl" class="checkbox-label">Salvar Link do LinkedIn</label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section-card">
-                 <div class="section-header">
-                    <h2 class="section-title">2. Detalhes do README</h2>
-                </div>
-                <div class="section-content space-y-6">
-                    <div>
-                        <div class="label-with-help">
-                            <h3 class="label-form mb-3">Nível de Detalhe</h3>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-readme-level" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-readme-level" class="help-tooltip hidden" data-tooltip-id="tooltip-readme-level">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Nível de Detalhe do README</h4>
-                                    <p>Escolha o quão completo você quer que seu README seja:</p>
-                                    <ul>
-                                        <li><strong>Simples:</strong> Um README mais curto, com o essencial.</li>
-                                        <li><strong>Moderado:</strong> Um bom equilíbrio, com as seções mais comuns.</li>
-                                        <li><strong>Completo:</strong> Um README detalhado, com várias seções e informações aprofundadas.</li>
+                                <div>
+                                    <span class="font-semibold">Limites (Google AI Studio, grátis):</span>
+                                    <ul class="list-disc ml-5">
+                                        <li>Gemini 2.0 Flash: <span class="font-mono">15/minuto</span>, <span class="font-mono">1.500/dia</span></li>
+                                        <li>Gemini 2.5 Pro Preview: limites podem ser mais baixos</li>
                                     </ul>
+                                    <span class="block mt-1 text-slate-500 dark:text-slate-400">Ultrapassou o limite? Aguarde ou contrate um plano no Google Cloud.</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold">Qual modelo escolher?</span><br>
+                                    <span class="block">Para a maioria dos usuários: <b>Gemini 2.0 Flash</b> já resolve. Só use o Pro Preview se realmente precisar.</span>
+                                </div>
+                                <div>
+                                    <span class="font-semibold">Como obter a API Key?</span>
+                                    <ol class="list-decimal ml-5">
+                                        <li>Acesse <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="underline text-sky-700 dark:text-sky-300">aistudio.google.com/app/apikey</a></li>
+                                        <li>Faça login, crie um projeto e gere sua chave (<code>AIzaSy...</code>).</li>
+                                        <li>Guarde sua chave, não compartilhe.</li>
+                                    </ol>
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-1">
+                                    * O uso de qualquer modelo está sujeito às políticas do Google. Respeite os limites e mantenha sua API Key segura.
                                 </div>
                             </div>
                         </div>
-                        <div class="radio-group">
-                            <div>
-                                <input type="radio" name="readmeLevel" id="levelSimple" value="simple" class="sr-only">
-                                <label for="levelSimple" class="radio-label">
-                                    <span class="icon-wrapper"><ion-icon name="document-text-outline"></ion-icon></span>
-                                    <span class="radio-text-main">Simples</span>
-                                </label>
-                            </div>
-                            <div>
-                                <input type="radio" name="readmeLevel" id="levelModerate" value="moderate" class="sr-only" checked>
-                                <label for="levelModerate" class="radio-label">
-                                    <span class="icon-wrapper"><ion-icon name="newspaper-outline"></ion-icon></span>
-                                    <span class="radio-text-main">Moderado</span>
-                                </label>
-                            </div>
-                            <div>
-                                <input type="radio" name="readmeLevel" id="levelComplete" value="complete" class="sr-only">
-                                <label for="levelComplete" class="radio-label">
-                                    <span class="icon-wrapper"><ion-icon name="library-outline"></ion-icon></span>
-                                    <span class="radio-text-main">Completo</span>
-                                </label>
-                            </div>
-                        </div>
+                        <!-- FIM DA SEÇÃO INFO GEMINI -->
                     </div>
-                    <div id="badgeSelectionSection">
-                        <div class="label-with-help">
-                            <h3 class="label-form mb-3">Badges Opcionais</h3>
-                            <div class="help-tooltip-wrapper"> <button type="button" class="help-button" data-tooltip-target="tooltip-badges" title="Dúvidas">
-                                    <ion-icon name="help-circle-outline"></ion-icon>
-                                </button>
-                                <div id="tooltip-badges" class="help-tooltip hidden" data-tooltip-id="tooltip-badges">
-                                    <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
-                                    <h4>Badges Opcionais</h4>
-                                    <p>São pequenos ícones que você pode adicionar ao seu README para mostrar informações rápidas sobre o projeto, como a licença, o status do build, a versão da linguagem, etc.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="badgeSelectionContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <details class="info-details">
-                <summary class="info-summary">
-                    <ion-icon name="information-circle-outline"></ion-icon>
-                    Informações sobre Modelos Gemini, Limites e API Key
-                </summary>
-                <div class="info-content">
-                    <h4 class="font-semibold">✅ O que é o Gemini 2.5 Pro Preview?</h4>
-                        <p>O modelo <code>gemini-2.5-pro-preview-03-25</code> é uma versão avançada e preliminar da série Pro, oferecendo desempenho de ponta em tarefas complexas, como interpretação de linguagem natural, raciocínio e geração de conteúdo mais sofisticado.</p>
-                        <p>⚠️ <strong>Recomendação:</strong> Este é um modelo recomendado apenas para quem precisa de alto desempenho. Seu uso é de responsabilidade do usuário, e pode envolver limites mais restritos ou custos maiores dependendo do ambiente (AI Studio ou Google Cloud).</p>
-
-                        <h4 class="font-semibold">✅ O que é o Gemini 2.0 Flash?</h4>
-                        <p>O <strong>Gemini 2.0 Flash</strong> é um modelo leve e rápido, ideal para tarefas cotidianas como geração de textos curtos, organização de informações, respostas objetivas e processamento rápido.</p>
-                        <p>⚠️ <strong>Recomendação:</strong> Este modelo é indicado para a maioria dos usuários por oferecer um bom equilíbrio entre desempenho e custo. Porém, o uso é de responsabilidade do usuário e deve considerar os limites diários e mensais.</p>
-
-                        <h4 class="font-semibold">🆓 Uso grátis (camada gratuita)</h4>
-                        <p>Ambos os modelos podem ser usados gratuitamente no Google AI Studio, com limites diários:</p>
-                        <ul>
-                        <li><strong>Gemini 2.0 Flash:</strong>
-                            <ul>
-                            <li>RPM: 15</li>
-                            <li>RPD: 1500</li>
-                            <li>TPM: 1.000.000 (para o modelo <code>gemini-2.0</code>)</li>
-                            </ul>
-                        </li>
-                        <li><strong>Gemini 2.5 Pro Preview:</strong>
-                            <ul>
-                            <li>⚠️ Os limites podem variar e ser mais baixos, pois se trata de uma versão preview. Consulte a documentação do Google AI Studio para detalhes atualizados.</li>
-                            </ul>
-                        </li>
-                        <li>⚠️ Esses limites são por projeto do Google Cloud / conta do AI Studio. Se você usar a mesma chave em vários lugares, os limites são compartilhados.</li>
-                        </ul>
-
-                        <h4 class="font-semibold">💳 Se você quiser usar mais que isso:</h4>
-                        <p>Você pode ativar o plano pago no Google Cloud para aumentar os limites. Isso exige configurar cobrança com cartão de crédito e usar a API com um projeto do Google Cloud.</p>
-
-                        <h4 class="font-semibold">🧠 Qual modelo usar?</h4>
-                        <p>Para a maioria das tarefas, recomendamos começar com o <strong>Gemini 2.0 Flash</strong> (<code>gemini-2.0</code>), por ser gratuito dentro dos limites e rápido. Se você precisa de raciocínio mais avançado ou tarefas sofisticadas, pode testar o <strong>Gemini 2.5 Pro Preview</strong>, mas com cautela quanto ao uso e custos.</p>
-
-                        <h4 class="font-semibold">👨‍💻 Exemplo prático dos limites</h4>
-                        <p>Se você usa o modelo <code>gemini-2.0</code> em um app pessoal:</p>
-                        <ul>
-                        <li>Pode fazer até 1.500 requisições por dia sem pagar.</li>
-                        <li>Não mais que 15 por minuto.</li>
-                        <li>Se ultrapassar, vai receber erro (ex: código 429).</li>
-                        <li>Para projetos pessoais, testes e bots simples, geralmente é suficiente.</li>
-                        </ul>
-
-                        <h4 class="font-semibold">🧩 Tutorial: Como pegar a chave de API do Gemini (Google AI Studio)</h4>
-                        <ol>
-                        <li><strong>Pré-requisitos:</strong> Conta Google (Gmail) e um navegador.</li>
-                        <li><strong>Acesse:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/app/apikey</a></li>
-                        <li>Faça login com sua conta e aceite os termos, se necessário.</li>
-                        <li>Clique em <strong>"Create API key"</strong>.</li>
-                        <li>Você pode precisar criar um projeto novo no Google Cloud.</li>
-                        <li><strong>Copie a chave:</strong> Algo como <code>AIzaSyA...</code>.</li>
-                        <li><strong>Guarde com segurança:</strong> ⚠️ Não compartilhe essa chave!</li>
-                    </ol>
-                </div>
-            </details>
+                </section>
+            </div>
 
             <section id="uploadSection" class="section-card">
                 <div class="section-header">
@@ -291,7 +278,9 @@
                     </div>
                     <button type="submit" id="generateButton" class="button-primary w-full">
                         <span class="icon-wrapper" id="buttonIconWrapper">
-                           <svg id="buttonIcon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <svg id="buttonIcon" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                         </span>
                         <span id="buttonText">Gerar README.md</span>
                         <div id="loadingSpinner" class="spinner hidden ml-2"></div>
@@ -300,7 +289,7 @@
             </section>
 
             <section id="statusSection" class="mb-6 hidden">
-                 <div id="statusMessage" class="status-message-base"></div>
+                <div id="statusMessage" class="status-message-base"></div>
             </section>
 
             <section id="outputSection" class="section-card hidden">
@@ -337,7 +326,6 @@
             </div>
         </footer>
     </div>
-
     <script type="module" src="/public/js/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>

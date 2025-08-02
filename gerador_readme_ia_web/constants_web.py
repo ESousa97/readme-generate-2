@@ -167,11 +167,60 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
     * Descreva detalhadamente os componentes arquiteturais principais do sistema/software, seus módulos, suas interações e as responsabilidades de cada um.
     * **Inclua um diagrama de arquitetura** (use Mermaid.js ou arte ASCII) que ilustre claramente os componentes e o fluxo de dados/controle entre eles. Exemplo de estrutura Mermaid a ser preenchida:
       \`\`\`mermaid
-      graph TD
-          A[Componente A] --> B(Componente B);
-          B --> C{{Subsistema C}};
-          C --> D[Banco de Dados];
-          A --> E[Serviço Externo X];
+        graph TD
+            User["👤 Usuário"] --> Frontend["🌐 Projmanage Frontend (React SPA)"]
+            Frontend --> Backend["⚙️ Backend API (serverdatabase.onrender.com)"]
+            Backend --> Database[("💾 Banco de Dados")]
+
+            subgraph "Frontend Components"
+                Frontend --> AuthContext["🔐 Contexto de Autenticação"]
+                Frontend --> ThemeContext["🎨 Contexto de Tema"]
+                Frontend --> FeedbackContext["💬 Contexto de Feedback"]
+                Frontend --> ReactRouterDOM["🧭 React Router DOM"]
+                Frontend --> SharedComponents["🔄 Shared/Modal, ImageModal"]
+                Frontend --> ContentEditor["📝 ContentEditor/EditorActions"]
+                Frontend --> ImageUploader["📷 ImageUploader/DirectoryManager"]
+                Frontend --> Pages["📄 Pages/Dashboard, Login"]
+                Frontend --> Layout["🏗️ Layout/Header, Sidebar, Footer"]
+                Frontend --> CardComponents["🃏 Card/CardList, CardEditor"]
+                Frontend --> ProjectComponents["📊 Project/ProjectList, ProjectEditor, LivePreview"]
+            end
+
+            AuthContext --> Frontend
+            ThemeContext --> Frontend
+            FeedbackContext --> Frontend
+            CardComponents -.-> ProjectComponents
+            ProjectComponents -.-> CardComponents
+            ContentEditor --> LivePreview["👁️ LivePreviewPage"]
+            ImageUploader --> Backend
+
+            %% Estilos principais com cores vibrantes
+            style User fill:#FF6B6B,stroke:#333,stroke-width:4px,color:#fff
+            style Frontend fill:#4ECDC4,stroke:#333,stroke-width:4px,color:#fff
+            style Backend fill:#45B7D1,stroke:#333,stroke-width:4px,color:#fff
+            style Database fill:#96CEB4,stroke:#333,stroke-width:4px,color:#fff
+
+            %% Contextos com cores coordenadas
+            style AuthContext fill:#FFE66D,stroke:#FF6B6B,stroke-width:3px,color:#333
+            style ThemeContext fill:#B8A9FF,stroke:#6C5CE7,stroke-width:3px,color:#fff
+            style FeedbackContext fill:#A8E6CF,stroke:#00B894,stroke-width:3px,color:#333
+
+            %% Navegação e componentes compartilhados
+            style ReactRouterDOM fill:#FFD93D,stroke:#FDCB6E,stroke-width:3px,color:#333
+            style SharedComponents fill:#E17055,stroke:#D63031,stroke-width:3px,color:#fff
+
+            %% Editores e gerenciamento
+            style ContentEditor fill:#74B9FF,stroke:#0984E3,stroke-width:3px,color:#fff
+            style ImageUploader fill:#55A3FF,stroke:#2D3436,stroke-width:3px,color:#fff
+            style LivePreview fill:#FD79A8,stroke:#E84393,stroke-width:3px,color:#fff
+
+            %% Layout e páginas
+            style Pages fill:#FDCB6E,stroke:#E17055,stroke-width:3px,color:#333
+            style Layout fill:#81ECEC,stroke:#00CEC9,stroke-width:3px,color:#333
+
+            %% Componentes principais
+            style CardComponents fill:#FD79A8,stroke:#E84393,stroke-width:3px,color:#fff
+            style ProjectComponents fill:#A29BFE,stroke:#6C5CE7,stroke-width:3px,color:#fff
       \`\`\`
     * Explique o diagrama, detalhando cada componente e interação.
     * Discuta as decisões arquiteturais chave (ex: escolha de padrões como microserviços, monolítico, event-driven; camadas da aplicação) e justifique-as, incluindo os trade-offs considerados.
@@ -299,6 +348,10 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
     * Pode incluir: link para a seção de Issues do GitHub (`{{repo_link}}/issues`), email de contato específico do projeto, fórum de discussão da comunidade, servidor Discord/Slack, etc.
 
 **Estilo:**
+* Não omita nenhuma seção exceto se absolutamente não aplicável (neste caso, marque como "Não aplicável a este projeto neste momento").
+* Sempre busque máxima completude, clareza e utilidade em cada seção.
+* Diagramas Mermaid devem ser incluídos exatamente como no exemplo e explicados.
+* O README gerado deve ser totalmente aplicável e utilizável para publicação imediata no GitHub de um projeto real.
 * Formal, preciso, acadêmico (quando o projeto tiver essa natureza), mas sempre didático e acessível.
 * Use linguagem clara e objetiva, evitando jargões desnecessários ou explicando-os quando inevitáveis.
 * Estruture o conteúdo com parágrafos bem definidos, listas (bullet points ou numeradas), tabelas e blocos de código bem formatados para máxima clareza e legibilidade.
