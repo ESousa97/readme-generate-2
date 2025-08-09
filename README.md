@@ -683,5 +683,4 @@ Configuração GitHub Actions para testes automatizados em pushes e pull request
 
 ---
 
-
 > ✨ **Criado em:** 19 de mai. de 2025 às 20:33
