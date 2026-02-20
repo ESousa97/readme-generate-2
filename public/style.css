@@ -37,6 +37,10 @@
     /* Tokens semânticos */
     --color-brand: var(--bg-accent-light);
     --color-text-muted: var(--text-muted-light);
+
+    /* Versões RGB para box-shadow de foco */
+    --bg-accent-light-rgb: 88, 101, 242;
+    --bg-accent-dark-rgb: 88, 101, 242;
 }
 
 .dark:root {
@@ -236,8 +240,7 @@ select.input-field {
     border-color: var(--border-focus-dark);
     box-shadow: 0 0 0 3px rgba(var(--bg-accent-dark-rgb, 88, 101, 242), 0.35);
 }
-/* Definindo as versões RGB para o box-shadow do focus */
-:root { --bg-accent-light-rgb: 88, 101, 242; --bg-accent-dark-rgb: 88, 101, 242; }
+
 
 
 .checkbox-container { margin-top: 0.75rem; display: flex; align-items: center; }
@@ -455,44 +458,44 @@ input[type="radio"].sr-only:checked + .radio-label .radio-text-sub {
 .dark .status-message-base { box-shadow: 0 2px 6px var(--shadow-dark); }
 
 .status-success {
-    background-color: var(--bg-success-light); /* */
-    color: var(--text-success-light); /* */
-    border-left-color: var(--text-success-light); /* */
+    background-color: var(--bg-success-light);
+    color: var(--text-success-light);
+    border-left-color: var(--text-success-light);
 }
 .dark .status-success {
-    background-color: var(--bg-success-dark); /* */
-    color: var(--text-success-dark); /* */
-    border-left-color: var(--text-success-dark); /* */
+    background-color: var(--bg-success-dark);
+    color: var(--text-success-dark);
+    border-left-color: var(--text-success-dark);
 }
 .status-error {
-    background-color: var(--bg-error-light); /* */
-    color: var(--text-error-light); /* */
-    border-left-color: var(--text-error-light); /* */
+    background-color: var(--bg-error-light);
+    color: var(--text-error-light);
+    border-left-color: var(--text-error-light);
 }
 .dark .status-error {
-    background-color: var(--bg-error-dark); /* */
-    color: var(--text-error-dark); /* */
-    border-left-color: var(--text-error-dark); /* */
+    background-color: var(--bg-error-dark);
+    color: var(--text-error-dark);
+    border-left-color: var(--text-error-dark);
 }
 .status-warning {
-    background-color: var(--bg-warning-light); /* */
-    color: var(--text-warning-light); /* */
-    border-left-color: var(--text-warning-light); /* */
+    background-color: var(--bg-warning-light);
+    color: var(--text-warning-light);
+    border-left-color: var(--text-warning-light);
 }
 .dark .status-warning {
-    background-color: var(--bg-warning-dark); /* */
-    color: var(--text-warning-dark); /* */
-    border-left-color: var(--text-warning-dark); /* */
+    background-color: var(--bg-warning-dark);
+    color: var(--text-warning-dark);
+    border-left-color: var(--text-warning-dark);
 }
 .status-info {
-    background-color: var(--bg-info-light); /* */
-    color: var(--text-info-light); /* */
-    border-left-color: var(--text-info-light); /* */
+    background-color: var(--bg-info-light);
+    color: var(--text-info-light);
+    border-left-color: var(--text-info-light);
 }
 .dark .status-info {
-    background-color: var(--bg-info-dark); /* */
-    color: var(--text-info-dark); /* */
-    border-left-color: var(--text-info-dark); /* */
+    background-color: var(--bg-info-dark);
+    color: var(--text-info-dark);
+    border-left-color: var(--text-info-dark);
 }
 
 
