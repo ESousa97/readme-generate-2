@@ -16,8 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-bg-primary-light dark:bg-bg-primary-dark text-text-primary-light dark:text-text-primary-dark">
     <div class="container mx-auto">
@@ -48,10 +47,10 @@
                                 <label for="geminiApiKey" class="label-form">Sua API Key do Gemini</label>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-api-key" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-gemini-api-key" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-api-key">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>API Key do Gemini</h4>
                                         <p>Sua chave secreta para acessar a inteligência artificial do Google. É como uma senha para usar os recursos do Gemini. Mantenha-a segura!</p>
                                     </div>
@@ -71,10 +70,10 @@
                                 <label for="geminiModelSelect" class="label-form">Modelo Gemini</label>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-gemini-model" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-gemini-model" class="help-tooltip hidden" data-tooltip-id="tooltip-gemini-model">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Modelo Gemini</h4>
                                         <p>Define qual 'cérebro' do Gemini será usado. O <strong>Flash</strong> é mais rápido e econômico para a maioria dos READMEs. Outros modelos podem ser mais poderosos, mas podem ter custos diferentes.</p>
                                     </div>
@@ -95,10 +94,10 @@
                                 <label for="repoUrl" class="label-form">Link do Repositório <span class="text-xs optional-tag">(Opcional)</span></label>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-repo-url" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-repo-url" class="help-tooltip hidden" data-tooltip-id="tooltip-repo-url">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Link do Repositório</h4>
                                         <p>O link do seu projeto no GitHub, GitLab ou similar. Ajuda o Gemini a entender o código e a estrutura do projeto para gerar um README mais preciso e relevante.</p>
                                     </div>
@@ -117,10 +116,10 @@
                                 <label for="projectUrl" class="label-form">Link do Projeto <span class="text-xs optional-tag">(Opcional)</span></label>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-project-url" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-project-url" class="help-tooltip hidden" data-tooltip-id="tooltip-project-url">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Link do Projeto</h4>
                                         <p>Um link para o projeto em produção, uma demonstração ao vivo, página de download, ou qualquer outro recurso relevante que mostre o projeto em ação ou como obtê-lo. Ex: Vercel, Netlify, Itch.io, site oficial, Figma, etc.</p>
                                     </div>
@@ -139,10 +138,10 @@
                                 <label for="linkedinUrl" class="label-form">Link do LinkedIn <span class="text-xs optional-tag">(Opcional)</span></label>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-linkedin-url" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-linkedin-url" class="help-tooltip hidden" data-tooltip-id="tooltip-linkedin-url">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Link do LinkedIn</h4>
                                         <p>O link para o seu perfil no LinkedIn. Ele será incluído na seção de contato do README, permitindo que as pessoas te encontrem e se conectem profissionalmente.</p>
                                     </div>
@@ -169,10 +168,10 @@
                                 <h3 class="label-form mb-3">Nível de Detalhe</h3>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-readme-level" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-readme-level" class="help-tooltip hidden" data-tooltip-id="tooltip-readme-level">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Nível de Detalhe do README</h4>
                                         <p>Escolha o quão completo você quer que seu README seja:</p>
                                         <ul>
@@ -187,21 +186,21 @@
                                 <div>
                                     <input type="radio" name="readmeLevel" id="levelSimple" value="simple" class="sr-only">
                                     <label for="levelSimple" class="radio-label">
-                                        <span class="icon-wrapper"><ion-icon name="document-text-outline"></ion-icon></span>
+                                        <span class="icon-wrapper"><i class="fa-regular fa-file-lines" aria-hidden="true"></i></span>
                                         <span class="radio-text-main">Simples</span>
                                     </label>
                                 </div>
                                 <div>
                                     <input type="radio" name="readmeLevel" id="levelModerate" value="moderate" class="sr-only" checked>
                                     <label for="levelModerate" class="radio-label">
-                                        <span class="icon-wrapper"><ion-icon name="newspaper-outline"></ion-icon></span>
+                                        <span class="icon-wrapper"><i class="fa-regular fa-newspaper" aria-hidden="true"></i></span>
                                         <span class="radio-text-main">Moderado</span>
                                     </label>
                                 </div>
                                 <div>
                                     <input type="radio" name="readmeLevel" id="levelComplete" value="complete" class="sr-only">
                                     <label for="levelComplete" class="radio-label">
-                                        <span class="icon-wrapper"><ion-icon name="library-outline"></ion-icon></span>
+                                        <span class="icon-wrapper"><i class="fa-solid fa-book-open" aria-hidden="true"></i></span>
                                         <span class="radio-text-main">Completo</span>
                                     </label>
                                 </div>
@@ -213,10 +212,10 @@
                                 <h3 class="label-form mb-3">Badges Opcionais</h3>
                                 <div class="help-tooltip-wrapper">
                                     <button type="button" class="help-button" data-tooltip-target="tooltip-badges" title="Dúvidas">
-                                        <ion-icon name="help-circle-outline"></ion-icon>
+                                        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     </button>
                                     <div id="tooltip-badges" class="help-tooltip hidden" data-tooltip-id="tooltip-badges">
-                                        <button type="button" class="help-tooltip-close"><ion-icon name="close-outline"></ion-icon></button>
+                                        <button type="button" class="help-tooltip-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                                         <h4>Badges Opcionais</h4>
                                         <p>São pequenos ícones que você pode adicionar ao seu README para mostrar informações rápidas sobre o projeto, como a licença, o status do build, a versão da linguagem, etc.</p>
                                     </div>
@@ -227,7 +226,7 @@
                         <!-- INÍCIO DA SEÇÃO INFO GEMINI -->
                         <div class="rounded-lg bg-slate-100 dark:bg-slate-800/70 p-4 mt-2 text-xs leading-relaxed border border-slate-200 dark:border-slate-700 shadow-sm">
                             <div class="flex items-center mb-2">
-                                <ion-icon name="information-circle-outline" class="text-sky-600 dark:text-sky-400 mr-2 text-base"></ion-icon>
+                                <i class="fa-solid fa-circle-info text-sky-600 dark:text-sky-400 mr-2 text-base" aria-hidden="true"></i>
                                 <span class="font-semibold text-slate-800 dark:text-slate-100">Informações sobre Modelos Gemini, Limites e API Key</span>
                             </div>
                             <div class="space-y-2">
@@ -297,10 +296,10 @@
                     <h2 class="section-title">4. README.md Gerado</h2>
                     <div class="flex space-x-3">
                         <button id="copyButton" title="Copiar" class="button-secondary button-small">
-                            <ion-icon name="copy-outline"></ion-icon> Copiar
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i> Copiar
                         </button>
                         <button id="downloadButton" title="Baixar" class="button-secondary button-small">
-                            <ion-icon name="download-outline"></ion-icon> Baixar
+                            <i class="fa-solid fa-download" aria-hidden="true"></i> Baixar
                         </button>
                     </div>
                 </div>
@@ -317,10 +316,10 @@
                 <p class="text-sm">Desenvolvido por Enoque Sousa</p>
                 <div class="flex justify-center space-x-4 mt-2">
                     <a href="https://github.com/ESousa97" target="_blank" rel="noopener noreferrer" class="social-link">
-                        <ion-icon name="logo-github"></ion-icon>
+                        <i class="fa-brands fa-github" aria-hidden="true"></i>
                     </a>
                     <a href="https://www.linkedin.com/in/enoque-sousa-bb89aa168/" target="_blank" rel="noopener noreferrer" class="social-link">
-                        <ion-icon name="logo-linkedin"></ion-icon>
+                        <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>

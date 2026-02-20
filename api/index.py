@@ -90,7 +90,7 @@ async def secure_response_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     response.headers["Content-Security-Policy"] = (
-        "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; connect-src 'self';"
+        "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; connect-src 'self';"
     )
     return response
 
@@ -293,6 +293,191 @@ async def get_request_specific_gemini_client(
         )
 
 
+def _validate_project_zip_file(project_zip: UploadFile) -> None:
+    if not project_zip.filename or not project_zip.filename.endswith(".zip"):
+        logger.error(f"Upload inválido: {project_zip.filename}. Não é .zip ou sem nome.")
+        raise HTTPException(status_code=400, detail="Arquivo .zip inválido ou ausente.")
+
+
+async def _save_zip_and_extract_project_data(project_zip: UploadFile, temp_dir: str) -> str:
+    temp_zip_path = os.path.join(temp_dir, project_zip.filename if project_zip.filename else "upload.zip")
+    with open(temp_zip_path, "wb") as tmp_file:
+        content = await project_zip.read()
+        tmp_file.write(content)
+    logger.info(f"Arquivo .zip salvo temporariamente em: {temp_zip_path}")
+
+    project_data_str = extract_project_data_from_zip(temp_zip_path, logger)
+    if not project_data_str:
+        logger.error("Falha ao extrair dados do ZIP.")
+        raise HTTPException(status_code=500, detail="Não foi possível processar o arquivo .zip.")
+
+    return project_data_str
+
+
+def _build_badges_instructions(requested_badges: Optional[str]) -> str:
+    if not requested_badges:
+        return ""
+
+    badges_list = [b.strip() for b in requested_badges.split(",") if b.strip()]
+    if not badges_list:
+        return ""
+
+    return f"""
+
+**Instruções Adicionais para Badges Solicitados:**
+O usuário solicitou que a seção de badges (se aplicável ao nível de README) considere os seguintes tipos: {", ".join(badges_list)}.
+* Ao gerar a seção de badges, use o `{{{{repo_link}}}}` (que você deve inferir das instruções gerais do usuário, se fornecido) para obter `{{{{usuario_inferido}}}}` e `{{{{projeto_inferido}}}}` e assim construir os URLs dos badges.
+* Todos os badges devem usar `style=for-the-badge` (Ex: `![Nome Badge](https://img.shields.io/badge/exemplo-teste-blue?style=for-the-badge)`).
+* Se o `{{{{repo_link}}}}` não estiver disponível, ou se um tipo de badge solicitado não for aplicável/inferível, omita-o discretamente.
+* Se nenhum badge puder ser gerado com base nas informações e tipos solicitados, omita completamente a seção de badges do README.
+* Exemplos de construção (adapte para os tipos solicitados e use `{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`):
+    - Para 'License': `https://img.shields.io/github/license/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Issues': `https://img.shields.io/github/issues/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Top Language': `https://img.shields.io/github/languages/top/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Last Commit': `https://img.shields.io/github/last-commit/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+    - Para 'Contributors': `https://img.shields.io/github/contributors/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
+"""
+
+
+def _build_generation_prompt(
+    readme_level: str,
+    project_data_str: str,
+    repo_link: Optional[str],
+    project_link: Optional[str],
+    linkedin_link: Optional[str],
+    requested_badges: Optional[str],
+) -> str:
+    prompt_map = {
+        "simple": PROMPT_README_SIMPLE,
+        "complete": PROMPT_README_COMPLETE,
+        "moderate": PROMPT_README_MODERATE,
+    }
+    selected_prompt_template = prompt_map.get(readme_level, PROMPT_README_MODERATE)
+
+    base_user_instructions = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
+        repo_link=repo_link if repo_link else "Não fornecido",
+        project_link=project_link if project_link else "Não fornecido",
+        linkedin_link=linkedin_link if linkedin_link else "Não fornecido",
+    )
+    user_links_instructions_str = (
+        f"{base_user_instructions}{_build_badges_instructions(requested_badges)}"
+    )
+
+    return selected_prompt_template.format(
+        project_data=project_data_str,
+        user_provided_links_instructions=user_links_instructions_str,
+    )
+
+
+def _map_connection_error_to_http_exception(error_message: str) -> HTTPException:
+    user_friendly_detail = "Ocorreu um problema ao se comunicar com a API Gemini."
+
+    original_error_match = re.search(
+        r"Falha na comunicação com a API Gemini:\s*(.+)", error_message, re.DOTALL
+    )
+    original_error_str = original_error_match.group(1) if original_error_match else error_message
+
+    if "400" in original_error_str and (
+        "API key not valid" in original_error_str or "API_KEY_INVALID" in original_error_str.upper()
+    ):
+        user_friendly_detail = (
+            "A API Key do Gemini fornecida é inválida. Verifique a chave e tente novamente."
+        )
+        return HTTPException(status_code=400, detail=user_friendly_detail)
+
+    if "PermissionDenied" in original_error_str and (
+        "permission to access model" in original_error_str.lower()
+        or "User location is not supported" in original_error_str
+    ):
+        user_friendly_detail = "A API Key não tem permissão para usar o modelo Gemini selecionado ou sua região não é suportada. Verifique as configurações da sua chave e do modelo."
+        return HTTPException(status_code=403, detail=user_friendly_detail)
+
+    if (
+        "429" in original_error_str
+        and ("quota" in original_error_str.lower() or "ResourceExhausted" in original_error_str)
+    ) or "RESOURCE_EXHAUSTED" in original_error_str.upper():
+        detail_for_user = "Você excedeu sua cota atual da API Gemini. "
+        if "migrate to" in original_error_str.lower():
+            detail_for_user += (
+                "Considere verificar as opções de modelos ou planos com limites de cota mais altos. "
+            )
+        else:
+            detail_for_user += "Por favor, tente novamente mais tarde. "
+
+        retry_match = re.search(
+            r"retry_delay\s*{\s*seconds:\s*(\d+)\s*}", original_error_str, re.IGNORECASE
+        )
+        if retry_match:
+            detail_for_user += (
+                f"Você pode tentar novamente em aproximadamente {retry_match.group(1)} segundos. "
+            )
+
+        detail_for_user += "Consulte a seção 'Informações sobre Modelos Gemini' no rodapé da página ou visite https://ai.google.dev/gemini-api/docs/rate-limits."
+        logger.warning(f"Cota da API Gemini excedida: {original_error_str}")
+        return HTTPException(status_code=429, detail=detail_for_user)
+
+    if (
+        "500" in original_error_str
+        or "Internal error" in original_error_str
+        or "unavailable" in original_error_str.lower()
+    ):
+        user_friendly_detail = (
+            "A API Gemini reportou um erro interno ou está temporariamente indisponível. Tente novamente mais tarde."
+        )
+        return HTTPException(status_code=502, detail=user_friendly_detail)
+
+    return HTTPException(
+        status_code=503,
+        detail=f"Serviço indisponível: Falha na comunicação com a API Gemini. Detalhes técnicos: {original_error_str}",
+    )
+
+
+def _map_generate_readme_exception(exc: Exception) -> HTTPException:
+    if isinstance(exc, ValueError):
+        error_message = str(exc)
+        logger.error(f"ValueError no endpoint: {error_message}", exc_info=True)
+        if "PROMPT BLOQUEADO PELA IA" in error_message:
+            user_detail = error_message.replace("PROMPT BLOQUEADO PELA IA (Safety): ", "").replace(
+                "PROMPT BLOQUEADO PELA IA:", ""
+            )
+            return HTTPException(
+                status_code=400,
+                detail=f"Solicitação rejeitada pela IA devido a filtros de conteúdo/segurança: {user_detail.strip()}",
+            )
+        return HTTPException(status_code=400, detail=f"Erro nos dados da solicitação: {error_message}")
+
+    if isinstance(exc, ConnectionError):
+        error_message = str(exc.args[0]) if exc.args else str(exc)
+        logger.error(
+            f"ConnectionError no endpoint (falha na comunicação com Gemini): {error_message}",
+            exc_info=True,
+        )
+        return _map_connection_error_to_http_exception(error_message)
+
+    if isinstance(exc, KeyError):
+        logger.critical(
+            f"KeyError ao formatar o prompt: '{exc}'. Placeholders no template: project_data, user_provided_links_instructions.",
+            exc_info=True,
+        )
+        return HTTPException(
+            status_code=500,
+            detail=f"Erro de formatação interna do prompt: Chave '{str(exc)}' ausente. Isso é um bug no template do prompt.",
+        )
+
+    if isinstance(exc, HTTPException):
+        logger.error(
+            f"HTTPException pré-existente: {exc.status_code} - {exc.detail}",
+            exc_info=True if exc.status_code >= 500 else False,
+        )
+        return exc
+
+    logger.critical(f"Erro inesperado e não tratado no endpoint /api/generate-readme: {exc}", exc_info=True)
+    return HTTPException(
+        status_code=500,
+        detail="Erro interno inesperado no servidor. Por favor, contate o suporte se o problema persistir.",
+    )
+
+
 @app.post("/api/generate-readme")
 async def generate_readme_endpoint(
     project_zip: UploadFile = File(...),
@@ -310,204 +495,37 @@ async def generate_readme_endpoint(
     )
 
     try:
-        gemini_client = await get_request_specific_gemini_client(
-            x_api_key_header, gemini_model_select
-        )
-    except (
-        HTTPException
-    ) as http_exc_client_init:  # Erros da inicialização do cliente (400, 401, 503, 500)
-        raise http_exc_client_init
+        gemini_client = await get_request_specific_gemini_client(x_api_key_header, gemini_model_select)
+        _validate_project_zip_file(project_zip)
 
-    if not project_zip.filename or not project_zip.filename.endswith(".zip"):
-        logger.error(f"Upload inválido: {project_zip.filename}. Não é .zip ou sem nome.")
-        raise HTTPException(status_code=400, detail="Arquivo .zip inválido ou ausente.")
-
-    try:
         with tempfile.TemporaryDirectory() as temp_dir:
-            temp_zip_path = os.path.join(
-                temp_dir, project_zip.filename if project_zip.filename else "upload.zip"
-            )
-            with open(temp_zip_path, "wb") as tmp_file:
-                content = await project_zip.read()
-                tmp_file.write(content)
-            logger.info(f"Arquivo .zip salvo temporariamente em: {temp_zip_path}")
-
-            project_data_str = extract_project_data_from_zip(temp_zip_path, logger)
-            if not project_data_str:
-                logger.error("Falha ao extrair dados do ZIP.")
-                raise HTTPException(
-                    status_code=500, detail="Não foi possível processar o arquivo .zip."
-                )
-
-            prompt_map = {
-                "simple": PROMPT_README_SIMPLE,
-                "complete": PROMPT_README_COMPLETE,
-                "moderate": PROMPT_README_MODERATE,
-            }
-            selected_prompt_template = prompt_map.get(readme_level, PROMPT_README_MODERATE)
-
-            badges_instructions_for_ia = ""
-            if requested_badges:
-                badges_list = [b.strip() for b in requested_badges.split(",") if b.strip()]
-                if badges_list:
-                    badges_instructions_for_ia = f"""
-
-**Instruções Adicionais para Badges Solicitados:**
-O usuário solicitou que a seção de badges (se aplicável ao nível de README) considere os seguintes tipos: {", ".join(badges_list)}.
-* Ao gerar a seção de badges, use o `{{{{repo_link}}}}` (que você deve inferir das instruções gerais do usuário, se fornecido) para obter `{{{{usuario_inferido}}}}` e `{{{{projeto_inferido}}}}` e assim construir os URLs dos badges.
-* Todos os badges devem usar `style=for-the-badge` (Ex: `![Nome Badge](https://img.shields.io/badge/exemplo-teste-blue?style=for-the-badge)`).
-* Se o `{{{{repo_link}}}}` não estiver disponível, ou se um tipo de badge solicitado não for aplicável/inferível, omita-o discretamente.
-* Se nenhum badge puder ser gerado com base nas informações e tipos solicitados, omita completamente a seção de badges do README.
-* Exemplos de construção (adapte para os tipos solicitados e use `{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`):
-    - Para 'License': `https://img.shields.io/github/license/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
-    - Para 'Issues': `https://img.shields.io/github/issues/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
-    - Para 'Top Language': `https://img.shields.io/github/languages/top/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
-    - Para 'Last Commit': `https://img.shields.io/github/last-commit/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
-    - Para 'Contributors': `https://img.shields.io/github/contributors/{{{{usuario_inferido}}}}/{{{{projeto_inferido}}}}`
-"""
-
-            base_user_instructions = USER_LINKS_INSTRUCTIONS_TEMPLATE.format(
-                repo_link=repo_link if repo_link else "Não fornecido",
-                project_link=project_link if project_link else "Não fornecido",
-                linkedin_link=linkedin_link if linkedin_link else "Não fornecido",
-            )
-            user_links_instructions_str = f"{base_user_instructions}{badges_instructions_for_ia}"
-
-            prompt = selected_prompt_template.format(
-                project_data=project_data_str,
-                user_provided_links_instructions=user_links_instructions_str,
+            project_data_str = await _save_zip_and_extract_project_data(project_zip, temp_dir)
+            prompt = _build_generation_prompt(
+                readme_level=readme_level,
+                project_data_str=project_data_str,
+                repo_link=repo_link,
+                project_link=project_link,
+                linkedin_link=linkedin_link,
+                requested_badges=requested_badges,
             )
 
             logger.debug(
                 f"Prompt selecionado (nível: {readme_level}, modelo: {gemini_client.model_name}). Tamanho aprox: {len(prompt):,} chars. Enviando para Gemini..."
             )
-            readme_content = gemini_client.send_conversational_prompt(
-                prompt
-            )  # Pode levantar ValueError ou ConnectionError
-
-            if readme_content:
-                logger.info("README.md gerado com sucesso pela IA.")
-                return JSONResponse(
-                    content={"filename": project_zip.filename, "readme_content": readme_content}
-                )
-            else:  # Caso raro onde o cliente retorna None sem levantar exceção, mas deveria ser tratado por exceção.
-                logger.error(
-                    "Falha ao gerar README: IA não retornou conteúdo, mas não levantou exceção."
-                )
+            readme_content = gemini_client.send_conversational_prompt(prompt)
+            if not readme_content:
+                logger.error("Falha ao gerar README: IA não retornou conteúdo, mas não levantou exceção.")
                 raise HTTPException(
                     status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo."
                 )
 
-    except ValueError as ve:  # Captura "PROMPT BLOQUEADO PELA IA" do GeminiClient ou outros ValueErrors de validação.
-        error_message = str(ve)
-        logger.error(f"ValueError no endpoint: {error_message}", exc_info=True)
-        if "PROMPT BLOQUEADO PELA IA" in error_message:
-            user_detail = error_message.replace("PROMPT BLOQUEADO PELA IA (Safety): ", "").replace(
-                "PROMPT BLOQUEADO PELA IA:", ""
-            )
-            raise HTTPException(
-                status_code=400,
-                detail=f"Solicitação rejeitada pela IA devido a filtros de conteúdo/segurança: {user_detail.strip()}",
-            )
-        raise HTTPException(
-            status_code=400, detail=f"Erro nos dados da solicitação: {error_message}"
-        )
-
-    except ConnectionError as ce:  # Captura "Falha na comunicação com a API Gemini" do GeminiClient
-        error_message = (
-            str(ce.args[0]) if ce.args else str(ce)
-        )  # Mensagem que pode conter o erro original da API
-        logger.error(
-            f"ConnectionError no endpoint (falha na comunicação com Gemini): {error_message}",
-            exc_info=True,
-        )
-
-        user_friendly_detail = "Ocorreu um problema ao se comunicar com a API Gemini."
-
-        # Tenta extrair informações mais específicas do erro original encapsulado
-        original_error_match = re.search(
-            r"Falha na comunicação com a API Gemini:\s*(.+)", error_message, re.DOTALL
-        )
-        original_error_str = (
-            original_error_match.group(1) if original_error_match else error_message
-        )
-
-        if "400" in original_error_str and (
-            "API key not valid" in original_error_str
-            or "API_KEY_INVALID" in original_error_str.upper()
-        ):
-            user_friendly_detail = (
-                "A API Key do Gemini fornecida é inválida. Verifique a chave e tente novamente."
-            )
-            raise HTTPException(
-                status_code=400, detail=user_friendly_detail
-            )  # Gemini retorna 400 para chave inválida na geração
-        elif "PermissionDenied" in original_error_str and (
-            "permission to access model" in original_error_str.lower()
-            or "User location is not supported" in original_error_str
-        ):
-            user_friendly_detail = "A API Key não tem permissão para usar o modelo Gemini selecionado ou sua região não é suportada. Verifique as configurações da sua chave e do modelo."
-            raise HTTPException(status_code=403, detail=user_friendly_detail)
-        elif (
-            "429" in original_error_str
-            and ("quota" in original_error_str.lower() or "ResourceExhausted" in original_error_str)
-        ) or "RESOURCE_EXHAUSTED" in original_error_str.upper():
-            detail_for_user = "Você excedeu sua cota atual da API Gemini. "
-            if "migrate to" in original_error_str.lower():
-                detail_for_user += "Considere verificar as opções de modelos ou planos com limites de cota mais altos. "
-            else:
-                detail_for_user += "Por favor, tente novamente mais tarde. "
-
-            retry_match = re.search(
-                r"retry_delay\s*{\s*seconds:\s*(\d+)\s*}", original_error_str, re.IGNORECASE
-            )
-            if retry_match:
-                detail_for_user += f"Você pode tentar novamente em aproximadamente {retry_match.group(1)} segundos. "
-
-            detail_for_user += "Consulte a seção 'Informações sobre Modelos Gemini' no rodapé da página ou visite https://ai.google.dev/gemini-api/docs/rate-limits."
-            logger.warning(f"Cota da API Gemini excedida: {original_error_str}")
-            raise HTTPException(status_code=429, detail=detail_for_user)
-        elif (
-            "500" in original_error_str
-            or "Internal error" in original_error_str
-            or "unavailable" in original_error_str.lower()
-        ):
-            user_friendly_detail = "A API Gemini reportou um erro interno ou está temporariamente indisponível. Tente novamente mais tarde."
-            raise HTTPException(status_code=502, detail=user_friendly_detail)  # 502 Bad Gateway
-
-        # Fallback para outros erros de conexão/comunicação
-        raise HTTPException(
-            status_code=503,
-            detail=f"Serviço indisponível: Falha na comunicação com a API Gemini. Detalhes técnicos: {original_error_str}",
-        )
-
-    except KeyError as ke:  # Erro de formatação do prompt (bug interno)
-        logger.critical(
-            f"KeyError ao formatar o prompt: '{ke}'. Placeholders no template: project_data, user_provided_links_instructions.",
-            exc_info=True,
-        )
-        raise HTTPException(
-            status_code=500,
-            detail=f"Erro de formatação interna do prompt: Chave '{str(ke)}' ausente. Isso é um bug no template do prompt.",
-        )
-
-    except (
-        HTTPException
-    ) as http_exc:  # Re-levantar HTTPExceptions que podem ter sido levantadas diretamente
-        logger.error(
-            f"HTTPException pré-existente: {http_exc.status_code} - {http_exc.detail}",
-            exc_info=True if http_exc.status_code >= 500 else False,
-        )
-        raise
-
-    except Exception as e:  # Fallback para erros verdadeiramente inesperados
-        logger.critical(
-            f"Erro inesperado e não tratado no endpoint /api/generate-readme: {e}", exc_info=True
-        )
-        raise HTTPException(
-            status_code=500,
-            detail="Erro interno inesperado no servidor. Por favor, contate o suporte se o problema persistir.",
-        )
+            logger.info("README.md gerado com sucesso pela IA.")
+            return JSONResponse(content={"filename": project_zip.filename, "readme_content": readme_content})
+    except Exception as exc:
+        mapped_exception = _map_generate_readme_exception(exc)
+        if mapped_exception is exc:
+            raise
+        raise mapped_exception from exc
 
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)

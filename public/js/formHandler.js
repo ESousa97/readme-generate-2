@@ -82,9 +82,9 @@ async function populateGeminiModels() { //
                 let displayName = model.name || model.id;
                 const modelIdLowerCase = model.id.toLowerCase();
 
-                if (modelIdLowerCase === 'gemini-2.5-pro-preview-03-25' || modelIdLowerCase === 'gemini-2.5-pro-preview-03-25') {
+                if (modelIdLowerCase === 'gemini-2.5-pro-preview-03-25') {
                     displayName = `${model.name || model.id} (Recomendado p/ Projetos de Grande Escala)`;
-                } else if (modelIdLowerCase === 'gemini-2.0-flash' || modelIdLowerCase === 'gemini-2.0-flash') {
+                } else if (modelIdLowerCase === 'gemini-2.0-flash') {
                     displayName = `${model.name || model.id} (Recomendado)`;
                 }
                 option.textContent = displayName;
@@ -213,7 +213,7 @@ function setupEventListeners() {
         navigator.clipboard.writeText(rawReadmeContent)  //
             .then(() => {  //
                 const originalButtonContent = copyBtn.innerHTML;  //
-                copyBtn.innerHTML = `<ion-icon name="checkmark-done-outline" class="mr-1.5 text-lg"></ion-icon> Copiado!`;  //
+                copyBtn.innerHTML = `<i class="fa-solid fa-check-double mr-1.5 text-lg" aria-hidden="true"></i> Copiado!`;  //
                 setTimeout(() => { copyBtn.innerHTML = originalButtonContent; }, 2000);  //
             })
             .catch(err => { console.error('Erro ao copiar:', err); showStatus('Falha ao copiar.', 'error'); });  //
@@ -232,76 +232,117 @@ function setupEventListeners() {
     });
 }
 
+function focusFirstInvalidField() {
+    if (!document.getElementById(API_KEY_ERROR_ID).classList.contains('hidden')) {
+        apiKeyInput.focus();
+    } else if (!document.getElementById(GEMINI_MODEL_ERROR_ID).classList.contains('hidden')) {
+        geminiModelSelect.focus();
+    } else if (!document.getElementById(REPO_URL_ERROR_ID).classList.contains('hidden')) {
+        repoUrlInput.focus();
+    } else if (!document.getElementById(PROJECT_URL_ERROR_ID).classList.contains('hidden')) {
+        projectUrlInput.focus();
+    } else if (!document.getElementById(LINKEDIN_URL_ERROR_ID).classList.contains('hidden')) {
+        linkedinUrlInput.focus();
+    } else if (!document.getElementById(PROJECT_ZIP_ERROR_ID).classList.contains('hidden')) {
+        projectZipInput.focus();
+    }
+}
+
+function validateFormOnSubmit() {
+    validateApiKey(apiKeyInput.value);
+    validateUrlField(repoUrlInput, REPO_URL_ERROR_ID, "GitHub", "github.com");
+    validateUrlField(projectUrlInput, PROJECT_URL_ERROR_ID, "Projeto", null);
+    validateUrlField(linkedinUrlInput, LINKEDIN_URL_ERROR_ID, "LinkedIn", "linkedin.com");
+    validateSelectedModel(geminiModelSelect, GEMINI_MODEL_ERROR_ID);
+
+    const isZipSelectedOnSubmit = projectZipInput.files && projectZipInput.files.length > 0;
+    if (!isZipSelectedOnSubmit) {
+        displayValidationError(PROJECT_ZIP_ERROR_ID, "Por favor, selecione um arquivo .zip.");
+    } else {
+        clearValidationError(PROJECT_ZIP_ERROR_ID);
+    }
+
+    updateGenerateButtonState();
+    return !generateButton.disabled;
+}
+
+function buildSubmitPayload() {
+    const trimmedApiKey = apiKeyInput.value.trim();
+    const repoUrl = repoUrlInput.value.trim();
+    const projectUrl = projectUrlInput.value.trim();
+    const linkedinUrl = linkedinUrlInput.value.trim();
+    const selectedReadmeLevel = document.querySelector('input[name="readmeLevel"]:checked').value;
+    const selectedGeminiModel = geminiModelSelect.value;
+    const selectedBadges = Array.from(document.querySelectorAll('#badgeSelectionContainer input[name="badge"]:checked')).map(cb => cb.value);
+
+    const formData = new FormData();
+    formData.append('project_zip', projectZipInput.files[0]);
+    formData.append('readme_level', selectedReadmeLevel);
+    if (repoUrl) formData.append('repo_link', repoUrl);
+    if (projectUrl) formData.append('project_link', projectUrl);
+    if (linkedinUrl) formData.append('linkedin_link', linkedinUrl);
+    if (selectedBadges.length > 0) {
+        formData.append('requested_badges', selectedBadges.join(','));
+    }
+    if (selectedGeminiModel && selectedGeminiModel !== "DEFAULT_OPTION") {
+        formData.append('gemini_model_select', selectedGeminiModel);
+    }
+
+    return { formData, trimmedApiKey };
+}
+
+function setGenerateButtonLoadingState(isLoading) {
+    if (isLoading) {
+        generateButton.disabled = true;
+        buttonTextElement.textContent = 'Gerando...';
+        buttonIconSvgElement.classList.add('hidden');
+        loadingSpinnerElement.classList.remove('hidden');
+        outputSection.classList.add('hidden');
+        return;
+    }
+
+    buttonTextElement.textContent = 'Gerar README.md';
+    loadingSpinnerElement.classList.add('hidden');
+    buttonIconSvgElement.innerHTML = originalButtonIconHTMLStorage;
+    buttonIconSvgElement.classList.remove('hidden');
+    updateGenerateButtonState();
+}
+
+function handleReadmeGenerationSuccess(result) {
+    if (!result.readme_content) {
+        throw new Error('A API retornou uma resposta vazia ou inválida.');
+    }
+
+    rawReadmeContent = result.readme_content;
+    readmeContentElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(rawReadmeContent) : escapeHtml(rawReadmeContent);
+    currentReadmeFilename = result.filename ? `${result.filename.replace(/\.zip$/i, '')}_README.md` : "README.md";
+    outputSection.classList.remove('hidden');
+    showStatus('README.md gerado com sucesso!', 'success');
+    outputSection.scrollIntoView({ behavior: 'smooth' });
+}
+
 async function handleSubmit(event) { //
     event.preventDefault(); //
-    
-    const isApiKeyValidOnSubmit = validateApiKey(apiKeyInput.value); //
-    const isRepoUrlValidOnSubmit = validateUrlField(repoUrlInput, REPO_URL_ERROR_ID, "GitHub", "github.com"); //
-    const isProjectUrlValidOnSubmit = validateUrlField(projectUrlInput, PROJECT_URL_ERROR_ID, "Projeto", null); // Added
-    const isLinkedinUrlValidOnSubmit = validateUrlField(linkedinUrlInput, LINKEDIN_URL_ERROR_ID, "LinkedIn", "linkedin.com"); //
-    const isModelSelectedOnSubmit = validateSelectedModel(geminiModelSelect, GEMINI_MODEL_ERROR_ID); //
-    let isZipSelectedOnSubmit = projectZipInput.files && projectZipInput.files.length > 0; //
 
-    if (!isZipSelectedOnSubmit) { //
-        displayValidationError(PROJECT_ZIP_ERROR_ID, "Por favor, selecione um arquivo .zip."); // Corrected to use constant
-    } else { //
-        clearValidationError(PROJECT_ZIP_ERROR_ID); // Corrected to use constant
+    if (!validateFormOnSubmit()) {
+        showStatus('Por favor, corrija os erros no formulário antes de enviar.', 'warning');
+        focusFirstInvalidField();
+        return;
     }
-    
-    updateGenerateButtonState(); //
 
-    if (generateButton.disabled) { //
-        showStatus('Por favor, corrija os erros no formulário antes de enviar.', 'warning'); //
-        if (!document.getElementById(API_KEY_ERROR_ID).classList.contains('hidden')) apiKeyInput.focus(); //
-        else if (!document.getElementById(GEMINI_MODEL_ERROR_ID).classList.contains('hidden')) geminiModelSelect.focus(); //
-        else if (!document.getElementById(REPO_URL_ERROR_ID).classList.contains('hidden')) repoUrlInput.focus(); //
-        else if (!document.getElementById(PROJECT_URL_ERROR_ID).classList.contains('hidden')) projectUrlInput.focus(); // Added
-        else if (!document.getElementById(LINKEDIN_URL_ERROR_ID).classList.contains('hidden')) linkedinUrlInput.focus(); //
-        else if (!document.getElementById(PROJECT_ZIP_ERROR_ID).classList.contains('hidden')) projectZipInput.focus(); //
-        return; //
-    }
-    
-    const trimmedApiKey = apiKeyInput.value.trim(); //
-    const repoUrl = repoUrlInput.value.trim(); //
-    const projectUrl = projectUrlInput.value.trim(); // Added
-    const linkedinUrl = linkedinUrlInput.value.trim(); //
-    const selectedReadmeLevel = document.querySelector('input[name="readmeLevel"]:checked').value; //
-    const selectedGeminiModel = geminiModelSelect.value; //
-    const selectedBadges = Array.from(document.querySelectorAll('#badgeSelectionContainer input[name="badge"]:checked')).map(cb => cb.value); //
+    const { formData, trimmedApiKey } = buildSubmitPayload();
+    setGenerateButtonLoadingState(true);
+    showStatus('Enviando e processando... Por favor, aguarde. Isso pode levar alguns segundos.', 'info', false);
 
-    const formData = new FormData(); //
-    formData.append('project_zip', projectZipInput.files[0]); //
-    formData.append('readme_level', selectedReadmeLevel); //
-    if (repoUrl) formData.append('repo_link', repoUrl); //
-    if (projectUrl) formData.append('project_link', projectUrl); // Added
-    if (linkedinUrl) formData.append('linkedin_link', linkedinUrl); //
-    if (selectedBadges.length > 0) { formData.append('requested_badges', selectedBadges.join(',')); } //
-    if (selectedGeminiModel && selectedGeminiModel !== "DEFAULT_OPTION") { formData.append('gemini_model_select', selectedGeminiModel); } //
-
-    generateButton.disabled = true; buttonTextElement.textContent = 'Gerando...'; buttonIconSvgElement.classList.add('hidden'); loadingSpinnerElement.classList.remove('hidden'); outputSection.classList.add('hidden'); //
-    showStatus('Enviando e processando... Por favor, aguarde. Isso pode levar alguns segundos.', 'info', false); //
-
-    try { //
-        const result = await generateReadme(formData, trimmedApiKey); // Usa apiService
-
-        if (result.readme_content) { //
-            rawReadmeContent = result.readme_content; //
-            readmeContentElement.innerHTML = typeof marked !== 'undefined' ? marked.parse(rawReadmeContent) : escapeHtml(rawReadmeContent); //
-            currentReadmeFilename = result.filename ? `${result.filename.replace(/\.zip$/i, '')}_README.md` : "README.md"; //
-            outputSection.classList.remove('hidden'); //
-            showStatus('README.md gerado com sucesso!', 'success'); //
-            outputSection.scrollIntoView({ behavior: 'smooth' }); //
-        } else { throw new Error('A API retornou uma resposta vazia ou inválida.'); } //
-    } catch (error) { //
-        console.error('Erro:', error); //
-        showStatus(`Falha ao gerar README: ${error.message}`, 'error'); //
-        outputSection.classList.add('hidden'); //
-    } finally { //
-        buttonTextElement.textContent = 'Gerar README.md'; //
-        loadingSpinnerElement.classList.add('hidden'); //
-        buttonIconSvgElement.innerHTML = originalButtonIconHTMLStorage; //
-        buttonIconSvgElement.classList.remove('hidden'); //
-        updateGenerateButtonState(); //
+    try {
+        const result = await generateReadme(formData, trimmedApiKey);
+        handleReadmeGenerationSuccess(result);
+    } catch (error) {
+        console.error('Erro:', error);
+        showStatus(`Falha ao gerar README: ${error.message}`, 'error');
+        outputSection.classList.add('hidden');
+    } finally {
+        setGenerateButtonLoadingState(false);
     }
 }
 
