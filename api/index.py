@@ -300,7 +300,9 @@ def _validate_project_zip_file(project_zip: UploadFile) -> None:
 
 
 async def _save_zip_and_extract_project_data(project_zip: UploadFile, temp_dir: str) -> str:
-    temp_zip_path = os.path.join(temp_dir, project_zip.filename if project_zip.filename else "upload.zip")
+    temp_zip_path = os.path.join(
+        temp_dir, project_zip.filename if project_zip.filename else "upload.zip"
+    )
     with open(temp_zip_path, "wb") as tmp_file:
         content = await project_zip.read()
         tmp_file.write(content)
@@ -398,9 +400,7 @@ def _map_connection_error_to_http_exception(error_message: str) -> HTTPException
     ) or "RESOURCE_EXHAUSTED" in original_error_str.upper():
         detail_for_user = "Você excedeu sua cota atual da API Gemini. "
         if "migrate to" in original_error_str.lower():
-            detail_for_user += (
-                "Considere verificar as opções de modelos ou planos com limites de cota mais altos. "
-            )
+            detail_for_user += "Considere verificar as opções de modelos ou planos com limites de cota mais altos. "
         else:
             detail_for_user += "Por favor, tente novamente mais tarde. "
 
@@ -421,9 +421,7 @@ def _map_connection_error_to_http_exception(error_message: str) -> HTTPException
         or "Internal error" in original_error_str
         or "unavailable" in original_error_str.lower()
     ):
-        user_friendly_detail = (
-            "A API Gemini reportou um erro interno ou está temporariamente indisponível. Tente novamente mais tarde."
-        )
+        user_friendly_detail = "A API Gemini reportou um erro interno ou está temporariamente indisponível. Tente novamente mais tarde."
         return HTTPException(status_code=502, detail=user_friendly_detail)
 
     return HTTPException(
@@ -444,7 +442,9 @@ def _map_generate_readme_exception(exc: Exception) -> HTTPException:
                 status_code=400,
                 detail=f"Solicitação rejeitada pela IA devido a filtros de conteúdo/segurança: {user_detail.strip()}",
             )
-        return HTTPException(status_code=400, detail=f"Erro nos dados da solicitação: {error_message}")
+        return HTTPException(
+            status_code=400, detail=f"Erro nos dados da solicitação: {error_message}"
+        )
 
     if isinstance(exc, ConnectionError):
         error_message = str(exc.args[0]) if exc.args else str(exc)
@@ -471,7 +471,9 @@ def _map_generate_readme_exception(exc: Exception) -> HTTPException:
         )
         return exc
 
-    logger.critical(f"Erro inesperado e não tratado no endpoint /api/generate-readme: {exc}", exc_info=True)
+    logger.critical(
+        f"Erro inesperado e não tratado no endpoint /api/generate-readme: {exc}", exc_info=True
+    )
     return HTTPException(
         status_code=500,
         detail="Erro interno inesperado no servidor. Por favor, contate o suporte se o problema persistir.",
@@ -495,7 +497,9 @@ async def generate_readme_endpoint(
     )
 
     try:
-        gemini_client = await get_request_specific_gemini_client(x_api_key_header, gemini_model_select)
+        gemini_client = await get_request_specific_gemini_client(
+            x_api_key_header, gemini_model_select
+        )
         _validate_project_zip_file(project_zip)
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -514,13 +518,17 @@ async def generate_readme_endpoint(
             )
             readme_content = gemini_client.send_conversational_prompt(prompt)
             if not readme_content:
-                logger.error("Falha ao gerar README: IA não retornou conteúdo, mas não levantou exceção.")
+                logger.error(
+                    "Falha ao gerar README: IA não retornou conteúdo, mas não levantou exceção."
+                )
                 raise HTTPException(
                     status_code=500, detail="Falha ao gerar README: IA não retornou conteúdo."
                 )
 
             logger.info("README.md gerado com sucesso pela IA.")
-            return JSONResponse(content={"filename": project_zip.filename, "readme_content": readme_content})
+            return JSONResponse(
+                content={"filename": project_zip.filename, "readme_content": readme_content}
+            )
     except Exception as exc:
         mapped_exception = _map_generate_readme_exception(exc)
         if mapped_exception is exc:
