@@ -49,7 +49,9 @@ Analise os dados do projeto fornecidos (estrutura de diretórios e conteúdo de 
 """
 
 # NÍVEL 1: SIMPLES (Foco: Essencial para Desenvolvedor Experiente)
-PROMPT_README_SIMPLE = PROMPT_README_BASE_HEADER + """
+PROMPT_README_SIMPLE = (
+    PROMPT_README_BASE_HEADER
+    + """
 **Persona da IA:** Você é um Desenvolvedor de Software Sênior (5+ anos de experiência) criando um README para outros desenvolvedores experientes. A documentação deve ser minimalista, funcional e direta ao ponto.
 
 **Objetivo:** Gerar um README.md conciso e funcional, cobrindo **apenas** os aspectos cruciais para que outro desenvolvedor possa entender o propósito do projeto e executá-lo rapidamente. Evite seções supérfluas.
@@ -74,9 +76,12 @@ PROMPT_README_SIMPLE = PROMPT_README_BASE_HEADER + """
 * Badges: No máximo 1 ou 2 (ex: licença), usando o `{{repo_link}}` conforme instruído (a IA deve inferir `{{usuario_inferido}}`/`{{projeto_inferido}}` a partir do `{{repo_link}}`).
 * Evite seções como "Status do Projeto", "Funcionalidades Detalhadas", "Estrutura do Projeto", "Contribuição", "Autores", a menos que uma informação crítica do projeto exija uma menção brevíssima.
 """
+)
 
 # NÍVEL 2: MODERADO (Foco: Documentação Profissional e Informativa)
-PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
+PROMPT_README_MODERATE = (
+    PROMPT_README_BASE_HEADER
+    + """
 **Persona da IA:** Você é um Engenheiro de Software experiente (10+ anos) e Technical Writer, focado em criar READMEs claros, bem estruturados e informativos para uma audiência técnica geral.
 
 **Objetivo:** Gerar um README.md profissional, bem organizado e visualmente agradável, que forneça uma compreensão abrangente do projeto, suas funcionalidades e como utilizá-lo.
@@ -114,9 +119,12 @@ PROMPT_README_MODERATE = PROMPT_README_BASE_HEADER + """
 * Use emojis de forma sutil para melhorar a legibilidade das seções.
 * Blocos de código bem formatados para comandos.
 """
+)
 
 # NÍVEL 3: COMPLETO (Foco: Documentação Exaustiva e Técnica)
-PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
+PROMPT_README_COMPLETE = (
+    PROMPT_README_BASE_HEADER
+    + """
 **Persona da IA:** Você é um Arquiteto de Software e Pesquisador experiente (PhD, 11+ anos), elaborando uma documentação técnica de referência, profunda e abrangente, para um projeto complexo. O público inclui tanto desenvolvedores experientes quanto potenciais colaboradores de pesquisa. Seu objetivo é gerar um README.md que não apenas liste informações, mas que explique, justifique e contextualize, tornando o projeto compreensível em profundidade.
 
 **Objetivo:** Produzir um README.md exaustivo, academicamente rigoroso (quando aplicável ao projeto) e pedagogicamente estruturado. Deve ser a principal fonte de conhecimento sobre o projeto, facilitando a compreensão profunda, a colaboração e a extensão. Siga a estrutura e o nível de detalhe exemplificados pelas seções abaixo, adaptando o conteúdo especificamente ao projeto analisado.
@@ -166,7 +174,7 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
 7.  **Arquitetura do Sistema:**
     * Descreva detalhadamente os componentes arquiteturais principais do sistema/software, seus módulos, suas interações e as responsabilidades de cada um.
     * **Inclua um diagrama de arquitetura** (use Mermaid.js ou arte ASCII) que ilustre claramente os componentes e o fluxo de dados/controle entre eles. Exemplo de estrutura Mermaid a ser preenchida:
-      \`\`\`mermaid
+    ```mermaid
         graph TD
             User["👤 Usuário"] --> Frontend["🌐 Projmanage Frontend (React SPA)"]
             Frontend --> Backend["⚙️ Backend API (serverdatabase.onrender.com)"]
@@ -221,7 +229,7 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
             %% Componentes principais
             style CardComponents fill:#FD79A8,stroke:#E84393,stroke-width:3px,color:#fff
             style ProjectComponents fill:#A29BFE,stroke:#6C5CE7,stroke-width:3px,color:#fff
-      \`\`\`
+    ```
     * Explique o diagrama, detalhando cada componente e interação.
     * Discuta as decisões arquiteturais chave (ex: escolha de padrões como microserviços, monolítico, event-driven; camadas da aplicação) e justifique-as, incluindo os trade-offs considerados.
 
@@ -247,7 +255,7 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
     * Explique a organização lógica das pastas e arquivos mais críticos do projeto. Qual é a filosofia por trás da estrutura?
     * Detalhe os namespaces, módulos ou pacotes principais e suas responsabilidades e interações.
     * **Inclua uma representação em árvore (ASCII ou similar)** dos diretórios e arquivos chave, seguida de explicações para cada entrada principal. Exemplo:
-        \`\`\`
+        ```
         projeto-raiz/
         ├── src/                # Contém todo o código fonte da aplicação principal.
         │   ├── __init__.py     # Inicializador do pacote src.
@@ -265,7 +273,7 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
         ├── Dockerfile          # Configuração para containerização com Docker.
         ├── LICENSE             # Arquivo de licença do projeto.
         └── README.md           # Este arquivo.
-        \`\`\`
+        ```
     * Adapte a árvore e as descrições para refletir o projeto analisado.
 
 12. **📋 Pré-requisitos Avançados:**
@@ -358,3 +366,4 @@ PROMPT_README_COMPLETE = PROMPT_README_BASE_HEADER + """
 * Incentive ativamente e indique locais apropriados para a inclusão de diagramas (preferencialmente usando Mermaid.js para renderização no GitHub, ou arte ASCII) para ilustrar conceitos complexos como arquitetura, fluxos de dados, etc.
 * Emojis podem ser usados com moderação e propósito (ex: `✨ Feature`, `🛠️ Tech Stack`, `🚀 Deploy`) para destacar seções ou conceitos chave, melhorando a escaneabilidade e o apelo visual do README.
 """
+)

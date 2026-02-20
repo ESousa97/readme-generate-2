@@ -12,5 +12,4 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentYearElement) {
         currentYearElement.textContent = new Date().getFullYear();
     }
-    console.log("Aplicação Readme Generation (Modularizada) Inicializada.");
 });

@@ -33,6 +33,10 @@
     --output-bg-light: #EEEEEE;         /* Fundo de blocos de código: cinza bem claro */
     --output-text-light: #212529;       /* Texto de código (mantido) */
     --output-border-light: #CCCCCC;     /* Borda de blocos de código: cinza médio claro */
+
+    /* Tokens semânticos */
+    --color-brand: var(--bg-accent-light);
+    --color-text-muted: var(--text-muted-light);
 }
 
 .dark:root {
@@ -67,6 +71,10 @@
     --output-bg-dark: #1e1f22;         /* Very dark for code blocks */
     --output-text-dark: #c9c9c9;       /* Lighter text for code */
     --output-border-dark: #121315;
+
+    /* Tokens semânticos */
+    --color-brand: var(--bg-accent-dark);
+    --color-text-muted: var(--text-muted-dark);
 }
 
 /* Reset e Base */
@@ -105,6 +113,9 @@ h4 { font-size: 1rem; /* ~16px */ font-weight: 500; color: var(--text-secondary-
 
 p { margin-bottom: 1em; color: var(--text-secondary-light); }
 .dark p { color: var(--text-secondary-dark); }
+
+.title-accent { color: var(--color-brand); }
+.optional-tag { color: var(--color-text-muted); }
 
 a { color: var(--text-link-light); text-decoration: none; transition: color 0.2s ease-out;}
 .dark a { color: var(--text-link-dark); }
