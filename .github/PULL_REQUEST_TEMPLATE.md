@@ -1,3 +1,9 @@
+## Archived repository notice
+
+This repository is archived and no longer active.
+It remains public only for study/reference.
+There is no guarantee of response, review, or fixes.
+
 ## Summary
 
 Describe what changed and why.

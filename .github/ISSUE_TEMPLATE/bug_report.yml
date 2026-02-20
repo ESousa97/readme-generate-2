@@ -6,6 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
+        ## Archived repository notice
+        This repository is archived and no longer active.
+        It remains public only for study/reference.
+        There is no guarantee of response, review, or fixes.
+
+  - type: markdown
+    attributes:
+      value: |
         Thanks for taking the time to report a bug.
   - type: input
     id: summary

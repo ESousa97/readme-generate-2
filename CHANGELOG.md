@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [1.5.1] - 2026-02-19
+
+### Changed
+
+- Repository status standardized as archived for study/reference purposes.
+- Dependabot configured to stop opening new pull requests.
+- Governance documents updated to explicitly state no guarantee of response, review, or fixes.
+- Issue and PR templates updated with visible archive notice.
+- Issue configuration kept with blank issues disabled and archive notice contact link.
+
 ## [1.5.0] - 2026-02-19
 
 ### Added

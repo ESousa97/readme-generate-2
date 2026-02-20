@@ -1,5 +1,11 @@
 # Contributor Covenant Code of Conduct
 
+## Repository Status
+
+This repository is archived and no longer actively maintained.
+It remains public for study and reference purposes only.
+There is no guarantee of response, review, or fixes.
+
 ## Our Pledge
 
 We as members, contributors, and leaders pledge to make participation in our

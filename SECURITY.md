@@ -1,10 +1,16 @@
 # Security Policy
 
+## Repository Status
+
+This repository is archived and no longer actively maintained.
+It remains public for study and reference purposes only.
+There is no guarantee of response, review, or fixes.
+
 ## Supported Versions
 
 | Version | Supported |
 |---|---|
-| main | Yes |
+| main | No |
 | legacy branches | No |
 
 ## Reporting a Vulnerability
@@ -23,11 +29,9 @@ When reporting, include:
 - Affected files/paths
 - Suggested mitigation (if available)
 
-## Response Policy (SLA)
+## Response Policy
 
-- Acknowledgement: within 72 hours
-- Initial triage: within 7 calendar days
-- Mitigation plan: within 14 calendar days (for valid reports)
+No response-time SLA is guaranteed for this archived repository.
 
 ## Disclosure Process
 

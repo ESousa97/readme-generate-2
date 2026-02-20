@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Repository archived notice
+    url: https://github.com/ESousa97/readme-generate-2/blob/main/CONTRIBUTING.md
+    about: This project is archived and kept public for study only. No guarantee of response, review, or fixes.
   - name: Security vulnerability report
     url: https://github.com/ESousa97/readme-generate-2/security/policy
     about: Please report security issues through SECURITY.md guidance.

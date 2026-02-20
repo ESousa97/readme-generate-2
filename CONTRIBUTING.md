@@ -1,5 +1,11 @@
 # Contributing Guide
 
+## Repository Status
+
+This repository is archived and no longer actively maintained.
+It remains public for study and reference purposes only.
+There is no guarantee of response, review, or fixes for issues and pull requests.
+
 ## Development setup
 
 ```bash
